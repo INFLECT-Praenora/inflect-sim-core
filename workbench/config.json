@@ -2,6 +2,6 @@
   "mode": "snapshot",
   "smsApiBase": "",
   "repo": "https://github.com/vivarium-collective/inflect-sim-core",
-  "commit": "17716d3985068f5448ffc54b484ad603f0f7e6e5",
+  "commit": "94e0fbe90e8b7f3e22a426aeea4365965caf3872",
   "generated_from_ref": "main"
 }
