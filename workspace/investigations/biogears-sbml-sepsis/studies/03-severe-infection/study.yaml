@@ -4,7 +4,6 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Severe infection (severity 3)"
 confidence: Accepted
-verdict: supported   # scientific-evidence axis: the study claim is backed run-for-run
 
 parent_studies:
   - {study: 01-baseline-parity, condition: tests-passed}
@@ -91,6 +90,17 @@ variants:
 interventions: []
 runs:
   - name: engine-vs-sbml-sev3
+    status: completed
+    canonical: true
+    outcomes:
+      severe-timing-divergence-quantified:
+        result: passed
+        detail: "SBP<100 engine 26.55 h vs SBML 37.47 h (10.9 h lag); HR>90 26.77 h vs 37.55 h — divergence quantified run-for-run (compare-sev3.json)."
+        evidence_refs: [out/compare-sev3.json]
+      severe-collapse-sequence-matches:
+        result: partial
+        detail: "Same qualitative collapse sequence on both sides, but a qualified match: the vasodilation mechanism diverges (SVR min 0.952 engine vs 0.715 SBML) and the timing lags ~11 h."
+        evidence_refs: [out/compare-sev3.json]
     note: "Aligned comparison in out/compare-sev3.json; per-arm series + milestones in out/. Note: passed:false there is the EXPECTED result (the 5% numeric tolerance failing on hemodynamics is the finding); the parity gate that must pass is study 01 (baseline), which is test-backed."
 
 artifacts:

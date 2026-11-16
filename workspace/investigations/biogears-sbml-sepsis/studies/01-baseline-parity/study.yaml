@@ -4,7 +4,6 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Baseline parity"
 confidence: Accepted
-verdict: supported   # scientific-evidence axis: the study claim is backed run-for-run
 
 question: |
   At rest (no infection), do the real BioGears engine and the SBML/Antimony
@@ -72,4 +71,14 @@ findings:
       infection (studies 02/03) reflects the model, not the starting state.
     status: supported
 
-runs: []
+runs:
+  - name: baseline-parity-check
+    status: completed
+    canonical: true
+    outcomes:
+      sbml-baseline-matches-biogears-targets:
+        result: passed
+        detail: "SBML severity-0 baseline (SBP 114.6 / DBP 73.48 / HR 71.5 / CO 5.905 L/min) within tolerance of the StandardMale targets; tests/test_sepsis_sbml.py."
+      engine-baseline-matches-targets:
+        result: passed
+        detail: "Real BioGears 8.2.0 severity-0 baseline (SBP 114.87 / DBP 74.54 / HR 72.24 / CO 5.81 L/min) within tolerance; tests/test_sepsis_engine.py."

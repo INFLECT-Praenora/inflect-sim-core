@@ -4,7 +4,6 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Mild infection (severity 1)"
 confidence: Accepted
-verdict: supported   # scientific-evidence axis: the study claim is backed run-for-run
 
 parent_studies:
   - {study: 01-baseline-parity, condition: tests-passed}
@@ -67,6 +66,13 @@ variants:
 interventions: []
 runs:
   - name: engine-vs-sbml-sev1
+    status: completed
+    canonical: true
+    outcomes:
+      mild-controlled-no-hypotension:
+        result: passed
+        detail: "Both arms, 48 h: no SBP<100 / MAP<65 / HR>90 (compare-sev1.json milestones all None); tissue integrity min 0.9676/0.9676, peak pathogen 6.298/6.298."
+        evidence_refs: [out/compare-sev1.json]
     note: "Aligned comparison in out/compare-sev1.json; per-arm series + milestones in out/. Note: passed:false there is the EXPECTED result (the 5% numeric tolerance failing on hemodynamics is the finding); the parity gate that must pass is study 01 (baseline), which is test-backed."
 
 artifacts:

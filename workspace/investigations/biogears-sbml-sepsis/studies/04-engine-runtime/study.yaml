@@ -4,7 +4,6 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Engine runtime + cross-engine determinism"
 confidence: Accepted
-verdict: supported   # scientific-evidence axis: the study claim is backed run-for-run
 
 parent_studies:
   - {study: 01-baseline-parity, relation: supports}
@@ -81,4 +80,14 @@ variants:
     note: "Same serialized .pbg document run on the Rust viva-core engine via vc_adapter."
 
 interventions: []
-runs: []
+runs:
+  - name: cross-engine-sev0
+    status: completed
+    canonical: true
+    outcomes:
+      cross-engine-bit-identical:
+        result: passed
+        detail: "viva-core vs process-bigraph, warm runs: max abs diff 0.0 across all 9 observables (severity 0 and 1); tests/test_cross_engine.py."
+      runtime-overhead-only:
+        result: passed
+        detail: "Wall-clock within ~10% (600 s: 25.3/25.9 s; 3600 s: 139.9/125.8 s) — framework overhead, no solver speedup, as predicted for a single heavy process."
