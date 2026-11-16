@@ -4,6 +4,7 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Baseline parity"
 confidence: Accepted
+verdict: supported   # scientific-evidence axis: the study claim is backed run-for-run
 
 question: |
   At rest (no infection), do the real BioGears engine and the SBML/Antimony

@@ -4,6 +4,7 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Engine runtime + cross-engine determinism"
 confidence: Accepted
+verdict: supported   # scientific-evidence axis: the study claim is backed run-for-run
 
 parent_studies:
   - {study: 01-baseline-parity, relation: supports}
