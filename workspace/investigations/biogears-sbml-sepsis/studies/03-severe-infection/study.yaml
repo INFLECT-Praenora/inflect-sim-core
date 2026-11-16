@@ -1,9 +1,9 @@
 schema_version: 3
 name: 03-severe-infection
 investigation: biogears-sbml-sepsis
-status: planned
+status: ran
 title: "Severe infection (severity 3)"
-confidence: Planned
+confidence: Accepted
 
 parent_studies:
   - {study: 01-baseline-parity, condition: tests-passed}
@@ -41,25 +41,55 @@ expected_behavior:
       This is the headline result: the ~8-10 h lag measured run-for-run against
       the real engine rather than against the paper milestones.
 
+claim: |
+  Run-for-run, the SBML extraction reproduces BioGears' severe-sepsis inflammation
+  almost exactly (tissue integrity 0.325/0.325, peak pathogen 60.5/60.6) but its
+  hemodynamic collapse arrives ~11 h LATE: SBP crosses 100 mmHg at 37.5 h in the
+  extraction vs 26.6 h in the real engine (a 10.9 h lag), with the same ~11 h lag
+  on the HR>90 compensation. This is the engine-vs-extraction comparison the
+  extraction report could not make; it confirms and slightly exceeds its ~8-10 h
+  estimate against the paper.
+
+findings:
+  - summary: "Severe hemodynamic collapse lags the real engine by ~11 h (SBP<100: 37.5 h vs 26.6 h)."
+    detail: |
+      Both arms, severity 3, 48 h, infection at t=0, run-for-run:
+      - SBP < 100 mmHg: engine 26.55 h, extraction 37.47 h -> +10.9 h lag.
+      - HR > 90 /min: engine 26.77 h, extraction 37.55 h -> +10.8 h lag.
+      - MAP < 65 mmHg: neither crossed (sustained) by 48 h.
+      - SVR ratio minimum: engine 0.952, extraction 0.715 — the extraction
+        over-shoots the vasodilation.
+      The delay most likely comes from processes the extraction does not translate
+      (urine loss, fever-driven skin vasodilation, lactate, intracellular water).
+    status: supported
+  - summary: "The inflammation / pathogen core matches the engine almost bit-for-bit."
+    detail: |
+      tissue_integrity minimum 0.3248 (engine) vs 0.3248 (extraction); peak
+      blood_pathogen 60.55 vs 60.60. The Acute Inflammatory Response the extraction
+      copied from BioGears reproduces the engine's dynamics to ~1e-4; divergence is
+      confined to the hemodynamic response, not the inflammation model.
+    status: supported
+
 baseline:
   - name: engine-severe
     composite: viva_biogears.composites.sepsis.biogears_sepsis
     config: {severity: 3}
-    status: pending
-    note: "Real BioGears engine, severity 3. Pending native build."
+    status: ran
+    note: "Real BioGears 8.2.0 engine, severity 3, 48 h. SBP<100 at 26.6 h; tissue integrity min 0.325."
 
 variants:
   - name: sbml-severe
     composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
     config: {severity: 3}
-    status: pending
-    note: "SBML extraction, severity 3. 48 h arm deferred until the engine arm runs alongside it."
+    status: ran
+    note: "SBML extraction via viva-tellurium, severity 3, 48 h. SBP<100 at 37.5 h (~11 h late); tissue integrity min 0.325."
 
 interventions: []
-runs: []
+runs:
+  - name: engine-vs-sbml-sev3
+    note: "Aligned comparison in out/compare-sev3.json; per-arm series + milestones in out/."
 
-notes: |
-  DEFERRED until the BioGears engine is built on a run host. The known ~8-10 h
-  severe-course delay (report, vs paper milestones) is re-measured here run-for-run
-  against the real engine. Milestones via
-  viva_simulation_core.analysis.milestones.extract_milestones.
+artifacts:
+  - out/compare-sev3.json
+  - out/engine-sev3.json
+  - out/sbml-sev3.json

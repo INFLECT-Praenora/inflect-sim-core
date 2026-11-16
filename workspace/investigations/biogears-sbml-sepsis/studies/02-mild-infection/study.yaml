@@ -1,9 +1,9 @@
 schema_version: 3
 name: 02-mild-infection
 investigation: biogears-sbml-sepsis
-status: planned
+status: ran
 title: "Mild infection (severity 1)"
-confidence: Planned
+confidence: Accepted
 
 parent_studies:
   - {study: 01-baseline-parity, condition: tests-passed}
@@ -30,24 +30,43 @@ expected_behavior:
       Report milestone: mild (1e6) controlled within 24 h in both the paper and
       the Antimony model. This study confirms it run-for-run against the engine.
 
+claim: |
+  Under mild infection both the real engine and the SBML extraction keep the
+  infection controlled over 48 h — neither crosses into hypotension (no SBP<100,
+  no MAP<65, no HR>90) — and the inflammation core matches almost exactly
+  (tissue integrity min 0.9676/0.9676, peak pathogen 6.298/6.298). Mild is the
+  agreement case that frames the severe-arm divergence.
+
+findings:
+  - summary: "Mild infection stays controlled on both sides; no hypotension milestones crossed."
+    detail: |
+      Both arms, severity 1, 48 h, infection at t=0: SBP<100, MAP<65 and HR>90 are
+      never reached (sustained) on either side. tissue_integrity minimum
+      0.96755/0.96755; peak blood_pathogen 6.2983/6.2983 — near-identical.
+      Hemodynamics differ modestly over the course (DBP ~5, MAP ~7.6, HR ~6.3 mmHg/bpm,
+      blood_volume ~0.57 L), but the qualitative mild outcome agrees run-for-run.
+    status: supported
+
 baseline:
   - name: engine-mild
     composite: viva_biogears.composites.sepsis.biogears_sepsis
     config: {severity: 1}
-    status: pending
-    note: "Real BioGears engine, severity 1. Pending native build."
+    status: ran
+    note: "Real BioGears 8.2.0 engine, severity 1, 48 h. Controlled; no hypotension."
 
 variants:
   - name: sbml-mild
     composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
     config: {severity: 1}
-    status: pending
-    note: "SBML extraction, severity 1. 48 h arm deferred until the engine arm can run alongside it (the comparison is the point)."
+    status: ran
+    note: "SBML extraction via viva-tellurium, severity 1, 48 h. Controlled; no hypotension."
 
 interventions: []
-runs: []
+runs:
+  - name: engine-vs-sbml-sev1
+    note: "Aligned comparison in out/compare-sev1.json; per-arm series + milestones in out/."
 
-notes: |
-  DEFERRED until the BioGears engine is built on a run host. Both 48 h arms run
-  together so the comparison is run-for-run, not SBML-vs-paper. Milestones computed
-  via viva_simulation_core.analysis.milestones.extract_milestones.
+artifacts:
+  - out/compare-sev1.json
+  - out/engine-sev1.json
+  - out/sbml-sev1.json

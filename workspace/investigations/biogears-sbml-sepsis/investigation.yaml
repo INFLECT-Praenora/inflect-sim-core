@@ -35,20 +35,22 @@ executive:
     plus a runtime axis comparing the Python process-bigraph engine with the Rust
     viva-core engine on the same composite.
   verdict: |
-    Baseline parity PASSES run-for-run: the locally-built BioGears 8.2.0 engine
-    (SBP 114.9/74.5, HR 72.2, CO 5.81) and the SBML extraction (114.6/73.5, 71.5,
-    5.9) hold the same StandardMale baseline. Cross-engine runtime axis complete
-    (viva-core bit-identical to process-bigraph). The mild/severe infection arms
-    (studies 02/03) are the remaining step — ~8 h of local compute.
-  verdict_status: in-progress
+    The SBML extraction reproduces the BioGears sepsis core's inflammation almost
+    exactly but its hemodynamic collapse arrives ~11 h late. Run-for-run over 48 h:
+    baseline parity holds; mild stays controlled on both sides; under severe sepsis
+    SBP crosses 100 mmHg at 37.5 h in the extraction vs 26.6 h in the real engine
+    (a 10.9 h lag), while tissue integrity (0.325/0.325) and pathogen load
+    (60.5/60.6) match to ~1e-4. The engine-vs-extraction comparison the extraction
+    report could not make — confirming and slightly exceeding its ~8-10 h estimate.
+  verdict_status: complete
   verdict_detail: |
-    Engine + SBML composites both run and match at rest; the run-for-run parity
-    gate is closed. BioGears 8.2.0 + pybiogears are built locally. Remaining: the
-    severity-1 and severity-3 48 h arms on both engines, then the divergence
-    quantification and report.
-  decisions_needed:
-    - question: "Launch the ~8 h mild/severe arms now (overnight local compute)?"
-      context: "Both engines build; the 48 h arms are the last runs needed for the headline divergence."
+    All four 48 h arms ran (severity 1 & 3 × engine & SBML, locally-built BioGears
+    8.2.0). Parity gate closed; cross-engine runtime axis bit-identical. The
+    divergence is confined to the hemodynamic response (the untranslated urine /
+    fever-vasodilation / lactate / intracellular-water processes), not the
+    inflammation model. Remaining work is packaging: comparison figures + report,
+    then publish once org access lands.
+  decisions_needed: []
 
 scientific_argument:
   main_claim: |
