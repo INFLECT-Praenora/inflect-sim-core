@@ -1,0 +1,5 @@
+{
+"title": "01_severe_sbp_hr_overlay",
+"interpretation": "Severe arm: SBP and HR, engine vs SBML extraction. The extraction crosses SBP<100 at 37.5h vs 26.6h in the real engine (10.9h lag); HR>90 shows the same ~11h lag.",
+"caption": "Severe arm: SBP and HR, engine vs SBML extraction. The extraction crosses SBP<100 at 37.5h vs 26.6h in the real engine (10.9h lag); HR>90 shows the same ~11h lag."
+}
