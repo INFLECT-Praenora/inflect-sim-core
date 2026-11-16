@@ -33,3 +33,6 @@ workspace/reports/assets/*
 .superpowers/brainstorm/
 # Scratch TODO list agents keep per-workspace; not tracked content.
 todo.md
+
+# SDD controller scratch (ledgers, briefs, review packages)
+.superpowers/

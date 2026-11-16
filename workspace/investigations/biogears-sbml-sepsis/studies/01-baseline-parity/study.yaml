@@ -1,0 +1,68 @@
+schema_version: 3
+name: 01-baseline-parity
+investigation: biogears-sbml-sepsis
+status: running
+title: "Baseline parity"
+confidence: Investigating
+
+question: |
+  At rest (no infection), do the real BioGears engine and the SBML/Antimony
+  extraction settle to the same StandardMale baseline haemodynamics, so that any
+  later divergence under infection is attributable to the model and not to a
+  mismatched starting state?
+
+hypothesis: |
+  Both sides hold the stabilised StandardMale baseline — SBP/DBP ~114/73.5 mmHg,
+  HR ~72 /min, cardiac output ~5.9 L/min — within a small tolerance, because the
+  extraction ships at BioGears' own stabilised healthy state.
+
+objective: |
+  Run both the BioGears engine (viva-biogears biogears_sepsis) and the SBML
+  extraction (viva-tellurium) at severity 0 and compare the baseline observables
+  on a common clock. This study is the gate for studies 02 and 03: if the
+  baselines do not match, measured infection divergence is not trustworthy.
+
+claim: |
+  The SBML extraction holds the BioGears StandardMale baseline within tolerance
+  (SBP 114.6, DBP 73.5, HR 71.5, CO 5.9 L/min at severity 0). The engine-side
+  baseline run is pending the BioGears native build; parity is one-sided so far.
+
+expected_behavior:
+  - name: sbml-baseline-matches-biogears-targets
+    observable: "SBP, DBP, HR, cardiac output at severity 0"
+    condition: "within tolerance of StandardMale targets (SBP 114, DBP 73.5, HR 72, CO 5.9 L/min)"
+    rationale: |
+      The extraction ships at BioGears' stabilised healthy state; a short
+      severity-0 run must stay at that baseline. Verified by
+      tests/test_sepsis_sbml.py::test_sbml_loads_and_steps.
+  - name: engine-baseline-matches-targets
+    observable: "same baseline observables from the real BioGears engine"
+    condition: "within tolerance of the same StandardMale targets"
+    rationale: |
+      PENDING — requires BioGears 8.2.0 + pybiogears on the run host. Closes the
+      run-for-run parity gate once the engine arm runs.
+
+baseline:
+  - name: engine-rest
+    composite: viva_biogears.composites.sepsis.biogears_sepsis
+    config: {severity: 0}
+    status: pending
+    note: "Real BioGears engine at rest. Pending native build (mini unreachable / no local build)."
+
+variants:
+  - name: sbml-extraction-rest
+    composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
+    config: {severity: 0}
+    note: "SBML extraction via viva-tellurium. Baseline recorded in findings."
+
+interventions: []
+
+findings:
+  - summary: "SBML extraction holds the StandardMale baseline at severity 0."
+    detail: |
+      30 s run at severity 0: SBP 114.6 mmHg, DBP 73.48, HR 71.5 /min,
+      CO 5.905 L/min; blood_pathogen ~0, tissue_integrity ~1.0 (uninfected).
+      All within the stated tolerances of the BioGears StandardMale targets.
+    status: supported
+
+runs: []

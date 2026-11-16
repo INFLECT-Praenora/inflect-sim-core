@@ -1,0 +1,94 @@
+# biogears-sbml-sepsis/investigation.yaml — schema v2
+schema_version: 2
+name: biogears-sbml-sepsis
+title: "BioGears sepsis core: engine vs SBML extraction"
+created: '2026-11-15'
+status: running
+
+question: |
+  Does the Antimony/SBML extraction of the BioGears sepsis core reproduce the
+  real BioGears engine run-for-run — not merely against the McDaniel et al. 2019
+  paper milestones — and where does it diverge, and why?
+
+hypothesis: |
+  The extraction reproduces BioGears' healthy baseline and the qualitative mild
+  and severe infection outcomes, but the severe course lags the engine by several
+  hours and the two diverge on observables fed by processes the extraction does
+  not translate (urine, fever-driven vasodilation, lactate, intracellular water).
+
+lead: |
+  BioGears is a lumped-parameter C++ whole-body physiology engine. Its sepsis
+  core — cardiovascular circuit, baroreflex, capillary fluid/albumin exchange,
+  and the McDaniel 2019 Acute Inflammatory Response — was extracted by Herbert
+  Sauro into a single Antimony model (91 state variables) that also exports to
+  SBML. That extraction was validated only against the paper's published
+  milestones, because the author could not run BioGears. This investigation runs
+  both: the real engine via viva-biogears and the SBML extraction via
+  viva-tellurium, side by side, to produce the run-for-run comparison the
+  extraction report could not.
+
+executive:
+  what_is_this: |
+    A side-by-side comparison of the BioGears sepsis core run two ways — the real
+    BioGears 8.2.0 engine (viva-biogears) versus its SBML/Antimony extraction
+    (viva-tellurium) — across a healthy baseline and mild and severe infection,
+    plus a runtime axis comparing the Python process-bigraph engine with the Rust
+    viva-core engine on the same composite.
+  verdict: |
+    Baseline parity established on the SBML side (SBP 114.6/73.5, HR 71.5,
+    CO 5.9 L/min — matches the BioGears StandardMale targets). The engine-side
+    runs and the mild/severe divergence quantification are pending the BioGears
+    native build.
+  verdict_status: in-progress
+  verdict_detail: |
+    The SBML composite loads, steps, holds the stabilised healthy baseline, and
+    seeds infection by severity as designed. The real-engine arm requires BioGears
+    8.2.0 + pybiogears built on the run host (not yet available), so the run-for-run
+    comparison is scaffolded but not yet executed.
+  decisions_needed:
+    - question: "Where does the BioGears engine run — the mini or a local build?"
+      context: "viva-biogears needs a native source build; the mini is currently unreachable."
+
+scientific_argument:
+  main_claim: |
+    The SBML extraction is a faithful, independently-runnable surrogate for the
+    BioGears sepsis core at baseline and for qualitative infection outcomes, with
+    quantifiable, mechanistically-attributable divergence under severe sepsis.
+  evidence_for:
+    - "SBML baseline matches BioGears StandardMale targets within tolerance (study 01)."
+    - "Extraction report: all qualitative mild/severe outcomes reproduced vs McDaniel 2019 milestones."
+  evidence_against:
+    - "Report notes the severe course runs ~8-10 h behind BioGears."
+    - "Untranslated processes (urine, fever vasodilation, lactate, intracellular water) are known omissions."
+  key_figures: []
+  caveats:
+    - "Validation to date is extraction-vs-paper, not extraction-vs-engine; closing that gap is the point of this investigation."
+    - "viva-biogears runs its InfectionModerate nutrition schedule; the extraction does not model meals — a documented scenario delta."
+
+inputs:
+  datasets:
+    - name: biogears_sepsis.xml
+      path: investigations/biogears-sbml-sepsis/sources/biogears_sepsis.xml
+      supports_claims: "The SBML form of the BioGears sepsis core, run via viva-tellurium."
+    - name: biogears_sepsis.ant
+      path: investigations/biogears-sbml-sepsis/sources/biogears_sepsis.ant
+      supports_claims: "Human-readable Antimony source of the same model."
+  references: []
+  expert_docs:
+    - name: "BioGears sepsis core in Antimony: extraction report (Sauro)"
+      path: investigations/biogears-sbml-sepsis/sources/BioGears sepsis core in Antimony extraction report.pdf
+
+competing_frameworks:
+  - name: "Extraction validated against paper milestones only (status quo)"
+    relation: "This investigation supersedes it with a run-for-run engine comparison."
+
+studies:
+  - 01-baseline-parity
+
+expert_docs: []
+acceptance_criteria:
+  - study: 01-baseline-parity
+    behavior: sbml-baseline-matches-biogears-targets
+
+narrative_spine_skip: [biological_story]
+narrative_spine_skip_reason: "mechanism narrative lives in the Sauro extraction report (expert_doc); not duplicated here while runs are pending."
