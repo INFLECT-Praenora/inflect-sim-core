@@ -1,0 +1,65 @@
+schema_version: 3
+name: 03-severe-infection
+investigation: biogears-sbml-sepsis
+status: planned
+title: "Severe infection (severity 3)"
+confidence: Planned
+
+parent_studies:
+  - {study: 01-baseline-parity, condition: tests-passed}
+
+question: |
+  Under a severe infection (severity 3), does the SBML extraction track the
+  BioGears engine's collapse sequence run-for-run, and how large is the known
+  timing divergence (the extraction report saw the severe course lag by ~8-10 h
+  against the paper)?
+
+hypothesis: |
+  Both sides follow the same qualitative collapse — capillary leak, compensation,
+  then hyperdynamic decompensation — but the SBML extraction lags the engine by
+  several hours on the hypotension milestones, attributable to processes the
+  extraction does not translate (urine, fever vasodilation, lactate,
+  intracellular water).
+
+objective: |
+  Run severity 3 on both engines over 48 h, align observables, and quantify the
+  divergence: SBP<100 and MAP<65 crossing times, SVR-vs-baseline minimum, and the
+  magnitude of the timing lag — the run-for-run comparison the extraction report
+  could not do.
+
+expected_behavior:
+  - name: severe-collapse-sequence-matches
+    observable: "SBP, MAP, HR, SVR, tissue_integrity, blood_pathogen"
+    condition: "same qualitative collapse sequence on both sides"
+    rationale: |
+      Report: the Antimony model reproduces the severe sequence (capillary leak →
+      compensation → sympathetic-fatigue decompensation).
+  - name: severe-timing-divergence-quantified
+    observable: "SBP<100 crossing time (engine vs SBML), MAP<65, SVR ratio"
+    condition: "divergence measured and mechanistically attributed (report: SBML SBP<100 ~37.5 h vs engine ~26-30 h; MAP<65 reached by engine ~45 h, not reached by SBML at 48 h; SVR min ~60% engine vs ~72% SBML)"
+    rationale: |
+      This is the headline result: the ~8-10 h lag measured run-for-run against
+      the real engine rather than against the paper milestones.
+
+baseline:
+  - name: engine-severe
+    composite: viva_biogears.composites.sepsis.biogears_sepsis
+    config: {severity: 3}
+    status: pending
+    note: "Real BioGears engine, severity 3. Pending native build."
+
+variants:
+  - name: sbml-severe
+    composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
+    config: {severity: 3}
+    status: pending
+    note: "SBML extraction, severity 3. 48 h arm deferred until the engine arm runs alongside it."
+
+interventions: []
+runs: []
+
+notes: |
+  DEFERRED until the BioGears engine is built on a run host. The known ~8-10 h
+  severe-course delay (report, vs paper milestones) is re-measured here run-for-run
+  against the real engine. Milestones via
+  viva_simulation_core.analysis.milestones.extract_milestones.

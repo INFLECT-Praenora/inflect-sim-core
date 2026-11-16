@@ -1,0 +1,53 @@
+schema_version: 3
+name: 02-mild-infection
+investigation: biogears-sbml-sepsis
+status: planned
+title: "Mild infection (severity 1)"
+confidence: Planned
+
+parent_studies:
+  - {study: 01-baseline-parity, condition: tests-passed}
+
+question: |
+  Under a mild infection (severity 1), does the SBML extraction reproduce the
+  BioGears engine's course — a controlled infection that resolves without
+  progressing to hypotension — run for run?
+
+hypothesis: |
+  Both sides control the mild infection within ~24 h with SBP never falling below
+  the healthy baseline and tissue integrity staying high; any divergence is small.
+
+objective: |
+  Run severity 1 on both the BioGears engine (viva-biogears) and the SBML
+  extraction (viva-tellurium) over 48 h, align the 9 observables, and compare the
+  milestone table (resolution time, SBP floor, tissue-integrity minimum).
+
+expected_behavior:
+  - name: mild-resolves-within-24h
+    observable: "blood_pathogen, SBP, tissue_integrity"
+    condition: "infection controlled within ~24 h; SBP never below the baseline; tissue integrity stays high (report: min ~0.97)"
+    rationale: |
+      Report milestone: mild (1e6) controlled within 24 h in both the paper and
+      the Antimony model. This study confirms it run-for-run against the engine.
+
+baseline:
+  - name: engine-mild
+    composite: viva_biogears.composites.sepsis.biogears_sepsis
+    config: {severity: 1}
+    status: pending
+    note: "Real BioGears engine, severity 1. Pending native build."
+
+variants:
+  - name: sbml-mild
+    composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
+    config: {severity: 1}
+    status: pending
+    note: "SBML extraction, severity 1. 48 h arm deferred until the engine arm can run alongside it (the comparison is the point)."
+
+interventions: []
+runs: []
+
+notes: |
+  DEFERRED until the BioGears engine is built on a run host. Both 48 h arms run
+  together so the comparison is run-for-run, not SBML-vs-paper. Milestones computed
+  via viva_simulation_core.analysis.milestones.extract_milestones.

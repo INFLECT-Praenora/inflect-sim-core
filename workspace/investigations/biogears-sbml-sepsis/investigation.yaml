@@ -84,12 +84,18 @@ competing_frameworks:
 
 studies:
   - 01-baseline-parity
+  - 02-mild-infection
+  - 03-severe-infection
   - 04-engine-runtime
 
 expert_docs: []
 acceptance_criteria:
   - study: 01-baseline-parity
     behavior: sbml-baseline-matches-biogears-targets
+  - study: 02-mild-infection
+    behavior: mild-resolves-within-24h
+  - study: 03-severe-infection
+    behavior: severe-timing-divergence-quantified
   - study: 04-engine-runtime
     behavior: cross-engine-bit-identical
 
