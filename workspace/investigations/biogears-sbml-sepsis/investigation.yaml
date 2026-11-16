@@ -84,11 +84,14 @@ competing_frameworks:
 
 studies:
   - 01-baseline-parity
+  - 04-engine-runtime
 
 expert_docs: []
 acceptance_criteria:
   - study: 01-baseline-parity
     behavior: sbml-baseline-matches-biogears-targets
+  - study: 04-engine-runtime
+    behavior: cross-engine-bit-identical
 
 narrative_spine_skip: [biological_story]
 narrative_spine_skip_reason: "mechanism narrative lives in the Sauro extraction report (expert_doc); not duplicated here while runs are pending."
