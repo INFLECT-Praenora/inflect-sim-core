@@ -269,3 +269,7 @@ def _render_one(address, config, runs_db, study_yaml, overrides=None):
 # ## Study: `04-engine-runtime`
 #
 # _study.yaml not found — skipped._
+
+# ## Study: `05-divergence-mechanism`
+#
+# _study.yaml not found — skipped._
