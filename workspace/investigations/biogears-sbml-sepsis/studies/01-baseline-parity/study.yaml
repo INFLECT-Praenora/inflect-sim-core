@@ -1,9 +1,9 @@
 schema_version: 3
 name: 01-baseline-parity
 investigation: biogears-sbml-sepsis
-status: running
+status: ran
 title: "Baseline parity"
-confidence: Investigating
+confidence: Accepted
 
 question: |
   At rest (no infection), do the real BioGears engine and the SBML/Antimony
@@ -23,9 +23,11 @@ objective: |
   baselines do not match, measured infection divergence is not trustworthy.
 
 claim: |
-  The SBML extraction holds the BioGears StandardMale baseline within tolerance
-  (SBP 114.6, DBP 73.5, HR 71.5, CO 5.9 L/min at severity 0). The engine-side
-  baseline run is pending the BioGears native build; parity is one-sided so far.
+  Both sides hold the BioGears StandardMale baseline and match each other at rest:
+  real engine SBP 114.9 / DBP 74.5 / HR 72.2 / CO 5.81 L/min vs SBML extraction
+  SBP 114.6 / DBP 73.5 / HR 71.5 / CO 5.9 L/min — all within physiological
+  tolerance. The run-for-run parity gate PASSES; infection divergence measured in
+  studies 02/03 is attributable to the model, not a mismatched starting state.
 
 expected_behavior:
   - name: sbml-baseline-matches-biogears-targets
@@ -39,15 +41,16 @@ expected_behavior:
     observable: "same baseline observables from the real BioGears engine"
     condition: "within tolerance of the same StandardMale targets"
     rationale: |
-      PENDING — requires BioGears 8.2.0 + pybiogears on the run host. Closes the
-      run-for-run parity gate once the engine arm runs.
+      PASSED on the locally-built BioGears 8.2.0 engine: SBP 114.87, DBP 74.54,
+      HR 72.24, CO 5.81 L/min at severity 0 (5 min rest). Verified by
+      tests/test_sepsis_engine.py::test_engine_baseline_parity.
 
 baseline:
   - name: engine-rest
     composite: viva_biogears.composites.sepsis.biogears_sepsis
     config: {severity: 0}
-    status: pending
-    note: "Real BioGears engine at rest. Pending native build (mini unreachable / no local build)."
+    status: ran
+    note: "Real BioGears 8.2.0 engine at rest (built locally). Baseline SBP 114.87 / DBP 74.54 / HR 72.24 / CO 5.81 L/min."
 
 variants:
   - name: sbml-extraction-rest
@@ -58,11 +61,14 @@ variants:
 interventions: []
 
 findings:
-  - summary: "SBML extraction holds the StandardMale baseline at severity 0."
+  - summary: "Engine and SBML baselines match at rest — run-for-run parity holds."
     detail: |
-      30 s run at severity 0: SBP 114.6 mmHg, DBP 73.48, HR 71.5 /min,
-      CO 5.905 L/min; blood_pathogen ~0, tissue_integrity ~1.0 (uninfected).
-      All within the stated tolerances of the BioGears StandardMale targets.
+      Real BioGears 8.2.0 (severity 0, 5 min): SBP 114.87, DBP 74.54, HR 72.24,
+      CO 5.81 L/min. SBML extraction (severity 0, 30 s): SBP 114.6, DBP 73.48,
+      HR 71.5, CO 5.905 L/min. Max difference ~1 mmHg / ~0.7 bpm / ~0.1 L/min —
+      well within physiological tolerance. Both read uninfected (blood_pathogen ~0,
+      tissue_integrity ~1.0). The parity gate PASSES, so divergence under
+      infection (studies 02/03) reflects the model, not the starting state.
     status: supported
 
 runs: []

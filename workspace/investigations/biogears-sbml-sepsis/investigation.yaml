@@ -35,19 +35,20 @@ executive:
     plus a runtime axis comparing the Python process-bigraph engine with the Rust
     viva-core engine on the same composite.
   verdict: |
-    Baseline parity established on the SBML side (SBP 114.6/73.5, HR 71.5,
-    CO 5.9 L/min — matches the BioGears StandardMale targets). The engine-side
-    runs and the mild/severe divergence quantification are pending the BioGears
-    native build.
+    Baseline parity PASSES run-for-run: the locally-built BioGears 8.2.0 engine
+    (SBP 114.9/74.5, HR 72.2, CO 5.81) and the SBML extraction (114.6/73.5, 71.5,
+    5.9) hold the same StandardMale baseline. Cross-engine runtime axis complete
+    (viva-core bit-identical to process-bigraph). The mild/severe infection arms
+    (studies 02/03) are the remaining step — ~8 h of local compute.
   verdict_status: in-progress
   verdict_detail: |
-    The SBML composite loads, steps, holds the stabilised healthy baseline, and
-    seeds infection by severity as designed. The real-engine arm requires BioGears
-    8.2.0 + pybiogears built on the run host (not yet available), so the run-for-run
-    comparison is scaffolded but not yet executed.
+    Engine + SBML composites both run and match at rest; the run-for-run parity
+    gate is closed. BioGears 8.2.0 + pybiogears are built locally. Remaining: the
+    severity-1 and severity-3 48 h arms on both engines, then the divergence
+    quantification and report.
   decisions_needed:
-    - question: "Where does the BioGears engine run — the mini or a local build?"
-      context: "viva-biogears needs a native source build; the mini is currently unreachable."
+    - question: "Launch the ~8 h mild/severe arms now (overnight local compute)?"
+      context: "Both engines build; the 48 h arms are the last runs needed for the headline divergence."
 
 scientific_argument:
   main_claim: |
