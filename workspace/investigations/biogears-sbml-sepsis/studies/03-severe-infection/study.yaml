@@ -82,7 +82,7 @@ baseline:
 
 variants:
   - name: sbml-severe
-    composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
     config: {severity: 3}
     status: ran
     note: "SBML extraction via viva-tellurium, severity 3, 48 h. SBP<100 at 37.5 h (~11 h late); tissue integrity min 0.325."

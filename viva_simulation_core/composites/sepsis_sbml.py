@@ -15,7 +15,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from process_bigraph.composite_generator import composite_generator
 from viva_tellurium import make_tellurium_document
+
+from viva_simulation_core.core import build_core
 
 SBML_PATH = (Path(__file__).resolve().parents[2] / 'workspace' / 'investigations'
              / 'biogears-sbml-sepsis' / 'sources' / 'biogears_sepsis.xml')
@@ -34,12 +37,32 @@ SEPSIS_OBSERVABLES = {
 }
 
 
-def make_sepsis_sbml_composite(severity: int = 0,
+@composite_generator(
+    name="sepsis_sbml",
+    description="The BioGears sepsis core as its SBML/Antimony extraction (Sauro), run via "
+                "Tellurium / roadrunner. Emits the 9 shared comparison observables (SBP, DBP, MAP, "
+                "HR, CO, SVR, blood volume, tissue integrity, blood pathogen). Infection is seeded "
+                "from `severity` at t = infection_start_s. Healthy at severity 0.",
+    parameters={
+        "severity": {"type": "integer", "default": 0,
+                     "description": "0 none / 1 mild / 2 moderate / 3 severe (seeds tissue pathogen)"},
+        "infection_start_s": {"type": "float", "default": 0.0,
+                              "description": "Infection start time in seconds (applied only when severity > 0)"},
+        "interval_s": {"type": "float", "default": 10.0, "description": "Seconds per update"},
+    },
+    core_extensions=[build_core],
+    default_n_steps=360,
+    fidelity="reproduction",
+)
+def make_sepsis_sbml_composite(core=None, *, severity: int = 0,
                                infection_start_s: float | None = None,
                                horizon_s: float = 3600.0,
                                interval_s: float = 10.0) -> dict:
     """Build the Tellurium composite document (healthy at severity=0).
 
+    Registered as the ``sepsis_sbml`` composite generator (the SBML counterpart
+    to viva-biogears' ``biogears_sepsis``). ``core`` is accepted for the
+    generator protocol but unused — Tellurium/roadrunner carries its own solver.
     ``horizon_s`` is advisory (run the Composite for that long); the document
     itself only fixes the process interval.
     """

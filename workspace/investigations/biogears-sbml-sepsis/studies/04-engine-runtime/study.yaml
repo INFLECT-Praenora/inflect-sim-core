@@ -69,13 +69,13 @@ findings:
 
 baseline:
   - name: sbml-under-process-bigraph
-    composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
     config: {severity: 0}
     note: "Same composite run on the Python process-bigraph engine."
 
 variants:
   - name: sbml-under-viva-core
-    composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
     config: {severity: 0}
     note: "Same serialized .pbg document run on the Rust viva-core engine via vc_adapter."
 

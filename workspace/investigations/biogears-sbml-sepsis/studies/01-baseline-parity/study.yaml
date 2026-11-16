@@ -54,7 +54,7 @@ baseline:
 
 variants:
   - name: sbml-extraction-rest
-    composite: viva_simulation_core.composites.sepsis_sbml.make_sepsis_sbml_composite
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
     config: {severity: 0}
     note: "SBML extraction via viva-tellurium. Baseline recorded in findings."
 
