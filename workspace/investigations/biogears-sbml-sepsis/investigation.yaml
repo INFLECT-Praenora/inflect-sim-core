@@ -32,8 +32,10 @@ executive:
     A side-by-side comparison of the BioGears sepsis core run two ways — the real
     BioGears 8.2.0 engine (viva-biogears) versus its SBML/Antimony extraction
     (viva-tellurium) — across a healthy baseline and mild and severe infection,
-    plus a runtime axis comparing the Python process-bigraph engine with the Rust
-    viva-core engine on the same composite.
+    plus two runtime axes: one comparing the Python process-bigraph engine with the
+    Rust viva-core engine on the same composite (the composition engine), and one
+    asking whether a faster or compiled ODE integrator could speed up the SBML model
+    (the numerical solver).
   verdict: |
     The extraction's inflammation core is bit-identical to the engine, and ALL
     divergence lives in the hemodynamic layer. Run-for-run over 48 h: baseline
@@ -59,6 +61,17 @@ executive:
     qualitative outcomes, but it is NOT a drop-in replacement for BioGears'
     cardiovascular dynamics: it misses the engine's ambient physiological variation
     and reaches septic shock by a different hemodynamic route.
+
+    On performance (study 06), the SBML route is not a shortcut to speed by way of a
+    faster integrator. The sepsis ODE is stiff, so the one solver class that works is
+    an implicit stiff method (CVODE/BDF) — already compiled C inside libroadrunner.
+    An explicit fixed-step integrator (the kind our viva-hybrid Rust engine uses) is
+    unstable on the real model and gets the fast cardiovascular states wrong by more
+    than 100x even at 173 million steps per 48 h run. An independent viva-hybrid trial
+    shows that even where explicit integration is valid, a from-scratch Rust
+    integrator beats compiled numba by only ~2x. The real speed levers are a better or
+    warm-started stiff solver, GPU parallelism across many virtual patients, or a
+    reduced-order surrogate — not reimplementing the integrator in another language.
   decisions_needed: []
 
 scientific_argument:
@@ -83,10 +96,12 @@ scientific_argument:
     - "studies/03-severe-infection/charts/04_severe_mechanism_co_svr.svg"
     - "studies/05-divergence-mechanism/charts/01_divergence_heatmap.svg"
     - "studies/05-divergence-mechanism/charts/03_functional_difference_matrix.svg"
+    - "studies/06-ode-integrator-runtime/charts/01_integrator_stiffness.svg"
   caveats:
     - "'Functional-difference' attributions (study 05) come from the extraction report's own 'Differences from BioGears' inventory; they are documented omissions, not newly-measured mechanisms."
     - "viva-biogears runs its InfectionModerate nutrition schedule; the extraction models no meals — a documented scenario delta that accounts for much of the mild-arm fluctuation."
     - "Both arms are single 48 h runs per severity; no multi-seed ensemble (the engine is deterministic for a fixed scenario)."
+    - "The integrator benchmark (study 06) is run on a 60 s window with step counts extrapolated to 48 h, and uses roadrunner's own rk4/rk45/cvode integrators (rk4 is the same algorithm as the viva-hybrid Rust engine, not viva-hybrid itself); the ~2x Rust-vs-compiled figure is carried over from the viva-hybrid repo's non-stiff benchmark, not re-measured on the sepsis model."
 
 inputs:
   datasets:
@@ -111,6 +126,7 @@ studies:
   - 03-severe-infection
   - 04-engine-runtime
   - 05-divergence-mechanism
+  - 06-ode-integrator-runtime
 
 expert_docs: []
 acceptance_criteria:
@@ -124,13 +140,18 @@ acceptance_criteria:
     behavior: cross-engine-bit-identical
   - study: 05-divergence-mechanism
     behavior: divergence-maps-to-omitted-functionality
+  - study: 06-ode-integrator-runtime
+    behavior: sepsis-ode-is-stiff
+  - study: 06-ode-integrator-runtime
+    behavior: integrator-reimpl-not-a-speed-lever
 
 at_a_glance:
   - {study: 01-baseline-parity, role: "Parity gate — both sides hold the StandardMale baseline at rest, so later divergence is the model, not the starting state."}
   - {study: 02-mild-infection, role: "Agreement case — mild infection controlled on both sides; also the first sign of the engine's ambient fluctuation."}
   - {study: 03-severe-infection, role: "Headline — the full 9-observable severe comparison: ~11 h lag and the opposite shock mechanism."}
-  - {study: 04-engine-runtime, role: "Runtime axis — the SBML composite is bit-identical under process-bigraph (Python) and viva-core (Rust); engine swap moves only framework overhead."}
+  - {study: 04-engine-runtime, role: "Runtime axis (composition engine) — the SBML composite is bit-identical under process-bigraph (Python) and viva-core (Rust); engine swap moves only framework overhead."}
   - {study: 05-divergence-mechanism, role: "Synthesis — maps every divergence to the BioGears subsystem the extraction omits or simplifies."}
+  - {study: 06-ode-integrator-runtime, role: "Runtime axis (ODE integrator) — the sepsis ODE is stiff, so an explicit/Rust integrator (viva-hybrid-style) cannot speed it up; the speed levers are a better stiff solver, GPU-parallel patients, or a surrogate."}
 
 biological_story: |
   Sepsis in BioGears is a race between an inflammatory response and the
