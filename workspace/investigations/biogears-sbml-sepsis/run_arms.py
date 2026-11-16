@@ -10,14 +10,17 @@ Infection is seeded at t=0 on both sides. Outputs in <out>:
   <engine>-sev<S>.json              {meta, samples:[{time,<9 obs>}...]}  (checkpointed at each progress line)
   <engine>-sev<S>.milestones.json   extract_milestones() of the arm
   compare-sev<S>.json               analyze output (align + milestone divergence)
-Resume: if the arm json exists with the same meta and a shorter horizon, a rerun
-restarts from scratch (composite state is not serialisable); a complete run
-(sim_time >= horizon) is skipped unless --no-resume.
+Resume: composite state is not serialisable, so an interrupted arm restarts from scratch.
+A finished arm is skipped on rerun ONLY if engine/severity/interval/horizon/infection_start
+AND the version stamp (SBML+composite source hash, or biogears versions) all match, the last
+sample reaches horizon_s, and the milestones file exists. Otherwise it is rerun.
+`analyze` refuses mismatched or incomplete arm pairs (non-zero exit).
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -34,13 +37,61 @@ def arm_paths(out: Path, engine: str, sev: int):
     return out / f'{engine}-sev{sev}.json', out / f'{engine}-sev{sev}.milestones.json'
 
 
+def _sha(*paths) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    for p in paths:
+        h.update(Path(p).read_bytes())
+    return h.hexdigest()[:16]
+
+
+def version_stamp(engine: str) -> str:
+    from importlib import metadata
+    import viva_simulation_core.composites.sepsis_sbml as sb
+    if engine == 'sbml':
+        return 'sbml:' + _sha(sb.SBML_PATH, sb.__file__)
+    import viva_simulation_core.composites.sepsis_engine as en
+    vers = []
+    for n in ('viva-biogears', 'pybiogears'):
+        try:
+            vers.append(f'{n}={metadata.version(n)}')
+        except metadata.PackageNotFoundError:
+            vers.append(f'{n}=?')
+    return 'engine:' + ','.join(vers) + ':' + _sha(en.__file__)
+
+
+SCENARIO_KEYS = ('severity', 'interval_s', 'horizon_s', 'infection_start_s')
+
+
+def arm_is_finished(series_p: Path, ms_p: Path, meta: dict) -> bool:
+    """True only if an on-disk arm matches `meta` (incl. version), reached horizon, has milestones."""
+    if not (series_p.exists() and ms_p.exists()):
+        return False
+    try:
+        old = json.loads(series_p.read_text())
+        om = old['meta']
+        samples = old['samples']
+        return bool(om.get('complete') and samples
+                    and all(om.get(k) == meta[k] for k in ('engine', 'version') + SCENARIO_KEYS)
+                    and max(x['time'] for x in samples) >= meta['horizon_s'] - 1e-6)
+    except (KeyError, ValueError, TypeError):
+        return False
+
+
 def rows_to_samples(rows, extract, observables):
     """Emitter rows -> [{'time': s, obs: v}]; drops rows without readings (as extract does)."""
     obs = extract(rows)
     if not obs:
         return []
     keep = [r for r in rows if (r.get('parameters') if 'parameters' in r else r.get('circuits'))]
-    times = [float(r.get('time', r.get('global_time', 0.0))) for r in keep]
+    times = []
+    for r in keep:
+        if r.get('time') is not None:
+            times.append(float(r['time']))
+        elif r.get('global_time') is not None:
+            times.append(float(r['global_time']))
+        else:
+            raise ValueError(f'emitter row has neither time nor global_time: keys={sorted(r)}')
     n = len(obs['SBP'])
     assert len(times) == n, (len(times), n)
     return [{'time': times[i], **{k: obs[k][i] for k in observables}} for i in range(n)]
@@ -78,18 +129,23 @@ def write_json(path: Path, obj):
 def run_arm(engine, sev, horizon_h, interval_s, out: Path, log_every_h=1.0, resume=True):
     from process_bigraph import gather_emitter_results
     from viva_simulation_core.analysis.milestones import extract_milestones
+    if horizon_h <= 0:
+        sys.exit('--horizon-hours must be > 0')
+    if engine == 'engine' and not os.environ.get('BIOGEARS_RUNTIME'):
+        sys.exit('BIOGEARS_RUNTIME is not set; export BIOGEARS_RUNTIME='
+                 '~/biogears-8.2.0-install/share/biogears/runtime')
     out.mkdir(parents=True, exist_ok=True)
     series_p, ms_p = arm_paths(out, engine, sev)
     horizon_s = horizon_h * 3600.0
     meta = dict(engine=engine, severity=sev, interval_s=interval_s, horizon_s=horizon_s,
-                infection_start_s=0, patient='StandardMale' if engine == 'engine' else 'sbml-default')
-    if resume and series_p.exists():
-        old = json.loads(series_p.read_text())
-        om = old.get('meta', {})
-        if (om.get('complete') and all(om.get(k) == meta[k] for k in
-                                       ('engine', 'severity', 'interval_s', 'horizon_s'))):
-            print(f'[{engine} sev{sev}] already complete, skipping', flush=True)
-            return
+                infection_start_s=0, version=version_stamp(engine),
+                patient='StandardMale' if engine == 'engine' else 'sbml-default')
+    if resume and arm_is_finished(series_p, ms_p, meta):
+        print(f'[{engine} sev{sev}] already complete with matching settings+version, skipping', flush=True)
+        return
+    if ms_p.exists():
+        ms_p.unlink()  # never leave milestones from a different/older run beside a new series
+    samples = []
     sim, extract, observables = build(engine, sev, interval_s, horizon_s)
     t0 = time.perf_counter()
     chunk = max(interval_s, log_every_h * 3600.0)
@@ -123,6 +179,23 @@ def analyze(sev, out: Path):
         if not p.exists():
             sys.exit(f'missing arm file {p}')
         arms[e] = json.loads(p.read_text())
+    me, ms_ = arms['engine']['meta'], arms['sbml']['meta']
+    problems = []
+    for e, m in (('engine', me), ('sbml', ms_)):
+        if not m.get('complete'):
+            problems.append(f'{e} arm incomplete (sim_time_s={m.get("sim_time_s")}, horizon_s={m.get("horizon_s")})')
+        if m.get('severity') != sev:
+            problems.append(f'{e} arm severity {m.get("severity")} != --severity {sev}')
+    for k in SCENARIO_KEYS:  # 'patient' deliberately excluded: labels differ by engine
+        if me.get(k) != ms_.get(k):
+            problems.append(f'{k} differs: engine={me.get(k)} sbml={ms_.get(k)}')
+    for e in ('engine', 'sbml'):
+        sm = arms[e]['samples']
+        hz = arms[e]['meta'].get('horizon_s')
+        if not sm or max(x['time'] for x in sm) < (hz or 0) - 1e-6:
+            problems.append(f'{e} samples do not reach horizon_s={hz}')
+    if problems:
+        sys.exit('analyze REFUSED (scenario_mismatch/incomplete):\n  ' + '\n  '.join(problems))
     s_e, s_s = arms['engine']['samples'], arms['sbml']['samples']
     cmp_ = align_observables(s_e, s_s, require_all=True)
     m_e, m_s = (extract_milestones(s).as_dict() for s in (s_e, s_s))
