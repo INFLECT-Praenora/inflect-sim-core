@@ -67,6 +67,11 @@ findings:
       slice. These single measurements are indicative, not benchmarked.
     status: supported
 
+visualizations:
+  - name: "Cross-engine runtime: process-bigraph (Python) vs viva-core (Rust) — bit-identical, overhead-only"
+    address: image:charts/01_runtime_bars.svg
+    display: primary
+
 baseline:
   - name: sbml-under-process-bigraph
     composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml

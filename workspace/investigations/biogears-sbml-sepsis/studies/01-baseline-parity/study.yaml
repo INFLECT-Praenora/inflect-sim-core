@@ -45,6 +45,11 @@ expected_behavior:
       HR 72.24, CO 5.81 L/min at severity 0 (5 min rest). Verified by
       tests/test_sepsis_engine.py::test_engine_baseline_parity.
 
+visualizations:
+  - name: "Baseline parity at rest: engine vs SBML vs StandardMale target"
+    address: image:charts/01_baseline_parity.svg
+    display: primary
+
 baseline:
   - name: engine-rest
     composite: viva_biogears.composites.sepsis.biogears_sepsis
@@ -82,3 +87,7 @@ runs:
       engine-baseline-matches-targets:
         result: passed
         detail: "Real BioGears 8.2.0 severity-0 baseline (SBP 114.87 / DBP 74.54 / HR 72.24 / CO 5.81 L/min) within tolerance; tests/test_sepsis_engine.py."
+
+artifacts:
+  - charts/01_baseline_parity.svg
+  - out/baseline.json

@@ -112,6 +112,16 @@ findings:
       See 03_functional_difference_matrix.
     status: supported
 
+visualizations:
+  - name: "Where they diverge: per-observable divergence heatmap (all hemodynamic)"
+    address: image:charts/01_divergence_heatmap.svg
+    display: primary
+  - name: "Each divergence mapped to an omitted or simplified BioGears subsystem"
+    address: image:charts/03_functional_difference_matrix.svg
+    display: mechanism
+  - name: "Severe milestones: the ~11 h timing lag, engine vs extraction"
+    address: image:charts/02_milestone_dumbbell.svg
+
 baseline:
   - name: engine-arms
     composite: viva_biogears.composites.sepsis.biogears_sepsis

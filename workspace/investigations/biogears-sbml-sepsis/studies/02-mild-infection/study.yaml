@@ -49,6 +49,14 @@ findings:
       HR ~6.3 bpm, blood_volume ~0.57 L, plus a cardiac-output offset), but the qualitative mild outcome agrees run-for-run.
     status: supported
 
+visualizations:
+  - name: "Mild infection: SBP & pathogen, engine vs SBML (controlled, no hypotension)"
+    address: image:charts/01_mild_overlay.svg
+    display: primary
+  - name: "Mild arm: the engine fluctuates continuously, the extraction idles"
+    address: image:charts/02_mild_fluctuation.svg
+    display: mechanism
+
 baseline:
   - name: engine-mild
     composite: viva_biogears.composites.sepsis.biogears_sepsis

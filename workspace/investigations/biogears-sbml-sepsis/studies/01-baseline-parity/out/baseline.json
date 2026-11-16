@@ -1,0 +1,8 @@
+{
+  "note": "Recorded severity-0 (at-rest) baseline. Committed results from the real BioGears 8.2.0 engine (5 min) and the SBML extraction (30 s), as reported in this study's finding/claim and verified by tests/test_sepsis_engine.py + tests/test_sepsis_sbml.py.",
+  "observables": ["SBP", "DBP", "HR", "CO"],
+  "labels": {"SBP": "Systolic BP (mmHg)", "DBP": "Diastolic BP (mmHg)", "HR": "Heart rate (/min)", "CO": "Cardiac output (L/min)"},
+  "engine": {"SBP": 114.87, "DBP": 74.54, "HR": 72.24, "CO": 5.81},
+  "sbml":   {"SBP": 114.6,  "DBP": 73.48, "HR": 71.5,  "CO": 5.905},
+  "target": {"SBP": 114.0,  "DBP": 73.5,  "HR": 72.0,  "CO": 5.9}
+}

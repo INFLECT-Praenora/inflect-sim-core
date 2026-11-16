@@ -73,6 +73,18 @@ findings:
       confined to the hemodynamic response, not the inflammation model.
     status: supported
 
+visualizations:
+  - name: "Severe sepsis: all 9 observables, engine vs SBML over 48 h"
+    address: image:charts/03_severe_9panel_engine_vs_sbml.svg
+    display: primary
+  - name: "Opposite shock mechanism: cardiac output vs systemic vascular resistance"
+    address: image:charts/04_severe_mechanism_co_svr.svg
+    display: mechanism
+  - name: "Severe arm: SBP & HR overlay (the ~11 h hemodynamic lag)"
+    address: image:charts/01_severe_sbp_hr_overlay.svg
+  - name: "Inflammation core matches near bit-for-bit"
+    address: image:charts/02_severe_inflammation_match.svg
+
 baseline:
   - name: engine-severe
     composite: viva_biogears.composites.sepsis.biogears_sepsis

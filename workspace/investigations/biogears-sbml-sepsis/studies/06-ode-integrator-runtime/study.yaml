@@ -128,6 +128,11 @@ findings:
       lever.
     status: supported
 
+visualizations:
+  - name: "Integrator stiffness: an explicit/Rust solver can't speed up the sepsis ODE"
+    address: image:charts/01_integrator_stiffness.svg
+    display: primary
+
 baseline:
   - name: sbml-sepsis-composite
     composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
