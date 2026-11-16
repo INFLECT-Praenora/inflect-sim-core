@@ -1,0 +1,5 @@
+{
+ "title": "03_severe_9panel_engine_vs_sbml",
+ "interpretation": "Severe arm, all 9 observables, engine vs SBML extraction over 48 h. Inflammation (tissue integrity, blood pathogen) overlaps bit-for-bit; every divergence is in the hemodynamic layer. Dotted lines mark the SBP<100 / MAP<65 / HR>90 thresholds.",
+ "caption": "Severe arm, all 9 observables, engine vs SBML extraction over 48 h. Inflammation (tissue integrity, blood pathogen) overlaps bit-for-bit; every divergence is in the hemodynamic layer. Dotted lines mark the SBP<100 / MAP<65 / HR>90 thresholds."
+}

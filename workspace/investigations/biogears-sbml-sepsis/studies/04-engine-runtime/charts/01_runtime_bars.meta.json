@@ -1,0 +1,5 @@
+{
+ "title": "01_runtime_bars",
+ "interpretation": "Wall-clock for the same SBML composite under the Python process-bigraph engine vs the Rust viva-core engine, at two simulated horizons. A single heavy libroadrunner process dominates, so the engine swap moves only framework overhead (within ~10%); the two engines produce bit-identical results (max abs diff 0.0 across all 9 observables).",
+ "caption": "Wall-clock for the same SBML composite under the Python process-bigraph engine vs the Rust viva-core engine, at two simulated horizons. A single heavy libroadrunner process dominates, so the engine swap moves only framework overhead (within ~10%); the two engines produce bit-identical results (max abs diff 0.0 across all 9 observables)."
+}
