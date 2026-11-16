@@ -8,7 +8,8 @@ Scenario knobs ``severity`` (0 none, 1 mild, 2 moderate, 3 severe) and
 ``infectionStart`` (s) are model parameters. ``TelluriumProcess`` re-applies
 ``parameter_overrides`` after its init reset(), so they take effect; the event
 ``E_infect`` fires at t >= infectionStart and seeds tissue pathogen PT from
-``severity`` (1e6 / 5e6 / 2.5e7). Healthy baseline = severity 0.
+``severity`` (1e6 / 5e6 / 2.5e7). Healthy baseline = severity 0; there ``infectionStart`` is deliberately left at
+its model default (1e12) so the infection event cannot fire.
 """
 from __future__ import annotations
 
@@ -45,7 +46,7 @@ def make_sepsis_sbml_composite(severity: int = 0,
     overrides = {'severity': float(severity)}
     # NB: the model's piecewise seed maps severity 0 to the *mild* dose, so a
     # healthy run must never fire E_infect: keep the default infectionStart=1e12.
-    if severity:
+    if severity > 0:
         overrides['infectionStart'] = float(infection_start_s) if infection_start_s is not None else 1.0
     doc = make_tellurium_document(
         model_file=str(SBML_PATH), model_format='sbml',

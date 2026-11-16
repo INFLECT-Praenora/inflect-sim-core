@@ -25,3 +25,14 @@ def test_sbml_loads_and_steps():
     assert abs(last['DBP'] - 73.5) < 5
     assert abs(last['HR'] - 72.0) < 5
     assert abs(last['CO'] - 5.9) < 0.5
+    # healthy run must be genuinely uninfected (guards the severity-0 seeding quirk)
+    assert last['blood_pathogen'] < 1e-6
+    assert last['tissue_integrity'] > 0.99
+
+
+def test_severity1_infects():
+    doc = make_sepsis_sbml_composite(severity=1, infection_start_s=5.0,
+                                     horizon_s=120.0, interval_s=5.0)
+    obs = _run(doc, 120.0)
+    assert obs
+    assert max(obs['blood_pathogen']) > 1e-3
