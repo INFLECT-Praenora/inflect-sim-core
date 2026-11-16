@@ -32,6 +32,9 @@ class VivaCoreTelluriumProcess(TelluriumProcess):
 
     def update(self, state, interval=1.0):
         up = super().update(state, interval)
+        # Guard the "always empty" claim: never silently drop real data.
+        assert len(up['species']) == 0 and len(up['rates']) == 0, (
+            'SBML model now has floating species/rates; viva-core adapter would drop them')
         up = {k: v for k, v in up.items() if k not in _DROP}
         up['parameters'] = {sid: float(up['parameters'][sid])
                             for sid in SEPSIS_OBSERVABLES.values()}
