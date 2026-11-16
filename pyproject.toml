@@ -21,7 +21,8 @@ dependencies = [
     # Extracted from viva-template as of v0.4.16; provides the `vivarium-workbench
     # serve` CLI invoked by scripts/serve.sh.
     "vivarium-workbench",
-    # Non-PyPI viva modules: installed editable from local checkouts in ~/code.
+    # viva-core/tellurium/biogears are not on PyPI: resolved via [tool.uv.sources]
+    # (sibling checkouts). viva-emitters is on PyPI.
     "viva-core",
     "viva-tellurium",
     "viva-biogears",
@@ -52,4 +53,7 @@ allow-direct-references = true
 packages = ["viva_simulation_core"]
 
 [tool.uv.sources]
+viva-core = { path = "../viva-core", editable = true }
+viva-tellurium = { path = "../viva-tellurium", editable = true }
+viva-biogears = { path = "../viva-biogears", editable = true }
 vivarium-workbench = { git = "https://github.com/vivarium-collective/vivarium-workbench.git", branch = "main" }
