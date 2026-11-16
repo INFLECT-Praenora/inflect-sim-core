@@ -28,8 +28,10 @@ if _os.environ.get("PYTHONUTF8") != "1":
 # A side-by-side comparison of the BioGears sepsis core run two ways — the real
 # BioGears 8.2.0 engine (viva-biogears) versus its SBML/Antimony extraction
 # (viva-tellurium) — across a healthy baseline and mild and severe infection,
-# plus a runtime axis comparing the Python process-bigraph engine with the Rust
-# viva-core engine on the same composite.
+# plus two runtime axes: one comparing the Python process-bigraph engine with the
+# Rust viva-core engine on the same composite (the composition engine), and one
+# asking whether a faster or compiled ODE integrator could speed up the SBML model
+# (the numerical solver).
 #
 # ---
 #
@@ -271,5 +273,9 @@ def _render_one(address, config, runs_db, study_yaml, overrides=None):
 # _study.yaml not found — skipped._
 
 # ## Study: `05-divergence-mechanism`
+#
+# _study.yaml not found — skipped._
+
+# ## Study: `06-ode-integrator-runtime`
 #
 # _study.yaml not found — skipped._
