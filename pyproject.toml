@@ -21,6 +21,11 @@ dependencies = [
     # Extracted from viva-template as of v0.4.16; provides the `vivarium-workbench
     # serve` CLI invoked by scripts/serve.sh.
     "vivarium-workbench",
+    # Non-PyPI viva modules: installed editable from local checkouts in ~/code.
+    "viva-core",
+    "viva-tellurium",
+    "viva-biogears",
+    "viva-emitters",
 ]
 
 [project.optional-dependencies]
