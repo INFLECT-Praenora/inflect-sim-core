@@ -30,10 +30,13 @@ objective: |
 expected_behavior:
   - name: severe-collapse-sequence-matches
     observable: "SBP, MAP, HR, SVR, tissue_integrity, blood_pathogen"
-    condition: "same qualitative collapse sequence on both sides"
+    condition: "same timing-shifted collapse with matched inflammation, but a divergent hemodynamic mechanism (engine SVR min 0.952 vs extraction 0.715: the extraction over-shoots vasodilation)"
     rationale: |
       Report: the Antimony model reproduces the severe sequence (capillary leak →
-      compensation → sympathetic-fatigue decompensation).
+      compensation → sympathetic-fatigue decompensation). Run-for-run, the
+      collapse occurs on both sides (shifted ~11 h) with matched inflammation, but
+      the hemodynamic mechanism differs: the engine barely vasodilates while the
+      extraction over-dilates, so the sequence match is partial, not mechanistic.
   - name: severe-timing-divergence-quantified
     observable: "SBP<100 crossing time (engine vs SBML), MAP<65, SVR ratio"
     condition: "divergence measured and mechanistically attributed (report: SBML SBP<100 ~37.5 h vs engine ~26-30 h; MAP<65 reached by engine ~45 h, not reached by SBML at 48 h; SVR min ~60% engine vs ~72% SBML)"
@@ -43,7 +46,7 @@ expected_behavior:
 
 claim: |
   Run-for-run, the SBML extraction reproduces BioGears' severe-sepsis inflammation
-  almost exactly (tissue integrity 0.325/0.325, peak pathogen 60.5/60.6) but its
+  almost exactly (tissue integrity 0.325/0.325, peak pathogen 60.5/60.6; values at the 48 h horizon, the severe course not yet at its true peak/min) but its
   hemodynamic collapse arrives ~11 h LATE: SBP crosses 100 mmHg at 37.5 h in the
   extraction vs 26.6 h in the real engine (a 10.9 h lag), with the same ~11 h lag
   on the HR>90 compensation. This is the engine-vs-extraction comparison the
@@ -65,8 +68,8 @@ findings:
   - summary: "The inflammation / pathogen core matches the engine almost bit-for-bit."
     detail: |
       tissue_integrity minimum 0.3248 (engine) vs 0.3248 (extraction); peak
-      blood_pathogen 60.55 vs 60.60. The Acute Inflammatory Response the extraction
-      copied from BioGears reproduces the engine's dynamics to ~1e-4; divergence is
+      blood_pathogen 60.55 vs 60.60 (both are 48 h-horizon values; *_h = 48.0, so the true peak/min is not yet reached). The Acute Inflammatory Response the extraction
+      copied from BioGears reproduces the engine's dynamics to ~1e-4 for tissue integrity (~1e-3 for peak pathogen); divergence is
       confined to the hemodynamic response, not the inflammation model.
     status: supported
 
@@ -87,7 +90,7 @@ variants:
 interventions: []
 runs:
   - name: engine-vs-sbml-sev3
-    note: "Aligned comparison in out/compare-sev3.json; per-arm series + milestones in out/."
+    note: "Aligned comparison in out/compare-sev3.json; per-arm series + milestones in out/. Note: passed:false there is the EXPECTED result (the 5% numeric tolerance failing on hemodynamics is the finding); the parity gate that must pass is study 01 (baseline), which is test-backed."
 
 artifacts:
   - out/compare-sev3.json

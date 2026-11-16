@@ -17,6 +17,7 @@ from viva_simulation_core.composites.sepsis_engine import (  # noqa: E402
 from viva_simulation_core.composites.sepsis_sbml import SEPSIS_OBSERVABLES  # noqa: E402
 
 
+@pytest.mark.slow
 def test_engine_baseline_parity():
     core = build_core()
     doc = make_sepsis_engine_composite(severity=0, horizon_s=300.0, interval_s=60.0, core=core)

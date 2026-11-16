@@ -10,6 +10,8 @@ import pytest
 
 viva_core = pytest.importorskip('viva_core')
 
+pytestmark = pytest.mark.slow
+
 from viva_simulation_core.analysis.run_s4_engines import (  # noqa: E402
     run_under_both, run_viva_core)
 from viva_simulation_core.composites.sepsis_sbml import make_sepsis_sbml_composite  # noqa: E402

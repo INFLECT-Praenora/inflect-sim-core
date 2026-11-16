@@ -51,6 +51,19 @@ line with one plain sentence on what this workspace studies._
 AI coding assistant? `docs/first-run-agent-guide.md` takes it from a clean clone to a
 running workbench.
 
+## Engine arm prerequisite
+
+Re-running the real-engine (BioGears) arms needs BioGears 8.2.0 and pybiogears
+built from source:
+
+    ~/code/pybiogears/scripts/install_biogears.sh        # -> ~/biogears-8.2.0-install
+    CMAKE_PREFIX_PATH=~/biogears-8.2.0-install uv pip install -e ~/code/pybiogears
+    export BIOGEARS_RUNTIME=~/biogears-8.2.0-install/share/biogears/runtime
+
+The SBML side and all committed comparison data are reproducible without this;
+only re-running the real-engine arms needs it. Slow/engine tests are skipped by
+default; run them with `pytest -m slow`.
+
 ## Building on it
 
 [viva-superpowers](https://github.com/vivarium-collective/viva-superpowers) is the

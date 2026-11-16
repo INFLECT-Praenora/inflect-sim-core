@@ -40,7 +40,7 @@ executive:
     baseline parity holds; mild stays controlled on both sides; under severe sepsis
     SBP crosses 100 mmHg at 37.5 h in the extraction vs 26.6 h in the real engine
     (a 10.9 h lag), while tissue integrity (0.325/0.325) and pathogen load
-    (60.5/60.6) match to ~1e-4. The engine-vs-extraction comparison the extraction
+    (60.5/60.6) match within ~0.1% (tissue integrity to ~1e-4, peak pathogen to ~1e-3). The engine-vs-extraction comparison the extraction
     report could not make — confirming and slightly exceeding its ~8-10 h estimate.
   verdict_status: complete
   verdict_detail: |
@@ -96,7 +96,7 @@ acceptance_criteria:
   - study: 01-baseline-parity
     behavior: sbml-baseline-matches-biogears-targets
   - study: 02-mild-infection
-    behavior: mild-resolves-within-24h
+    behavior: mild-controlled-no-hypotension
   - study: 03-severe-infection
     behavior: severe-timing-divergence-quantified
   - study: 04-engine-runtime

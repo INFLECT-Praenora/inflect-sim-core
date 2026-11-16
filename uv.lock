@@ -2858,10 +2858,10 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "rich", marker = "extra == 'cli'" },
     { name = "typer", marker = "extra == 'cli'" },
-    { name = "viva-biogears", editable = "../viva-biogears" },
-    { name = "viva-core", editable = "../viva-core" },
+    { name = "viva-biogears", git = "https://github.com/vivarium-collective/viva-biogears?branch=main" },
+    { name = "viva-core", git = "https://github.com/vivarium-collective/viva-core?branch=main" },
     { name = "viva-emitters" },
-    { name = "viva-tellurium", editable = "../viva-tellurium" },
+    { name = "viva-tellurium", git = "https://github.com/vivarium-collective/viva-tellurium?branch=main" },
     { name = "vivarium-workbench", git = "https://github.com/vivarium-collective/vivarium-workbench.git?branch=main" },
 ]
 provides-extras = ["dev", "cli"]
@@ -3113,7 +3113,7 @@ dependencies = [
 [[package]]
 name = "viva-biogears"
 version = "0.1.0"
-source = { editable = "../viva-biogears" }
+source = { git = "https://github.com/vivarium-collective/viva-biogears?branch=main#9cedbdeb5e8cf81acd6e2eb1a9cef71c8e118ba2" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "bigraph-viz" },
@@ -3129,35 +3129,6 @@ dependencies = [
     { name = "vivarium-workbench" },
 ]
 
-[package.metadata]
-requires-dist = [
-    { name = "bigraph-schema", specifier = ">=1.8.3" },
-    { name = "bigraph-viz", specifier = ">=2.0.3" },
-    { name = "jinja2", specifier = ">=3.1" },
-    { name = "jsonschema", extras = ["format-nongpl"], specifier = ">=4.21" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-    { name = "platformdirs", specifier = ">=3" },
-    { name = "plotly" },
-    { name = "process-bigraph", specifier = ">=1.10.1" },
-    { name = "pypdf", specifier = ">=4.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "rich", marker = "extra == 'cli'" },
-    { name = "typer", marker = "extra == 'cli'" },
-    { name = "vivarium-workbench" },
-]
-provides-extras = ["dev", "cli"]
-
-[package.metadata.requires-dev]
-docs = [
-    { name = "furo", specifier = ">=2025.12.19" },
-    { name = "ipykernel", specifier = ">=7.4.0" },
-    { name = "matplotlib" },
-    { name = "myst-nb", specifier = ">=1.4.0" },
-    { name = "sphinx", specifier = ">=8.2" },
-]
-
 [[package]]
 name = "viva-catalog"
 version = "0.1.0"
@@ -3165,7 +3136,8 @@ source = { git = "https://github.com/vivarium-collective/viva-marketplace.git?re
 
 [[package]]
 name = "viva-core"
-source = { editable = "../viva-core" }
+version = "0.1.0"
+source = { git = "https://github.com/vivarium-collective/viva-core?branch=main#154d94c2f30050715e87aa89af2b93b04d5f77b7" }
 
 [[package]]
 name = "viva-discovery-engine"
@@ -3253,48 +3225,19 @@ evaluator = [
 
 [[package]]
 name = "viva-tellurium"
-version = "0.1.2"
-source = { editable = "../viva-tellurium" }
+version = "0.2.3"
+source = { git = "https://github.com/vivarium-collective/viva-tellurium?branch=main#c65f8032f76935524912c2b3d384accb805b9e24" }
 dependencies = [
     { name = "bigraph-schema" },
-    { name = "bigraph-viz" },
-    { name = "jinja2" },
-    { name = "jsonschema", extra = ["format-nongpl"] },
     { name = "libroadrunner" },
-    { name = "matplotlib" },
     { name = "numpy" },
-    { name = "plotly" },
     { name = "process-bigraph" },
-    { name = "pypdf" },
     { name = "pyyaml" },
+    { name = "rich" },
+    { name = "six" },
     { name = "tellurium" },
-    { name = "viva-superpowers" },
-    { name = "vivarium-workbench" },
+    { name = "typer" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "bigraph-schema" },
-    { name = "bigraph-viz", specifier = ">=2.0.3" },
-    { name = "bigraph-viz", marker = "extra == 'dev'" },
-    { name = "jinja2", specifier = ">=3.1" },
-    { name = "jsonschema", extras = ["format-nongpl"], specifier = ">=4.21" },
-    { name = "libroadrunner", specifier = ">=2.11.0" },
-    { name = "matplotlib" },
-    { name = "matplotlib", marker = "extra == 'dev'" },
-    { name = "numpy" },
-    { name = "plotly" },
-    { name = "process-bigraph", specifier = ">=1.8.5" },
-    { name = "pypdf", specifier = ">=4.0" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pyyaml" },
-    { name = "rich", marker = "extra == 'cli'" },
-    { name = "tellurium", specifier = ">=2.2" },
-    { name = "typer", marker = "extra == 'cli'" },
-    { name = "viva-superpowers", git = "https://github.com/vivarium-collective/viva-superpowers.git?branch=main" },
-    { name = "vivarium-workbench" },
-]
-provides-extras = ["cli", "dev"]
 
 [[package]]
 name = "viva-workspace"

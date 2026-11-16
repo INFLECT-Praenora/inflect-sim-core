@@ -12,6 +12,8 @@ def test_core_deps_import(mod):
     importlib.import_module(mod)
 
 
+@pytest.mark.skipif(os.environ.get("SIMCORE_LOCAL_CHECKOUTS") != "1",
+                    reason="opt-in: set SIMCORE_LOCAL_CHECKOUTS=1 to assert ~/code editable checkouts")
 @pytest.mark.parametrize("mod", LOCAL)
 def test_deps_are_local_checkouts(mod):
     m = importlib.import_module(mod)
