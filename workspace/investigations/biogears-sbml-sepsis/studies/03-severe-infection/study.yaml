@@ -115,6 +115,21 @@ runs:
         evidence_refs: [out/compare-sev3.json]
     note: "Aligned comparison in out/compare-sev3.json; per-arm series + milestones in out/. Note: passed:false there is the EXPECTED result (the 5% numeric tolerance failing on hemodynamics is the finding); the parity gate that must pass is study 01 (baseline), which is test-backed."
 
+conclusion_logic:
+  if_primary_tests_fail:
+    diagnose:
+      - observation: >
+          The severe arm reaches the same hypotension endpoint but by the opposite
+          hemodynamic mechanism and ~11 h late (SVR min 0.952 engine vs 0.715 SBML;
+          SBP<100 at 26.6 h vs 37.5 h) — a qualified, needs-calibration match rather
+          than a mechanistic one.
+        hypothesis: >
+          The divergence is confined to the hemodynamic layer and maps to the
+          vasomotor, fluid and metabolic subsystems the extraction omits or holds at
+          baseline (inert nitric oxide, absent fever vasodilation, no renal/urine,
+          no lactate) — so calibrating those pathways should close the gap.
+        seeded_study: 05-divergence-mechanism
+
 artifacts:
   - out/compare-sev3.json
   - out/engine-sev3.json

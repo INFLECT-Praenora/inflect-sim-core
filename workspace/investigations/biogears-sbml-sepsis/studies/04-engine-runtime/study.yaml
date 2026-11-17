@@ -66,11 +66,24 @@ findings:
       predicted: the libroadrunner solver dominates and the tick loop is a small
       slice. These single measurements are indicative, not benchmarked.
     status: supported
+  - summary: "The SBML extraction runs a matched 48 h sim modestly faster than the real engine (1.2-1.6x), not orders of magnitude."
+    detail: |
+      Committed wall-clock (meta.wall_s) for one matched 48 h simulation: mild —
+      real BioGears engine 3.35 h vs SBML extraction 2.15 h (1.56x); severe — engine
+      3.38 h vs SBML 2.81 h (1.20x). The extraction is modestly faster, not an order
+      of magnitude, because integrating the stiff 91-state ODE in roadrunner is
+      itself heavy (study 06). This is the model-vs-model axis relevant to large
+      virtual-patient sweeps — distinct from the composition-engine swap above
+      (process-bigraph vs viva-core), which is bit-identical and overhead-only.
+    status: supported
 
 visualizations:
   - name: "Cross-engine runtime: process-bigraph (Python) vs viva-core (Rust) — bit-identical, overhead-only"
     address: image:charts/01_runtime_bars.svg
     display: primary
+  - name: "Model-vs-model 48 h wall-clock: real engine vs SBML extraction (SBML modestly faster)"
+    address: image:charts/02_model_runtime_48h.svg
+    display: mechanism
 
 baseline:
   - name: sbml-under-process-bigraph
