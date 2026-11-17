@@ -20,6 +20,9 @@ def test_rate_rule_state_is_exposed_and_ordered():
     assert set(rr_store.keys()) == set(RATE_RULE_IDS) and len(rr_store) == 91
     vals = np.array([rr_store[i] for i in RATE_RULE_IDS], dtype=float)
     assert np.all(np.isfinite(vals))
+    # state actually evolves under severe infection: some variable differs first vs last row
+    first = rows[0]['rate_rules']
+    assert max(abs(rr_store[i] - first[i]) for i in RATE_RULE_IDS) > 1e-9
 
 
 def test_rate_rules_match_roadrunner_t0_and_after_step():
@@ -35,7 +38,32 @@ def test_rate_rules_match_roadrunner_t0_and_after_step():
     assert len(rows) >= 2
     for i in RATE_RULE_IDS:
         assert np.isclose(last[i], live[i], rtol=1e-12, atol=1e-12)
-    # state moved from t=0 after a step for at least one variable or equals (healthy near-steady)
     assert all(np.isfinite(v) for v in t0.values())
     # ids come from roadrunner's own ordering
     assert list(rr.model.getRateRuleSymbols()) == RATE_RULE_IDS
+
+
+def test_rate_rules_match_independent_roadrunner():
+    """Fresh RoadRunner from the same SBML, same overrides/tolerances/steps, severity 3."""
+    import roadrunner
+    from viva_simulation_core.composites.sepsis_sbml import SBML_PATH
+
+    interval = 5.0
+    doc, core = build_sepsis_state_composite(severity=3, interval_s=interval)
+    _, rows = _rows(doc, core, 10.0)
+
+    rr = roadrunner.RoadRunner(str(SBML_PATH))
+    rr.setIntegrator('cvode')
+    rr.integrator.absolute_tolerance = 1e-10
+    rr.integrator.relative_tolerance = 1e-8
+    rr['severity'] = 3.0
+    rr['infectionStart'] = 1.0  # builder default for severity > 0
+    t = 0.0
+    for _ in range(2):  # 10 s run / 5 s interval
+        rr.simulate(t, t + interval, 2)
+        t += interval
+    got = rows[-1]['rate_rules']
+    # Same solver, tolerances and step grid, so near-identical; rtol 1e-6 leaves
+    # headroom for CVODE adaptive-step differences (reset/init order).
+    for i in RATE_RULE_IDS:
+        assert np.isclose(got[i], float(rr[i]), rtol=1e-6, atol=1e-9), i
