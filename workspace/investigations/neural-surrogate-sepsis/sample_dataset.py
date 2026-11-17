@@ -12,11 +12,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import multiprocessing as mp
 import os
 import pathlib
 import random
 import tempfile
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 
@@ -33,15 +35,18 @@ SEED = 0
 INTERVAL_S = 300.0          # surrogate timestep == composite update interval
 HORIZON_H = 48.0           # full trajectory (sepsis collapse at ~26-37 h)
 SEVERITIES = (0, 1, 2, 3)
-JITTERS = (0.0, 10.0, 30.0, 60.0)   # infection_start_s; severity 0 never infects
-EVAL_JITTERS = (30.0,)              # held out (all severities with infection)
+JITTERS = (0.0, 3 * 3600.0, 6 * 3600.0)   # infection_start_s (distinct, hours apart); severity 0 never infects
+EVAL_START_H = 3.0                  # held-out infection start: unseen timing between trained 0h and 6h
+EVAL_JITTERS = (EVAL_START_H * 3600.0,)
 SKIP_STEPS = 2   # drop first transitions: the t~0 infection event fires inside them
 
 
 def make_spec(interval_s: float = INTERVAL_S) -> SurrogateSpec:
     # NB: composite state lives under the top-level "stores" key.
+    # observables already in the rate-rule state (TI, PB) are not duplicated
     targets = ([["stores", "rate_rules", i] for i in RATE_RULE_IDS]
-               + [["stores", "parameters", v] for v in SEPSIS_OBSERVABLES.values()])
+               + [["stores", "parameters", v] for v in SEPSIS_OBSERVABLES.values()
+                  if v not in RATE_RULE_IDS])
     return SurrogateSpec(target_paths=targets, driver_paths=[],
                          timestep=float(interval_s), parameterization="delta")
 
@@ -69,6 +74,22 @@ def _run_combo(args):
     return k, path
 
 
+MAX_ATTEMPTS = 8
+
+
+def _run_combo_subprocess(job):
+    k, sev, jit, n_steps, interval_s, tmp = job
+    cmd = [sys.executable, str(pathlib.Path(__file__).resolve()), "--worker",
+           str(k), str(sev), repr(jit), str(n_steps), repr(interval_s), tmp]
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode == 0:
+            return k, os.path.join(tmp, f"combo_{k}.npz")
+        print(f"combo {k} (sev={sev}, start={jit}s) attempt {attempt} failed "
+              f"rc={r.returncode}: {r.stderr[-300:]}", file=sys.stderr, flush=True)
+    raise RuntimeError(f"combo {k} (sev={sev}, start={jit}) failed {MAX_ATTEMPTS} times")
+
+
 def sample(severities=SEVERITIES, jitters=JITTERS, eval_jitters=EVAL_JITTERS,
            horizon_h=HORIZON_H, interval_s=INTERVAL_S, workers=None,
            n_steps=None, out_dir=OUT, seed=SEED):
@@ -81,12 +102,23 @@ def sample(severities=SEVERITIES, jitters=JITTERS, eval_jitters=EVAL_JITTERS,
     out_dir.mkdir(parents=True, exist_ok=True)
     spec = make_spec(interval_s)
     combos = _combos(severities, jitters)
+    eval_ics = [c for c in combos if c[0] > 0 and c[1] in eval_jitters]
+    train_ics = [c for c in combos if c not in eval_ics]
+    if not eval_ics or not train_ics:
+        raise ValueError(
+            f"empty split: eval_jitters={tuple(eval_jitters)} matched no severity>0 combo in "
+            f"{combos} (train={len(train_ics)}, eval={len(eval_ics)}); pick an eval start "
+            "that is in the jitter grid")
     workers = max(1, min(workers or os.cpu_count() or 1, len(combos)))
     with tempfile.TemporaryDirectory(prefix="sepsis_combo_") as tmp:
         jobs = [(k, s, j, n_steps, float(interval_s), tmp) for k, (s, j) in enumerate(combos)]
         # spawn: each worker is a fresh interpreter with its own RoadRunner
-        with mp.get_context("spawn").Pool(workers, maxtasksperchild=1) as pool:
-            results = dict(pool.imap_unordered(_run_combo, jobs))
+        # One fresh interpreter per combo (own RoadRunner), `workers` at a time. Plain
+        # subprocesses rather than mp.Pool/ProcessPoolExecutor: Pool(maxtasksperchild=1)
+        # hung on macOS, and RoadRunner intermittently segfaults at startup, which would
+        # break a whole executor; here a crashed combo is simply retried.
+        with ThreadPoolExecutor(workers) as ex:
+            results = dict(ex.map(_run_combo_subprocess, jobs))
         Xs, Ys, DTs, ids = [], [], [], []
         for k in range(len(combos)):  # combine in combo order (deterministic)
             with np.load(results[k]) as z:
@@ -94,8 +126,6 @@ def sample(severities=SEVERITIES, jitters=JITTERS, eval_jitters=EVAL_JITTERS,
                 ids.append(np.full(len(z["X"]), k))
     full = TransitionDataset(X=np.concatenate(Xs), Y=np.concatenate(Ys),
                              DT=np.concatenate(DTs), traj_id=np.concatenate(ids), spec=spec)
-    eval_ics = [c for c in combos if c[0] > 0 and c[1] in eval_jitters]
-    train_ics = [c for c in combos if c not in eval_ics]
     full.save(out_dir / "dataset.npz")
     meta = {
         "n_features": spec.n_features, "n_targets": spec.n_targets,
@@ -106,6 +136,10 @@ def sample(severities=SEVERITIES, jitters=JITTERS, eval_jitters=EVAL_JITTERS,
         "parameterization": spec.parameterization,
         "severities": list(severities), "infection_start_jitters_s": list(jitters),
         "eval_jitters_s": list(eval_jitters),
+        "split_rationale": ("eval = infection starts in eval_jitters_s held out across all "
+                            "infected severities: an unseen infection timing (collapse timing "
+                            "shifts with start) interpolated between trained starts; "
+                            "severity 0 is always train"),
         "ic_fields": ["severity", "infection_start_s"],
         "n_planned_ics": len(combos),
         "traj_id_to_ic": [list(c) for c in combos],
@@ -124,18 +158,25 @@ def _floats(s):
 
 
 def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] == "--worker":  # internal: one combo in this process
+        k, sev, jit, n, iv, tmp = argv[1:]
+        _run_combo((int(k), int(sev), float(jit), int(n), float(iv), tmp))
+        return
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--workers", type=int, default=os.cpu_count())
     ap.add_argument("--horizon-h", type=float, default=HORIZON_H)
     ap.add_argument("--interval-s", type=float, default=INTERVAL_S)
     ap.add_argument("--severities", type=lambda s: tuple(int(x) for x in s.split(",")),
                     default=SEVERITIES)
-    ap.add_argument("--jitters", type=_floats, default=JITTERS,
-                    help="comma-separated infection_start_s values")
-    ap.add_argument("--eval-jitters", type=_floats, default=EVAL_JITTERS)
+    ap.add_argument("--starts-h", type=_floats, default=tuple(j / 3600 for j in JITTERS),
+                    help="comma-separated infection start times in hours")
+    ap.add_argument("--eval-start-h", type=_floats, default=(EVAL_START_H,),
+                    help="held-out infection start(s) in hours (must be in --starts-h)")
     ap.add_argument("--out-dir", default=str(OUT))
     a = ap.parse_args(argv)
-    ds, meta = sample(a.severities, a.jitters, a.eval_jitters, a.horizon_h, a.interval_s,
+    ds, meta = sample(a.severities, tuple(h * 3600 for h in a.starts_h),
+                      tuple(h * 3600 for h in a.eval_start_h), a.horizon_h, a.interval_s,
                       a.workers, out_dir=a.out_dir)
     print(ds.X.shape, "train", len(meta["train_ics"]), "eval", len(meta["eval_ics"]))
 
