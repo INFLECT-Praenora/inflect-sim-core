@@ -39,7 +39,7 @@
 
 **Interfaces:**
 - Consumes: the existing `sepsis_sbml` composite + `viva_tellurium.processes` TelluriumProcess (has the live `rr` handle; already exposes floating-species `X` the same way).
-- Produces: a composite whose PB state exposes `RATE_RULE_IDS: list[str]` (length 91, fixed order = `rr.model.getRateRuleIds()` or the stable fallback) and a readable path yielding a length-91 `array[(91,),float]` equal to `rr.model.getRateRuleValues()` each step. Export `RATE_RULE_IDS` for downstream tasks.
+- Produces: a composite whose PB state exposes `RATE_RULE_IDS: list[str]` (length 91, fixed order = `rr.model.getRateRuleIds()` or the stable fallback) and a **`map[float]` store named `rate_rules`** whose keys are the rate-rule ids, so each variable is an individually addressable **scalar** path `["rate_rules", "<id>"]` equal to its `rr.model.getRateRuleValues()` element each step. Export `RATE_RULE_IDS` for downstream tasks. **(Preflight ruling: viva-torch `get_path` resolves each `target_path` to a scalar — one column per path — so the state must be 91 scalar paths in a `map[float]` store, mirroring the existing `parameters` store, NOT a single array port.)**
 
 - [ ] **Step 1: Write the failing test**
 
@@ -52,10 +52,11 @@ from viva_simulation_core.composites.sepsis_sbml_state import (
 def test_rate_rule_state_is_exposed_and_ordered():
     assert len(RATE_RULE_IDS) == 91
     doc, core = build_sepsis_state_composite(severity=3)
-    state0 = run_one_step_and_read(doc, core)          # helper in the test
-    assert state0["rate_rules"].shape == (91,)
-    # ids are a stable ordered list, values finite, match roadrunner element-wise
-    assert np.all(np.isfinite(state0["rate_rules"]))
+    rr_store = run_one_step_and_read(doc, core)["rate_rules"]   # helper in the test
+    # 91 individually-keyed scalar paths (a map[float] store), ids stable & finite
+    assert set(rr_store.keys()) == set(RATE_RULE_IDS) and len(rr_store) == 91
+    vals = np.array([rr_store[i] for i in RATE_RULE_IDS], dtype=float)
+    assert np.all(np.isfinite(vals))
 ```
 
 - [ ] **Step 2: Run it, verify it fails** (`pytest tests/test_sepsis_state_exposure.py -v` → import/attr error).
@@ -92,7 +93,7 @@ def test_rate_rule_state_is_exposed_and_ordered():
 
 **Interfaces:**
 - Consumes: `build_sepsis_state_composite`, `RATE_RULE_IDS` (Task 1); `SurrogateSpec`, `TrajectorySampler`, `SamplingPlan` (viva-torch).
-- Produces: `make_spec() -> SurrogateSpec` with `target_paths` = the 91 rate-rule paths **plus** the 9 observable paths (100 targets; observables carried so they are comparable at inference), `driver_paths = []` (severity/infectionStart enter via initial states), `parameterization="delta"`, `timestep` pinned here (start 30 s; the script records the value). `sample() -> TransitionDataset` over a severity sweep (0/1/2/3 × jittered `infection_start_s`), with a recorded **train/eval IC split**.
+- Produces: `make_spec() -> SurrogateSpec` with `target_paths` = `[["rate_rules", id] for id in RATE_RULE_IDS]` **plus** `[["parameters", obs_var] for obs_var in SEPSIS_OBSERVABLES.values()]` (100 scalar paths; the 9 observables are already scalar paths in the `parameters` store and are carried so they are comparable at inference), `driver_paths = []` (severity/infectionStart enter via initial states), `parameterization="delta"`, `timestep` pinned here (start 30 s; the script records the value). `sample() -> TransitionDataset` over a severity sweep (0/1/2/3 × jittered `infection_start_s`), with a recorded **train/eval IC split**.
 
 - [ ] **Step 1: Write the failing test** — `test_dataset_has_expected_shape_and_split`: dataset feature dim == 100, targets == 100, `len(train_ics)+len(eval_ics)` == planned, `set(train_ics).isdisjoint(eval_ics)`.
 - [ ] **Step 2: Run → fail.**
