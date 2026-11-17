@@ -75,6 +75,7 @@ def _run_combo(args):
 
 
 MAX_ATTEMPTS = 8
+WORKER_TIMEOUT_S = 10800  # 3 h; a 48 h/300 s combo takes ~1.7 h
 
 
 def _run_combo_subprocess(job):
@@ -82,7 +83,13 @@ def _run_combo_subprocess(job):
     cmd = [sys.executable, str(pathlib.Path(__file__).resolve()), "--worker",
            str(k), str(sev), repr(jit), str(n_steps), repr(interval_s), tmp]
     for attempt in range(1, MAX_ATTEMPTS + 1):
-        r = subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            # subprocess.run kills and reaps the child itself when the timeout expires
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=WORKER_TIMEOUT_S)
+        except subprocess.TimeoutExpired:
+            print(f"combo {k} (sev={sev}, start={jit}s) attempt {attempt} timed out "
+                  f"after {WORKER_TIMEOUT_S}s (killed)", file=sys.stderr, flush=True)
+            continue
         if r.returncode == 0:
             return k, os.path.join(tmp, f"combo_{k}.npz")
         print(f"combo {k} (sev={sev}, start={jit}s) attempt {attempt} failed "
