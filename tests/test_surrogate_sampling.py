@@ -11,16 +11,16 @@ SCRIPT = (pathlib.Path(__file__).resolve().parents[1]
 
 
 def _load():
-    spec = importlib.util.spec_from_file_location("sample_dataset", SCRIPT)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
+    # must be importable by name: spawned workers re-import the module to unpickle _run_combo
+    import sys
+    sys.path.insert(0, str(SCRIPT.parent))
+    return importlib.import_module("sample_dataset")
 
 
 def test_dataset_has_expected_shape_and_split(tmp_path):
     sd = _load()
     ds, meta = sd.sample(severities=(0, 2), jitters=(0.0, 30.0), eval_jitters=(30.0,),
-                         n_steps=4, out_dir=tmp_path)
+                         n_steps=4, interval_s=30.0, workers=2, out_dir=tmp_path)
     assert ds.X.shape[1] == 100 and ds.Y.shape[1] == 100
     assert ds.spec.n_features == 100 and ds.spec.n_targets == 100
     train = {tuple(i) for i in meta["train_ics"]}
