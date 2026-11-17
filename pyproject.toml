@@ -32,6 +32,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=7.4"]
 cli = ["typer", "rich"]
+# Heavy PyTorch surrogate stack; opt-in only (base install stays torch-free).
+surrogate = ["viva-torch"]
 
 [project.scripts]
 simulation-core = "viva_simulation_core.cli.__main__:main"
@@ -56,6 +58,7 @@ packages = ["viva_simulation_core"]
 viva-core = { git = "https://github.com/vivarium-collective/viva-core", branch = "main" }
 viva-tellurium = { git = "https://github.com/vivarium-collective/viva-tellurium", branch = "main" }
 viva-biogears = { git = "https://github.com/vivarium-collective/viva-biogears", branch = "main" }
+viva-torch = { git = "https://github.com/vivarium-collective/viva-torch", branch = "main" }
 vivarium-workbench = { git = "https://github.com/vivarium-collective/vivarium-workbench.git", branch = "main" }
 
 [tool.pytest.ini_options]
