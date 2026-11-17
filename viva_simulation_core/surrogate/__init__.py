@@ -26,10 +26,12 @@ except ImportError:
     _vt = None
     HAS_VIVA_TORCH = False
 
+_bound: list[str] = []
 if HAS_VIVA_TORCH:
     for _name in _API:
         if hasattr(_vt, _name):
             globals()[_name] = getattr(_vt, _name)
+            _bound.append(_name)
 
 _MSG = (
     "viva-torch / torch is not installed. Install the optional extra: "
@@ -49,4 +51,4 @@ def get(name: str) -> Any:
     return getattr(_vt, name)
 
 
-__all__ = ["HAS_VIVA_TORCH", "require_viva_torch", "get", *_API]
+__all__ = ["HAS_VIVA_TORCH", "require_viva_torch", "get", *_bound]
