@@ -84,7 +84,7 @@ against the paper)?
   </button>
   <button class="study-pillar" data-kind="conclusions" onclick="_setStudyTab('conclusions')">
     <svg class="pillar-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M6 8.2v7.6"/><path d="M6 12h6a4 4 0 0 0 4-4V11"/></svg>
-    <span class="pillar-label">Conclusions</span>
+    <span class="pillar-label">Decide</span>
   </button>
   
   <span class="study-dl study-export-wrap" style="margin-left:auto; align-self:center; position:relative; display:inline-flex">
@@ -1257,6 +1257,29 @@ could not do.
     
 
     
+    
+    
+    
+    <div class="decide-section" style="margin-top:18px">
+      <h3 class="overview-label">Conclusion logic — gate decision</h3>
+      
+      
+      <div style="padding:10px 14px;background:#fef2f2;border-left:4px solid #dc2626;border-radius:4px">
+        <strong>✗ If primary tests fail:</strong>
+        
+        <div style="margin-top:4px"><em>Diagnose:</em>
+          <ul style="margin:4px 0 0 18px"><li>{&#39;observation&#39;: &#39;The severe arm reaches the same hypotension endpoint but by the opposite hemodynamic mechanism and ~11 h late (SVR min 0.952 engine vs 0.715 SBML; SBP&lt;100 at 26.6 h vs 37.5 h) — a qualified, needs-calibration match rather than a mechanistic one.\n&#39;, &#39;hypothesis&#39;: &#39;The divergence is confined to the hemodynamic layer and maps to the vasomotor, fluid and metabolic subsystems the extraction omits or holds at baseline (inert nitric oxide, absent fever vasodilation, no renal/urine, no lactate) — so calibrating those pathways should close the gap.\n&#39;, &#39;seeded_study&#39;: &#39;05-divergence-mechanism&#39;}</li></ul>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+    
+
+    
+    
+    
 
   </div>
 
@@ -1268,30 +1291,29 @@ could not do.
 
     
     
-    <p class="muted" style="margin:0 0 10px 0;font-size:0.85em">
-      Synthesised read-only from canonical fields — edit <code>findings</code>,
-      <code>limitations</code>, and <code>discovery_implications</code> to change
-      this (and the generated report) together.
-    </p>
-    <div class="conclusions-grid conclusions-synthesis">
-      <div class="conclusion-field">
-        <h3>Claims <span class="muted small">(from findings)</span></h3>
-        
-        <ul class="synthesis-list">
-          
-          <li>Severe hemodynamic collapse lags the real engine by ~11 h (SBP&lt;100: 37.5 h vs 26.6 h).</li>
-          
-          <li>The inflammation / pathogen core matches the engine almost bit-for-bit.</li>
-          
-        </ul>
-        
+    
+    
+    <div class="decide-section">
+      <h3 class="overview-label">Latest run outcomes</h3>
+      <div style="font-size:0.88em;color:#64748b;margin-bottom:8px">
+        baseline · seed ? ·
+        ?s simulated ·
+        ? history rows ·
+        started ?
       </div>
-      <div class="conclusion-field">
-        <h3>Evidence <span class="muted small">(from findings)</span></h3>
-        
-        <p class="muted">No evidence recorded on findings yet.</p>
-      </div>
+      
+      
+      
+      <p class="muted" style="margin:0;font-size:0.9em">
+        <strong>2</strong> test outcomes
+        — <span style="color:#065f46;font-weight:600">0 PASS</span> ·
+        <span style="color:#991b1b;font-weight:600">0 FAIL</span>.
+        Per-test outcomes (measured value · evaluator · band) are canonical on the
+        <a onclick="_setStudyTab('audit')" style="cursor:pointer;color:#3b82f6;text-decoration:underline">Tests (in Audit) →</a>.
+      </p>
+      
     </div>
+    
     
 
   </div>
@@ -1306,30 +1328,19 @@ could not do.
     
 
     
+    
+    
+    
 
   </div>
 
   
   
-  <details class="overview-section"><summary class="overview-label">Limitations &amp; provenance</summary>
-
-    
-    
-    
-    <div class="conclusions-grid conclusions-synthesis">
-      <div class="conclusion-field">
-        <h3>Next steps <span class="muted small">(from discovery implications)</span></h3>
-        <p class="muted">No follow-up proposals recorded yet.</p>
-      </div>
-    </div>
-
-  </details>
-  
 
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "c10156cf5a49b49be69f8e537a8f88ab2ef92f35", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/c10156cf5a49b49be69f8e537a8f88ab2ef92f35", "branch": "main", "lockfile": "uv.lock@48c70b2e1587", "generated_at": "2026-11-16 23:34 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "1846929c4e1513714cf235670648d6ea9c39b5a4", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/1846929c4e1513714cf235670648d6ea9c39b5a4", "branch": "main", "lockfile": "uv.lock@48c70b2e1587", "generated_at": "2026-11-17 00:24 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>
 <script>
