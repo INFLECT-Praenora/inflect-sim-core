@@ -72,14 +72,30 @@ findings:
       copied from BioGears reproduces the engine's dynamics to ~1e-4 for tissue integrity (~1e-3 for peak pathogen); divergence is
       confined to the hemodynamic response, not the inflammation model.
     status: supported
+  - summary: "In CO–SVR phase space the two arms are orthogonal: MAP = 17.34·CO·SVR holds in both, so each reaches the same low-MAP contour by a different axis."
+    detail: |
+      MAP decomposes as MAP = k·CO·SVR with k = 17.34 mmHg·min·mL/(L·s), a
+      relation that holds to <0.5% (CV 0.26% engine, 0.45% extraction) with the
+      SAME constant in both arms — so the two trajectories live in one CO–SVR
+      plane and the divergence is purely a matter of which axis each moves along.
+      From the shared baseline (CO ~5.8 L/min, SVR ~0.95) the engine slides along
+      the CO axis (5.78 → 4.51 L/min, SVR ~flat 0.954 → 0.930) to MAP 72 — a
+      cold, low-output shock — while the extraction slides along the SVR axis
+      (holds CO ~6.0, SVR swings 0.93 → 1.13 → 0.665) to MAP 70 — a warm,
+      vasodilatory shock. Same endpoint contour, orthogonal mechanisms; this is
+      the geometric statement of the vasomotor overshoot characterized in
+      study 05. See charts/05_severe_phase_portrait_co_svr.svg.
+    status: supported
 
 visualizations:
   - name: "Severe sepsis: all 9 observables, engine vs SBML over 48 h"
     address: image:charts/03_severe_9panel_engine_vs_sbml.svg
     display: primary
-  - name: "Opposite shock mechanism: cardiac output vs systemic vascular resistance"
-    address: image:charts/04_severe_mechanism_co_svr.svg
+  - name: "CO–SVR phase portrait: same hypotension endpoint, opposite mechanism (orthogonal paths to the same iso-MAP contour)"
+    address: image:charts/05_severe_phase_portrait_co_svr.svg
     display: mechanism
+  - name: "Opposite shock mechanism over time: cardiac output and SVR as separate traces"
+    address: image:charts/04_severe_mechanism_co_svr.svg
   - name: "Severe arm: SBP & HR overlay (the ~11 h hemodynamic lag)"
     address: image:charts/01_severe_sbp_hr_overlay.svg
   - name: "Inflammation core matches near bit-for-bit"
