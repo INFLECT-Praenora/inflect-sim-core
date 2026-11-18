@@ -42,6 +42,7 @@ class TwinSession:
     created: float
     last_access: float
     requested_observables: Any = None
+    evicted: bool = False
     lock: threading.RLock = field(default_factory=threading.RLock)
 
 
@@ -58,17 +59,20 @@ class TwinRegistry:
         w.start(self.config.register_compile_timeout_s)
         return w
 
-    def _remove(self, session: TwinSession, blocking: bool = True) -> bool:
+    def _remove(self, session: TwinSession, blocking: bool = True, only_if_stale: bool = False) -> bool:
         """Drop from the map and close its worker once the session lock is free."""
         with self._mu:
             if self._sessions.get(session.twin_id) is not session:
                 return False
+            if only_if_stale and self._clock() - session.last_access <= self.config.twin_ttl_s:
+                return False  # refreshed by a concurrent get since the sweep scan
             if not blocking and not session.lock.acquire(blocking=False):
                 return False
             del self._sessions[session.twin_id]
         if blocking:
             session.lock.acquire()
         try:
+            session.evicted = True
             session.worker.close()
         finally:
             session.lock.release()
@@ -79,7 +83,7 @@ class TwinRegistry:
         with self._mu:
             stale = [s for s in self._sessions.values() if now - s.last_access > self.config.twin_ttl_s]
         for s in stale:
-            self._remove(s, blocking=False)
+            self._remove(s, blocking=False, only_if_stale=True)
 
     # -- public API --------------------------------------------------------
     def register(self, source: str, model_format: str, owner_key: str, observables=None) -> TwinSession:
@@ -89,7 +93,7 @@ class TwinRegistry:
 
         def existing():
             for s in self._sessions.values():
-                if s.owner_key == owner_key and s.model_hash == h:
+                if secrets.compare_digest(s.owner_key.encode(), owner_key.encode()) and s.model_hash == h:
                     s.last_access = self._clock()
                     return s
             return None
@@ -145,6 +149,10 @@ class TwinRegistry:
     def rebuild_if_crashed(self, session: TwinSession) -> bool:
         """Start a fresh worker from the stored source if the old one died (t=0)."""
         with session.lock:
+            with self._mu:
+                registered = self._sessions.get(session.twin_id) is session
+            if session.evicted or not registered:
+                return False  # evicted: never spawn a worker nothing will close
             if session.worker.is_alive():
                 return False
             try:

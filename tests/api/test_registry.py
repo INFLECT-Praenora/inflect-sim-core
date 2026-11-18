@@ -100,3 +100,42 @@ def test_dedup_same_source_same_owner(reg):
     assert a is b and a.twin_id == b.twin_id
     c = reg.register(ANT, "antimony", "k2")
     assert c.twin_id != a.twin_id
+
+
+def test_sweep_skips_locked_twin(reg, clock):
+    s = reg.register(ANT, "antimony", "k1")
+    held, release = threading.Event(), threading.Event()
+
+    def hold():
+        with s.lock:
+            held.set()
+            release.wait(10)
+
+    t = threading.Thread(target=hold)
+    t.start()
+    assert held.wait(5)
+    try:
+        clock.t = 1000
+        reg._sweep()
+        assert s.worker.is_alive() and not s.evicted
+        assert reg._sessions.get(s.twin_id) is s
+    finally:
+        release.set()
+        t.join()
+
+
+def test_sweep_rechecks_staleness(reg, clock):
+    s = reg.register(ANT, "antimony", "k1")
+    clock.t = 1000
+    s.last_access = clock.t  # refreshed after the scan would have listed it
+    assert reg._remove(s, blocking=False, only_if_stale=True) is False
+    assert s.worker.is_alive()
+
+
+def test_rebuild_on_evicted_session_refused(reg):
+    s = reg.register(ANT, "antimony", "k1")
+    reg.evict(s.twin_id)
+    assert s.evicted
+    assert reg.rebuild_if_crashed(s) is False
+    assert not s.worker.is_alive()
+    assert s.twin_id not in reg._sessions
