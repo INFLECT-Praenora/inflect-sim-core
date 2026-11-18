@@ -44,7 +44,7 @@ def test_rows_to_samples_both_shapes():
             return out if out['SBP'] else {}
         return extract
 
-    for shape, tkey in (('parameters', 'time'), ('circuits', 'global_time')):
+    for shape, tkey in (('parameters', 'time'), ('readings', 'global_time')):
         rows = [{shape: None, tkey: 0.0}, {shape: {'v': 1}, tkey: 60.0}, {shape: {'v': 2}, tkey: 120.0}]
         s = ra.rows_to_samples(rows, mk(shape), obs)
         assert [x['time'] for x in s] == [60.0, 120.0]

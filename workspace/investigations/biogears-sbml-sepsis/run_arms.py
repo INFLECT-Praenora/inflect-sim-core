@@ -83,7 +83,7 @@ def rows_to_samples(rows, extract, observables):
     obs = extract(rows)
     if not obs:
         return []
-    keep = [r for r in rows if (r.get('parameters') if 'parameters' in r else r.get('circuits'))]
+    keep = [r for r in rows if (r.get('parameters') if 'parameters' in r else r.get('readings'))]
     times = []
     for r in keep:
         if r.get('time') is not None:
