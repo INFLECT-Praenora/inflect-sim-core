@@ -131,7 +131,7 @@ class TwinRegistry:
             s = self._sessions.get(twin_id)
             if s is None:
                 raise UnknownTwin(twin_id)
-            if not secrets.compare_digest(s.owner_key, owner_key):
+            if not secrets.compare_digest(s.owner_key.encode(), owner_key.encode()):
                 raise NotOwner(twin_id)
             s.last_access = self._clock()
             return s
