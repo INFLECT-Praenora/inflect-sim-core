@@ -238,7 +238,9 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
             out = None
             if engine == "surrogate":
                 try:
-                    out = backend.predict(entry, req)
+                    seed = dict(s.worker.step(dt_s=0.0, observables=list(entry.targets))["observables"])
+                    seed.update(req.initial_state or {})
+                    out = backend.predict(entry, req, seed_state=seed)
                 except HTTPException:
                     raise
                 except Exception:  # SurrogateUnavailable or runtime failure

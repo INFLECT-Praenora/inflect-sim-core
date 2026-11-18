@@ -1,9 +1,8 @@
 """Tiered-engine layer: surrogate protocol, operator-curated checkpoint sidecars,
 and the envelope-gated engine selector.
 
-No torch here by design. The real viva-torch adapter (which loads the checkpoint
-named by ``SurrogateEntry.checkpoint_ref``) is a TODO that plugs in behind
-``SurrogateBackend``.
+No torch here by design. The real viva-torch adapter lives in the import-guarded
+``surrogate_torch`` module and plugs in behind ``SurrogateBackend``.
 """
 from __future__ import annotations
 
@@ -32,14 +31,14 @@ class SurrogateEntry:
 class SurrogateBackend(Protocol):
     def lookup(self, model_hash: str) -> SurrogateEntry | None: ...
 
-    def predict(self, entry: SurrogateEntry, request: Any) -> dict: ...
+    def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict: ...
 
 
 class NullBackend:
     def lookup(self, model_hash: str) -> SurrogateEntry | None:
         return None
 
-    def predict(self, entry: SurrogateEntry, request: Any) -> dict:
+    def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict:
         raise SurrogateUnavailable("no surrogate backend configured")
 
 
@@ -79,8 +78,8 @@ class CheckpointStore:
         except (OSError, ValueError, KeyError, TypeError, IndexError):
             return None
 
-    def predict(self, entry: SurrogateEntry, request: Any) -> dict:
-        # TODO: real viva-torch adapter loads entry.checkpoint_ref and runs inference.
+    def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict:
+        # Sidecar-only store; the torch runtime is ``surrogate_torch.TorchCheckpointBackend``.
         raise SurrogateUnavailable("sidecar known, runtime adapter not installed")
 
 
@@ -94,7 +93,7 @@ class FakeBackend:
     def lookup(self, model_hash: str) -> SurrogateEntry | None:
         return self.entry
 
-    def predict(self, entry: SurrogateEntry, request: Any) -> dict:
+    def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict:
         return self.predict_fn(entry, request)
 
 

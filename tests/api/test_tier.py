@@ -75,7 +75,7 @@ def test_fake_backend_predict():
     e = _entry()
     fb = FakeBackend(e, lambda entry, req: {"IL6": [1.0, 2.0]})
     assert fb.lookup("any") is e
-    assert fb.predict(e, _req()) == {"IL6": [1.0, 2.0]}
+    assert fb.predict(e, _req(), seed_state={}) == {"IL6": [1.0, 2.0]}
 
 
 def test_unknown_param_key_out_of_envelope():
