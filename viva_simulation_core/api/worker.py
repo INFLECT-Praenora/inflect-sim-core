@@ -15,6 +15,7 @@ import math
 import multiprocessing as mp
 import random
 import time
+from collections import OrderedDict
 from typing import Any
 
 from . import modeling
@@ -25,6 +26,7 @@ DEFAULT_TIMEOUT_S = 30.0
 START_TIMEOUT_S = 120.0
 DEFAULT_POOL_SIZE = 2
 
+_SEQ_CACHE = 16  # recent step results kept for idempotent retries
 _COMPILES = 0  # load_engine calls made in THIS process
 
 
@@ -66,8 +68,8 @@ class _Engine:
         self.interval_s = float(interval_s)
         self.rr.timeCourseSelections = ["time"] + list(self.obs.values())
         self._initial = self.rr.saveStateS()
-        self._last_seq: int | None = None
-        self._last_result: dict | None = None
+        self._seqs: OrderedDict[int, tuple[tuple | None, dict]] = OrderedDict()
+        self._max_seq: int | None = None
         self.n_steps = 0
 
     # -- state helpers -----------------------------------------------------
@@ -118,8 +120,15 @@ class _Engine:
 
     # -- commands ----------------------------------------------------------
     def step(self, dt_s=None, parameters=None, species=None, observables=None, seq=None, **_):
-        if seq is not None and seq == self._last_seq and self._last_result is not None:
-            return self._last_result
+        obs_key = tuple(observables) if observables else None
+        if seq is not None:
+            if seq in self._seqs:
+                key, cached = self._seqs[seq]
+                if key != obs_key:
+                    raise ValueError(f"seq {seq} was already applied with different observables")
+                return cached  # retried step: no-op
+            if self._max_seq is not None and seq < self._max_seq:
+                raise ValueError(f"stale seq {seq} (latest applied is {self._max_seq})")
         t_start = time.perf_counter()
         names = self._names(observables)
         self._apply(parameters)  # persists: set on the live instance
@@ -135,7 +144,10 @@ class _Engine:
             "provenance": self._provenance(t_start, None, 1),
         }
         if seq is not None:
-            self._last_seq, self._last_result = seq, result
+            self._seqs[seq] = (obs_key, result)
+            self._max_seq = seq if self._max_seq is None else max(self._max_seq, seq)
+            while len(self._seqs) > _SEQ_CACHE:
+                self._seqs.popitem(last=False)
         return result
 
     def predict(self, observables=None, horizon_s=10.0, interval_s=None, initial_state=None,
@@ -162,10 +174,10 @@ class _Engine:
         prev_integrator = self.rr.integrator.getName()
         out: list[tuple[int, dict]] = []
         try:
-            if stochastic:
-                self.rr.setIntegrator("gillespie")
             for idx, params in members:
-                self._restore(base)
+                self._restore(base)  # state blob also carries integrator choice
+                if stochastic:
+                    self.rr.setIntegrator("gillespie")
                 self._apply(initial_state)
                 self._apply(parameters)
                 self._apply(params)
@@ -174,15 +186,16 @@ class _Engine:
                 _, series = self._integrate(float(horizon_s), float(interval_s), names)
                 out.append((idx, series))
         finally:
-            if stochastic:
-                self.rr.setIntegrator(prev_integrator)
             self._restore(live)
+            if self.rr.integrator.getName() != prev_integrator:
+                self.rr.setIntegrator(prev_integrator)
         return out
 
     def reset(self, **_):
         self.rr.loadStateS(self._initial)
         self.rr.model.setTime(0.0)
-        self._last_seq = self._last_result = None
+        self._seqs.clear()
+        self._max_seq = None
         self.n_steps = 0
         return {"t": 0.0}
 
@@ -402,12 +415,30 @@ class TwinWorker:
                       parameters=parameters)
         if not self.is_alive():
             raise WorkerError("WorkerDead", "worker is not running")
+        sent: list[_Proc] = []
+        errors: list[BaseException] = []
         for eng, chunk in zip(engines, chunks):
-            eng.send("members", dict(common, members=chunk))
+            try:
+                eng.send("members", dict(common, members=chunk))
+                sent.append(eng)
+            except WorkerError as e:
+                errors.append(e)
         results: dict[int, dict] = {}
-        for eng in engines:
-            for idx, series in eng._recv(timeout):
-                results[idx] = series
+        # Drain EVERY engine that was sent work before raising, so no stale
+        # reply is left in a pipe to poison the next call.
+        for eng in sent:
+            try:
+                for idx, series in eng._recv(timeout):
+                    results[idx] = series
+            except Exception as e:  # noqa: BLE001
+                errors.append(e)
+        # Evict helpers that died so the next ensemble respawns them.
+        for h in list(self._helpers):
+            if not h.alive():
+                h.kill()
+                self._helpers.remove(h)
+        if errors:
+            raise errors[0]
         ordered = [results[i] for i in range(len(specs))]
         names = list(ordered[0])
         qs = sorted(set(quantiles or []))
