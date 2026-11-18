@@ -17,6 +17,7 @@ from typing import Any, Callable
 
 from . import modeling
 from .config import ApiConfig
+from .persistence import TwinMeta, TwinStore
 from .worker import TwinWorker
 
 __all__ = ["TwinSession", "TwinRegistry", "UnknownTwin", "NotOwner"]
@@ -47,8 +48,12 @@ class TwinSession:
 
 
 class TwinRegistry:
-    def __init__(self, config: ApiConfig | None = None, clock: Callable[[], float] = time.monotonic):
+    def __init__(self, config: ApiConfig | None = None, clock: Callable[[], float] = time.monotonic,
+                 store: TwinStore | None = None):
         self.config = config or ApiConfig()
+        # explicit store wins; else config.db_path ("" -> no persistence)
+        self._store = store if store is not None else (
+            TwinStore(self.config.db_path) if self.config.db_path else None)
         self._clock = clock
         self._sessions: dict[str, TwinSession] = {}
         self._mu = threading.RLock()  # guards _sessions only; never held during compile/close
@@ -116,6 +121,11 @@ class TwinRegistry:
                     model_hash=h, created=now, last_access=now, requested_observables=observables,
                 )
                 self._sessions[session.twin_id] = session
+                if self._store is not None:
+                    self._store.save(TwinMeta(
+                        twin_id=session.twin_id, source=source, model_format=model_format,
+                        metadata={"observables": resolved, "requested_observables": observables},
+                        owner_key=owner_key, model_hash=h, created=now))
                 victims = []
                 while len(self._sessions) - len(victims) > self.config.max_twins:
                     others = [s for s in self._sessions.values() if s is not session and s not in victims]
@@ -133,14 +143,52 @@ class TwinRegistry:
         self._sweep()
         with self._mu:
             s = self._sessions.get(twin_id)
-            if s is None:
-                raise UnknownTwin(twin_id)
-            if not secrets.compare_digest(s.owner_key.encode(), owner_key.encode()):
-                raise NotOwner(twin_id)
-            s.last_access = self._clock()
-            return s
+            if s is not None:
+                if not secrets.compare_digest(s.owner_key.encode(), owner_key.encode()):
+                    raise NotOwner(twin_id)
+                s.last_access = self._clock()
+                return s
+        return self._rewarm(twin_id, owner_key)
+
+    def _rewarm(self, twin_id: str, owner_key: str) -> TwinSession:
+        """Lazily rebuild a persisted twin that is not in memory (fresh worker, t=0)."""
+        meta = self._store.get(twin_id) if self._store is not None else None
+        if meta is None:
+            raise UnknownTwin(twin_id)
+        if not secrets.compare_digest(meta.owner_key.encode(), owner_key.encode()):
+            raise NotOwner(twin_id)
+        requested = meta.metadata.get("requested_observables")
+        worker = self._new_worker(meta.source, meta.model_format, requested)  # outside the lock
+        with self._mu:
+            hit = self._sessions.get(twin_id)  # lost a race with a concurrent re-warm
+            if hit is None:
+                now = self._clock()
+                session = TwinSession(
+                    twin_id=twin_id, worker=worker, source=meta.source,
+                    model_format=meta.model_format,
+                    observables=meta.metadata.get("observables") or {n: n for n in worker.observables},
+                    owner_key=meta.owner_key, model_hash=meta.model_hash, created=now,
+                    last_access=now, requested_observables=requested)
+                self._sessions[twin_id] = session
+                victims = []
+                while len(self._sessions) - len(victims) > self.config.max_twins:
+                    others = [x for x in self._sessions.values() if x is not session and x not in victims]
+                    if not others:
+                        break
+                    victims.append(min(others, key=lambda x: x.last_access))
+            else:
+                hit.last_access = self._clock()
+        if hit is not None:
+            worker.close()
+            return hit
+        for v in victims:
+            self._remove(v)
+        return session
 
     def evict(self, twin_id: str) -> None:
+        """Caller-requested delete: also drops the persisted row (TTL/LRU never do)."""
+        if self._store is not None:
+            self._store.delete(twin_id)
         with self._mu:
             s = self._sessions.get(twin_id)
         if s is not None:
@@ -168,3 +216,5 @@ class TwinRegistry:
             sessions = list(self._sessions.values())
         for s in sessions:
             self._remove(s)
+        if self._store is not None:
+            self._store.close()

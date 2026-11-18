@@ -19,6 +19,7 @@ class ApiConfig:
     register_compile_timeout_s: float = 60.0
     max_twins: int = 64
     twin_ttl_s: float = 3600.0
+    db_path: str = ""  # SQLite file for twin persistence; "" = no persistence
 
     @classmethod
     def from_env(cls) -> "ApiConfig":
