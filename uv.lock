@@ -3272,7 +3272,7 @@ dependencies = [
 [[package]]
 name = "viva-biogears"
 version = "0.1.0"
-source = { git = "https://github.com/vivarium-collective/viva-biogears?branch=main#9cedbdeb5e8cf81acd6e2eb1a9cef71c8e118ba2" }
+source = { git = "https://github.com/vivarium-collective/viva-biogears?branch=main#8d0201976b2b3a008bc6406fdfe3f980d9bcb77f" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "bigraph-viz" },

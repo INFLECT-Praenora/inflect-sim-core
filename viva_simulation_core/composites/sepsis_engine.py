@@ -20,7 +20,7 @@ from viva_simulation_core.composites.sepsis_sbml import SEPSIS_OBSERVABLES
 
 SEVERITY_NAMES = {0: 'none', 1: 'mild', 2: 'moderate', 3: 'severe'}
 
-# shared observable -> path under row['circuits'] (all 9 have an engine reading)
+# shared observable -> path under row['readings'] (viva-biogears >= 8d02019; was row['circuits']) (all 9 have an engine reading)
 ENGINE_READINGS = {
     'SBP': ('cardiovascular', 'hemodynamics', 'systolic_pressure_mmHg'),            # mmHg
     'DBP': ('cardiovascular', 'hemodynamics', 'diastolic_pressure_mmHg'),           # mmHg
@@ -59,7 +59,7 @@ def extract_observables(rows) -> dict[str, list[float]]:
     """Emitter rows -> {observable: [values over time]}, same keys as the SBML side."""
     out = {k: [] for k in SEPSIS_OBSERVABLES}
     for r in rows:
-        c = r.get('circuits')
+        c = r.get('readings')
         if not c:
             continue
         for k, path in ENGINE_READINGS.items():
