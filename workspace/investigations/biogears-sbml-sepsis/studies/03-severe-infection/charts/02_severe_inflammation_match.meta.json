@@ -1,5 +1,5 @@
 {
-"title": "02_severe_inflammation_match",
-"interpretation": "Severe arm: tissue integrity (0.325/0.325) and blood pathogen (60.5/60.6) are near-identical \u2014 the extracted Acute Inflammatory Response reproduces the engine to ~1e-4. Divergence is confined to hemodynamics.",
-"caption": "Severe arm: tissue integrity (0.325/0.325) and blood pathogen (60.5/60.6) are near-identical \u2014 the extracted Acute Inflammatory Response reproduces the engine to ~1e-4. Divergence is confined to hemodynamics."
+ "title": "02_severe_inflammation_match",
+ "interpretation": "Severe arm: tissue integrity (min 0.243/0.243) and blood pathogen (peak 330.2/330.6) are near-identical \u2014 the extracted Acute Inflammatory Response reproduces the engine to ~1e-4. Divergence is confined to hemodynamics.",
+ "caption": "Severe arm: tissue integrity (min 0.243/0.243) and blood pathogen (peak 330.2/330.6) are near-identical \u2014 the extracted Acute Inflammatory Response reproduces the engine to ~1e-4. Divergence is confined to hemodynamics."
 }

@@ -1,15 +1,15 @@
 {
  "severity": 3,
  "horizon_s": {
-  "engine": 172800.0,
-  "sbml": 172800.0
+  "engine": 259200.0,
+  "sbml": 259200.0
  },
  "complete": {
   "engine": true,
   "sbml": true
  },
  "aligned": {
-  "n_points": 2881,
+  "n_points": 4321,
   "passed": false,
   "only_engine": [],
   "only_sbml": [],
@@ -22,8 +22,8 @@
     "passed": false
    },
    "DBP": {
-    "max_abs": 8.184212694437278,
-    "max_rel": 0.12456263058217032,
+    "max_abs": 10.080888587528477,
+    "max_rel": 0.17739359094795093,
     "passed": false
    },
    "MAP": {
@@ -37,13 +37,13 @@
     "passed": false
    },
    "CO": {
-    "max_abs": 1.4493299972109472,
-    "max_rel": 0.32131004165206734,
+    "max_abs": 1.6135165204405784,
+    "max_rel": 0.3818347834949109,
     "passed": false
    },
    "SVR": {
-    "max_abs": 0.2654329830947795,
-    "max_rel": 0.28531841045188744,
+    "max_abs": 0.33768741572238514,
+    "max_rel": 0.3593242348322161,
     "passed": false
    },
    "blood_volume": {
@@ -57,8 +57,8 @@
     "passed": true
    },
    "blood_pathogen": {
-    "max_abs": 0.05560077136243535,
-    "max_rel": 0.0009183361638274692,
+    "max_abs": 0.3935294039985706,
+    "max_rel": 0.0011917832929363434,
     "passed": true
    }
   }
@@ -71,10 +71,10 @@
    "agree": null
   },
   "map_below_65_h": {
-   "engine": null,
-   "sbml": null,
-   "diff": null,
-   "agree": true
+   "engine": 69.33333333333333,
+   "sbml": 54.06666666666667,
+   "diff": -15.266666666666659,
+   "agree": null
   },
   "hr_above_90_h": {
    "engine": 26.766666666666666,
@@ -83,38 +83,38 @@
    "agree": null
   },
   "svr_ratio_min": {
-   "engine": 0.9518810561905543,
-   "sbml": 0.7153919523451178,
-   "diff": -0.23648910384543653,
+   "engine": 0.9494308343831831,
+   "sbml": 0.6456243281646542,
+   "diff": -0.3038065062185289,
    "agree": null
   },
   "svr_ratio_min_h": {
-   "engine": 46.75,
-   "sbml": 48.0,
-   "diff": 1.25,
+   "engine": 68.56666666666666,
+   "sbml": 72.0,
+   "diff": 3.433333333333337,
    "agree": null
   },
   "tissue_integrity_min": {
-   "engine": 0.32483328242372994,
-   "sbml": 0.3248017881026704,
-   "diff": -3.149432105953309e-05,
+   "engine": 0.2430521051075611,
+   "sbml": 0.2430415498482967,
+   "diff": -1.0555259264383166e-05,
    "agree": null
   },
   "tissue_integrity_min_h": {
-   "engine": 48.0,
-   "sbml": 48.0,
+   "engine": 72.0,
+   "sbml": 72.0,
    "diff": 0.0,
    "agree": null
   },
   "peak_blood_pathogen": {
-   "engine": 60.54511795626209,
-   "sbml": 60.600718727624525,
-   "diff": 0.05560077136243535,
+   "engine": 330.2021486045367,
+   "sbml": 330.5956780085353,
+   "diff": 0.3935294039985706,
    "agree": null
   },
   "peak_blood_pathogen_h": {
-   "engine": 48.0,
-   "sbml": 48.0,
+   "engine": 72.0,
+   "sbml": 72.0,
    "diff": 0.0,
    "agree": null
   },

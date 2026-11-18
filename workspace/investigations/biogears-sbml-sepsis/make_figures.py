@@ -65,32 +65,69 @@ fig.suptitle("Severe sepsis (severity 3): BioGears engine vs SBML extraction —
              fontsize=14,fontweight="bold",y=1.005)
 fig.tight_layout()
 save(fig,"03-severe-infection","03_severe_9panel_engine_vs_sbml",
-     "Severe arm, all 9 observables, engine vs SBML extraction over 48 h. Inflammation "
+     "Severe arm, all 9 observables, engine vs SBML extraction over 72 h. Inflammation "
      "(tissue integrity, blood pathogen) overlaps bit-for-bit; every divergence is in the "
-     "hemodynamic layer. Dotted lines mark the SBP<100 / MAP<65 / HR>90 thresholds.")
+     "hemodynamic layer. Dotted lines mark the SBP<100 / MAP<65 / HR>90 thresholds — both "
+     "arms cross MAP<65 within 72 h, the extraction (steel blue) first.")
 
 # -------------------------------------------------- severe mechanism (CO vs SVR)
 fig,(a1,a2) = plt.subplots(2,1, figsize=(9,7), sharex=True)
 a1.plot(te,E["CO"],color=ENGINE,lw=2,label="engine"); a1.plot(ts,S["CO"],color=SBML,lw=2,label="SBML")
 a1.set_ylabel("Cardiac output (L/min)"); a1.set_title("Cardiac output — engine falls and stays low; extraction rebounds")
 a1.legend(loc="lower left",fontsize=10); a1.margins(x=0)
-a1.annotate("engine: output failure\n(5.8 → 4.5)",(44,4.5),color=ENGINE,fontsize=9,ha="right")
-a1.annotate("extraction: hyperdynamic\nrebound (→ 6.0)",(44,5.9),color=SBML,fontsize=9,ha="right")
+a1.annotate("engine: output failure\n(5.8 → 4.0)",(60,4.2),color=ENGINE,fontsize=9,ha="right")
+a1.annotate("extraction: hyperdynamic\nrebound (→ 5.5)",(60,5.7),color=SBML,fontsize=9,ha="right")
 a2.plot(te,E["SVR"],color=ENGINE,lw=2); a2.plot(ts,S["SVR"],color=SBML,lw=2)
 a2.axhline(1.0,ls=":",color="0.6",lw=1)
 a2.set_ylabel("SVR (mmHg·s/mL)"); a2.set_xlabel("Hours after infection")
 a2.set_title("Vascular tone — engine barely moves; extraction swings up then collapses")
 a2.margins(x=0)
-a2.annotate("extraction: vasoconstrict → fatigue\n(0.93 → 1.13 → 0.67)",(37,1.1),color=SBML,fontsize=9,ha="center")
-a2.annotate("engine: SVR ~flat (0.93)",(30,0.90),color=ENGINE,fontsize=9,ha="center")
-fig.suptitle("Same hypotension, opposite mechanism (MAP ≈ CO × SVR)",fontsize=14,fontweight="bold")
+a2.annotate("extraction: vasoconstrict → fatigue\n(0.93 → 1.13 → 0.60)",(40,1.12),color=SBML,fontsize=9,ha="center")
+a2.annotate("engine: SVR ~flat (0.95)",(30,0.90),color=ENGINE,fontsize=9,ha="center")
+fig.suptitle("Both reach MAP<65 shock, opposite mechanism (MAP ≈ CO × SVR)",fontsize=14,fontweight="bold")
 fig.tight_layout()
 save(fig,"03-severe-infection","04_severe_mechanism_co_svr",
-     "The two drive MAP down to ≈70 mmHg (still above the MAP<65 shock threshold at 48 h) by "
-     "different routes: the engine declines via cardiac-output failure with near-constant SVR "
-     "(hypodynamic/low-output), while the extraction holds output and swings SVR — vasoconstriction "
-     "then sympathetic-fatigue vasodilation (hyperdynamic/warm). The extraction's single AIR→sympathetic "
-     "arc overshoots the vasomotor response the engine's full cardiovascular control keeps muted.")
+     "Over 72 h both arms cross the MAP<65 shock threshold (extraction at 54.1 h to MAP 58, engine "
+     "at 69.3 h to MAP 64) by different routes: the engine declines via cardiac-output failure with "
+     "near-constant SVR (hypodynamic/low-output), while the extraction holds output and swings SVR — "
+     "vasoconstriction then sympathetic-fatigue vasodilation (hyperdynamic/warm), reaching shock ~15 h "
+     "earlier. The extraction's single AIR→sympathetic arc overshoots the vasomotor response the "
+     "engine's full cardiovascular control keeps muted.")
+
+# -------------------------------------------------- severe SBP & HR overlay (the lag)
+fig,(a1,a2) = plt.subplots(2,1, figsize=(9,7), sharex=True)
+a1.plot(te,E["SBP"],color=ENGINE,lw=1.8,label="engine"); a1.plot(ts,S["SBP"],color=SBML,lw=1.8,label="SBML")
+a1.axhline(100,ls=":",color="0.5",lw=1); a1.set_ylabel("Systolic BP (mmHg)")
+a1.set_title("Systolic pressure — engine crosses SBP<100 first (26.6 h vs 37.5 h)")
+a1.legend(loc="upper right",fontsize=10); a1.margins(x=0)
+a2.plot(te,E["HR"],color=ENGINE,lw=1.8); a2.plot(ts,S["HR"],color=SBML,lw=1.8)
+a2.axhline(90,ls=":",color="0.5",lw=1); a2.set_ylabel("Heart rate (/min)")
+a2.set_xlabel("Hours after infection"); a2.margins(x=0)
+a2.set_title("Heart rate — the same ~11 h lag on the HR>90 compensation")
+fig.suptitle("Severe arm: the ~11 h systolic / heart-rate lag",fontsize=14,fontweight="bold")
+fig.tight_layout()
+save(fig,"03-severe-infection","01_severe_sbp_hr_overlay",
+     "Severe arm over 72 h: the extraction's systolic-pressure and heart-rate milestones lag the "
+     "engine by ~11 h (SBP<100 at 37.5 h vs 26.6 h; HR>90 at 37.6 h vs 26.8 h). Dotted lines mark the "
+     "SBP<100 and HR>90 thresholds. This is the systolic half of the picture; on the MAP<65 shock "
+     "threshold the order flips (see the study-05 milestone dumbbell).")
+
+# -------------------------------------------------- severe inflammation match
+fig,(a1,a2) = plt.subplots(1,2, figsize=(12,4.6))
+a1.plot(te,E["tissue_integrity"],color=ENGINE,lw=1.8,label="engine")
+a1.plot(ts,S["tissue_integrity"],color=SBML,lw=1.8,ls="--",label="SBML")
+a1.set_title("Tissue integrity — min 0.243 / 0.243"); a1.set_ylabel("Tissue integrity")
+a1.set_xlabel("Hours after infection"); a1.legend(fontsize=10); a1.margins(x=0)
+a2.plot(te,E["blood_pathogen"],color=ENGINE,lw=1.8,label="engine")
+a2.plot(ts,S["blood_pathogen"],color=SBML,lw=1.8,ls="--",label="SBML")
+a2.set_title("Blood pathogen — peak 330.2 / 330.6"); a2.set_ylabel("Blood pathogen")
+a2.set_xlabel("Hours after infection"); a2.legend(fontsize=10); a2.margins(x=0)
+fig.suptitle("Inflammation core is bit-identical (severity 3, 72 h)",fontsize=14,fontweight="bold")
+fig.tight_layout()
+save(fig,"03-severe-infection","02_severe_inflammation_match",
+     "Severe arm: tissue integrity (min 0.243/0.243) and blood pathogen (peak 330.2/330.6) are "
+     "near-identical — the extracted Acute Inflammatory Response reproduces the engine to ~1e-4. "
+     "Divergence is confined to hemodynamics.")
 
 # --------------------------------------------------------- mild fluctuation
 tem,Em = load("02-mild-infection","engine-sev1.json")
@@ -132,34 +169,39 @@ ax.set_title("Peak relative divergence by observable",fontweight="bold")
 cb=fig.colorbar(im,ax=ax,fraction=0.046,pad=0.04); cb.set_label("max |engine−SBML| / |engine|  (%)")
 fig.tight_layout()
 save(fig,S5,"01_divergence_heatmap",
-     "Peak relative divergence between engine and extraction, per observable and condition. "
-     "The inflammation states (tissue integrity, blood pathogen) agree to well under 0.1% in both "
-     "arms; the hemodynamic states carry all the divergence — small but nonzero at mild (the "
-     "engine's fluctuation) and large at severe (the different decompensation mechanism and ~11 h lag).")
+     "Peak relative divergence between engine and extraction, per observable and condition, over the "
+     "mild (48 h) and severe (72 h) arms. The inflammation states (tissue integrity, blood pathogen) "
+     "agree to well under 0.1% in both arms; the hemodynamic states carry all the divergence — small "
+     "but nonzero at mild (the engine's fluctuation) and large at severe (up to 38% on cardiac output "
+     "and 36% on SVR, from the different decompensation mechanism).")
 
-# ---- milestone dumbbell (severe timing lag)
+# ---- milestone dumbbell (severe timing: SBP/HR lag, but MAP<65 FLIPS)
 ms = json.load(open(STUDIES/"03-severe-infection"/"out"/"compare-sev3.json"))["milestones"]
-rows = [("SBP < 100 mmHg","sbp_below_100_h"),("HR > 90 /min","hr_above_90_h")]
-fig,ax = plt.subplots(figsize=(8.5,3.4))
+rows = [("SBP < 100 mmHg","sbp_below_100_h"),("HR > 90 /min","hr_above_90_h"),("MAP < 65 mmHg (shock)","map_below_65_h")]
+fig,ax = plt.subplots(figsize=(8.5,4.0))
 for i,(lab,key) in enumerate(rows):
-    e=ms[key]["engine"]; s=ms[key]["sbml"]
+    e=ms[key]["engine"]; s=ms[key]["sbml"]; d=s-e
     ax.plot([e,s],[i,i],color="0.6",lw=3,zorder=1)
     ax.scatter([e],[i],color=ENGINE,s=120,zorder=2,label="engine" if i==0 else None)
     ax.scatter([s],[i],color=SBML,s=120,zorder=2,label="SBML" if i==0 else None)
-    ax.text((e+s)/2,i+0.18,f"+{s-e:.1f} h lag",ha="center",fontsize=9,color="0.3")
-    ax.text(e,i-0.22,f"{e:.1f} h",ha="center",fontsize=8,color=ENGINE)
-    ax.text(s,i-0.22,f"{s:.1f} h",ha="center",fontsize=8,color=SBML)
+    tag=f"{abs(d):.1f} h {'later' if d>0 else 'EARLIER'}"
+    ax.text((e+s)/2,i+0.18,tag,ha="center",fontsize=9,
+            color="0.3" if d>0 else "#b3462f",fontweight="normal" if d>0 else "bold")
+    ax.text(e,i-0.24,f"{e:.1f} h",ha="center",fontsize=8,color=ENGINE)
+    ax.text(s,i-0.24,f"{s:.1f} h",ha="center",fontsize=8,color=SBML)
 ax.set_yticks(range(len(rows))); ax.set_yticklabels([r[0] for r in rows])
-ax.set_ylim(-0.6,len(rows)-0.4); ax.set_xlabel("Hours after infection (severe arm)")
-ax.set_title("Hemodynamic milestones arrive ~11 h late in the extraction",fontweight="bold")
+ax.set_ylim(-0.6,len(rows)-0.4); ax.set_xlabel("Hours after infection (severe arm, 72 h)")
+ax.set_title("The milestone order flips: extraction late on SBP/HR, early on MAP<65 shock",fontweight="bold")
 ax.legend(loc="lower right",fontsize=10); ax.margins(x=0.08)
-ax.text(0.01,0.02,"Mild arm: neither milestone reached on either side (infection controlled).",
+ax.text(0.01,0.02,"Mild arm: no milestone reached on either side (infection controlled).",
         transform=ax.transAxes,fontsize=8,color="0.4")
 fig.tight_layout()
 save(fig,S5,"02_milestone_dumbbell",
-     "Severe-arm crossing times, engine vs extraction: SBP<100 at 26.6 h (engine) vs 37.5 h "
-     "(extraction) and HR>90 at 26.8 h vs 37.6 h — a consistent ~11 h lag, measured run-for-run "
-     "against the real engine rather than against the McDaniel 2019 paper milestones.")
+     "Severe-arm crossing times, engine vs extraction, over 72 h. On SBP<100 (26.6 h vs 37.5 h) and "
+     "HR>90 (26.8 h vs 37.6 h) the extraction lags ~11 h — but on the MAP<65 shock threshold the order "
+     "FLIPS: the extraction crosses at 54.1 h vs the engine's 69.3 h, ~15 h EARLIER, because its deeper "
+     "SVR vasodilation pulls MAP = CO·SVR down first. Measured run-for-run against the real engine, "
+     "not against the McDaniel 2019 paper milestones.")
 
 # ---- functional-difference matrix (the heart of the report)
 feat = [

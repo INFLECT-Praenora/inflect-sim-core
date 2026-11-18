@@ -45,7 +45,7 @@ k = float(np.median(np.concatenate([E["MAP"]/(E["CO"]*E["SVR"]),
 fig, ax = plt.subplots(figsize=(8.6, 7.2))
 
 # --- iso-MAP hyperbolas: SVR = MAP / (k*CO) ---
-co_lo, co_hi = 4.2, 6.35
+co_lo, co_hi = 3.8, 6.35
 co_grid = np.linspace(co_lo, co_hi, 200)
 for MAP in (65, 75, 85, 95, 105):
     svr_line = MAP / (k * co_grid)
@@ -80,8 +80,8 @@ ax.annotate("t = 0  (shared healthy\nbaseline, MAP ≈ 96)",
             (E["CO"][0], E["SVR"][0]), textcoords="offset points", xytext=(-6, 14),
             ha="right", fontsize=9.5, color="0.2", fontweight="bold")
 for t, d, color, txt, off in [
-    (te, E, ENGINE, "engine 48 h\nCO 4.5 · SVR 0.93\nMAP 72 — LOW-OUTPUT (≥65)", (10, -26)),
-    (ts, S, SBML, "extraction 48 h\nCO 6.0 · SVR 0.67\nMAP 70 — VASODILATORY (≥65)", (-8, -4)),
+    (te, E, ENGINE, "engine 72 h\nCO 4.0 · SVR 0.93\nMAP 64 — LOW-OUTPUT (<65)", (10, -26)),
+    (ts, S, SBML, "extraction 72 h\nCO 5.5 · SVR 0.60\nMAP 58 — VASODILATORY (<65)", (-8, 16)),
 ]:
     ax.plot(d["CO"][-1], d["SVR"][-1], "*", color=color, ms=18, zorder=6, mec="white", mew=1.0)
     ha = "left" if off[0] > 0 else "right"
@@ -91,8 +91,8 @@ for t, d, color, txt, off in [
 ax.set_xlabel("Cardiac output  (L/min)")
 ax.set_ylabel("Systemic vascular resistance  (SVR, mmHg·s/mL)")
 ax.set_xlim(co_lo, co_hi)
-ax.set_ylim(0.60, 1.18)
-ax.set_title("Severe sepsis as a trajectory in CO–SVR space:\nsame hypotension endpoint, opposite mechanism",
+ax.set_ylim(0.56, 1.18)
+ax.set_title("Severe sepsis as a trajectory in CO–SVR space:\nboth reach MAP<65 shock, opposite mechanism",
              fontsize=13.5, loc="left")
 ax.legend(loc="upper left", fontsize=10.5, bbox_to_anchor=(0.012, 0.995))
 ax.margins(0)
@@ -100,16 +100,16 @@ fig.tight_layout()
 
 cap = ("Severe sepsis (severity 3) plotted as a path in cardiac-output x vascular-resistance "
        "space rather than as two separate time series. Dots mark 6-hour intervals; the square is "
-       "the shared healthy baseline (t=0), the stars are the 48 h endpoints, and grey dashes are "
+       "the shared healthy baseline (t=0), the stars are the 72 h endpoints, and grey dashes are "
        "iso-MAP contours (MAP = 17.34 x CO x SVR — a relation that holds to <0.5% in BOTH arms with "
-       "the same constant). Both arms begin at the same point and finish on nearly the same low-MAP "
-       "contour (~72 vs ~70 mmHg — both still above the MAP<65 shock threshold and still falling at "
-       "48 h), but by orthogonal routes: the real BioGears engine slides LEFT — "
-       "cardiac output fails 5.8->4.5 L/min while SVR stays flat (cold, low-output decline) — whereas "
+       "the same constant). Both arms begin at the same point and finish below the MAP<65 shock "
+       "contour (engine ~64 vs extraction ~58 mmHg — both now across the <65 threshold by 72 h, the "
+       "extraction ~15 h earlier), but by orthogonal routes: the real BioGears engine slides LEFT — "
+       "cardiac output fails 5.8->4.0 L/min while SVR stays flat (cold, low-output decline) — whereas "
        "the SBML extraction slides DOWN — it holds/rebuilds output and lets SVR swing up then fall "
-       "to 0.67 (warm, vasodilatory decline). The orthogonality is the finding: the extraction's single "
+       "to 0.60 (warm, vasodilatory decline). The orthogonality is the finding: the extraction's single "
        "AIR->sympathetic arc overshoots the vasomotor axis that the engine's full cardiovascular "
-       "control keeps muted, so the two approach the same low MAP by physiologically different routes. "
+       "control keeps muted, so the two cross into MAP<65 shock by physiologically different routes. "
        "This is the geometric view of studies 03/05.")
 
 d = STUDIES / "03-severe-infection" / "charts"; d.mkdir(parents=True, exist_ok=True)
