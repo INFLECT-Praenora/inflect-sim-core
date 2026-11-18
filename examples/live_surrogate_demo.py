@@ -99,7 +99,8 @@ def main():
         assert au["engine_used"] == "surrogate" and au["in_distribution"] is True
         assert ex["engine_used"] == "exact"
         assert nrmse_rt < 0.15, nrmse_rt
-        assert au["provenance"]["wall_ms"] < ex["provenance"]["wall_ms"] or t_au < t_ex
+        speed = ex["provenance"]["wall_ms"] / au["provenance"]["wall_ms"]
+        assert speed > 1, f"surrogate not faster engine-side (x{speed:.2f})"
         assert far["engine_used"] == "exact"
     print("\nLIVE SURROGATE DEMO OK")
 

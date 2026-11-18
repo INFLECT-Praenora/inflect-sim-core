@@ -26,6 +26,8 @@ class SurrogateEntry:
     param_ranges: dict[str, tuple[float, float]] = field(default_factory=dict)
     state_ranges: dict[str, tuple[float, float]] = field(default_factory=dict)
     val_error: dict = field(default_factory=dict)
+    # min/max of each target over the WHOLE training trajectories (not just the ICs)
+    target_bounds: dict[str, tuple[float, float]] = field(default_factory=dict)
 
 
 class SurrogateBackend(Protocol):
@@ -70,8 +72,9 @@ class CheckpointStore:
                 param_ranges=_ranges(d.get("param_ranges")),
                 state_ranges=_ranges(d.get("state_ranges")),
                 val_error=dict(d.get("val_error") or {}),
+                target_bounds=_ranges(d.get("target_bounds")),
             )
-            bounds = [b for r in (*entry.param_ranges.values(), *entry.state_ranges.values()) for b in r]
+            bounds = [b for r in (*entry.param_ranges.values(), *entry.state_ranges.values(), *entry.target_bounds.values()) for b in r]
             if not all(math.isfinite(x) for x in (entry.horizon_s, *bounds)):
                 return None
             return entry
@@ -95,6 +98,25 @@ class FakeBackend:
 
     def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict:
         return self.predict_fn(entry, request)
+
+
+def seed_in_bounds(entry: SurrogateEntry, seed_state: dict | None) -> bool:
+    """True if the live seed lies inside the trained region (``target_bounds``).
+
+    All of the entry's targets are checked, not only the requested ones, because
+    the rollout is coupled across targets. Entries without bounds are unconstrained.
+    """
+    for k, (lo, hi) in entry.target_bounds.items():
+        v = (seed_state or {}).get(k)
+        if v is None:
+            continue
+        tol = 1e-9 * max(1.0, abs(lo), abs(hi))
+        try:
+            if not (lo - tol <= float(v) <= hi + tol):
+                return False
+        except (TypeError, ValueError):
+            return False
+    return True
 
 
 def _within(values: dict | None, ranges: dict) -> bool:

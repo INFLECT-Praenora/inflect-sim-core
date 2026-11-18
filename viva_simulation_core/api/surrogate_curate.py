@@ -20,7 +20,7 @@ try:
                             evaluate_surrogate, train_surrogate)
     from viva_torch.dataset import TransitionDataset
     HAS_CURATE = True
-except Exception:  # noqa: BLE001
+except ImportError:
     HAS_CURATE = False
 
 
@@ -92,9 +92,14 @@ def train_and_curate(*, source: str, model_format: str, observables: list[str],
     ics = [draw() for _ in range(n_trajectories)]
     t0 = time.perf_counter()
     Xs, Ys, DTs, ids = [], [], [], []
+    lo = np.full(len(observables), np.inf)
+    hi = np.full(len(observables), -np.inf)
     for tid, ic in enumerate(ics):
         ds = TrajectorySampler(_document(source, model_format, ic, timestep_s), spec, core).sample(
             SamplingPlan(n_steps, timestep_s, [{}]))
+        k = len(observables)  # features are exactly the targets (no drivers); Y is the raw next state
+        both = np.concatenate([ds.X[:, :k], ds.Y[:, :k]])
+        lo, hi = np.minimum(lo, both.min(axis=0)), np.maximum(hi, both.max(axis=0))
         Xs.append(ds.X); Ys.append(ds.Y); DTs.append(ds.DT); ids.append(ds.traj_id + tid)
     data = TransitionDataset(X=np.concatenate(Xs), Y=np.concatenate(Ys), DT=np.concatenate(DTs),
                              traj_id=np.concatenate(ids), spec=spec)
@@ -116,6 +121,7 @@ def train_and_curate(*, source: str, model_format: str, observables: list[str],
     entry = SurrogateEntry(
         checkpoint_ref=ckpt.name, targets=list(observables), horizon_s=n_steps * timestep_s,
         param_ranges={}, state_ranges=state_ranges,
+        target_bounds={o: (float(lo[i]), float(hi[i])) for i, o in enumerate(observables)},
         val_error={"overall_nrmse": float(metrics["overall_nrmse"]),
                    "per_target": {k: {kk: float(vv) for kk, vv in m.items()}
                                   for k, m in metrics["per_target"].items()},
@@ -125,5 +131,6 @@ def train_and_curate(*, source: str, model_format: str, observables: list[str],
         "checkpoint_ref": entry.checkpoint_ref, "targets": entry.targets,
         "horizon_s": entry.horizon_s, "param_ranges": {},
         "state_ranges": {k: list(v) for k, v in state_ranges.items()},
+        "target_bounds": {k: list(v) for k, v in entry.target_bounds.items()},
         "val_error": entry.val_error}, indent=2))
     return CurationResult(mh, entry, ckpt, sidecar, train_s, sample_s)

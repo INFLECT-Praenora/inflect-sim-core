@@ -20,7 +20,7 @@ from .models import (PredictRequest, PredictResponse, Provenance, RegisterReques
                      RegisterResponse, StepRequest, StepResponse)
 from .registry import NotOwner, TwinRegistry, TwinSession, UnknownTwin
 from .surrogate_backend import (CheckpointStore, NullBackend, SurrogateBackend,
-                                SurrogateUnavailable, select_engine)
+                                SurrogateUnavailable, seed_in_bounds, select_engine)
 from .heavy_plane import OverCapacity
 from .worker import WorkerError, WorkerTimeout
 
@@ -48,6 +48,10 @@ def _provenance(d: dict | None, engine: str) -> Provenance:
         engine_used=engine, seed=d.get("seed"), integrator=str(d.get("integrator", engine)),
         wall_ms=float(d.get("wall_ms", 0.0)), n_steps=int(d.get("n_steps", 0)),
         lib_versions=d.get("lib_versions") or {})
+
+
+class _SeedOutOfBounds(Exception):
+    """Live twin state is outside the surrogate's trained region (auto -> exact)."""
 
 
 def _last(series: Any) -> Any:
@@ -240,6 +244,10 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
                 try:
                     seed = dict(s.worker.step(dt_s=0.0, observables=list(entry.targets))["observables"])
                     seed.update(req.initial_state or {})
+                    if not seed_in_bounds(entry, seed):
+                        if req.engine == "auto":  # never serve the surrogate off its trained region
+                            raise _SeedOutOfBounds()
+                        in_dist = False
                     out = backend.predict(entry, req, seed_state=seed)
                 except HTTPException:
                     raise

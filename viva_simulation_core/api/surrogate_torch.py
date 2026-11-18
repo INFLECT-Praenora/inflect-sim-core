@@ -2,15 +2,18 @@
 
 Operator-curated only: nets are loaded exclusively from ``directory`` (the
 ``checkpoint_ref`` in a sidecar is resolved *inside* that directory); caller
-bytes are never passed to ``torch.load``.
+bytes are never passed to ``torch.load``. The checkpoint directory is TRUSTED:
+loading uses ``torch.load(weights_only=False)``, which executes pickled code, so
+only operator-written files may live there. Loaded nets are cached by path and
+NOT invalidated if a checkpoint is re-curated in place (restart to refresh).
 
 The surrogate runs at its TRAINED timestep (``NeuralProcess`` refuses any other
-interval). If ``request.interval_s`` differs, the rollout still uses the trained
-step and the series is linearly resampled onto the requested grid, so the
-response lines up with the exact engine's ``times``.
+interval). The rollout uses the trained step and the series is linearly resampled
+onto the exact engine's grid (``round(h/interval)+1`` points from 0 to ``horizon_s``).
 """
 from __future__ import annotations
 
+import math
 import threading
 import time
 from pathlib import Path
@@ -21,7 +24,7 @@ from .surrogate_backend import CheckpointStore, SurrogateEntry, SurrogateUnavail
 try:  # guarded: base / [api] installs must not need torch
     from viva_torch import SurrogateNet, neural_process_node
     HAS_TORCH_BACKEND = True
-except Exception:  # noqa: BLE001
+except ImportError:
     HAS_TORCH_BACKEND = False
 
 
@@ -84,7 +87,8 @@ class TorchCheckpointBackend(CheckpointStore):
         if missing:
             raise SurrogateUnavailable(f"seed state missing {missing}")
 
-        n = max(1, round(request.horizon_s / dt))
+        horizon = float(request.horizon_s)
+        n = max(1, math.ceil(horizon / dt - 1e-9))  # rollout covers the whole horizon
         stores: dict = {}
         for p, name in zip(spec.target_paths, names):
             node = stores
@@ -109,8 +113,9 @@ class TorchCheckpointBackend(CheckpointStore):
             traj.append(read())
         arr = np.asarray(traj)
         grid = dt * np.arange(n + 1)
-        interval = float(request.interval_s)
-        out_t = np.arange(0.0, n * dt + 1e-9, interval) if interval > 0 else grid
+        # same grid as the exact engine: round(h/interval)+1 points from 0 to horizon
+        n_out = max(1, int(round(horizon / float(request.interval_s))))
+        out_t = np.linspace(0.0, horizon, n_out + 1)
         series = {name: np.interp(out_t, grid, arr[:, i]).tolist()
                   for i, name in enumerate(names) if name in want}
         return {
