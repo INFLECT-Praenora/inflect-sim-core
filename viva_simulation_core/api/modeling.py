@@ -103,8 +103,11 @@ def _nonconstant_globals(rr) -> list[str]:
 
 
 def tunable_parameters(rr) -> list[str]:
-    """Non-constant global parameters."""
-    return _nonconstant_globals(rr)
+    """Settable global parameters, including constant="true" ones (roadrunner
+    can assign constants at runtime). Assignment-rule targets are excluded
+    because the rule would overwrite any value set."""
+    driven = set(_rule_ids(rr))
+    return [p for p in _global_params(rr) if p not in driven]
 
 
 def infer_observables(rr) -> dict[str, str]:

@@ -26,7 +26,7 @@ def test_rules_and_tunables():
     rr = load_engine(ANTIMONY_RULE, "antimony")
     assert "total" in infer_observables(rr)
     assert "k" in tunable_parameters(rr)
-    assert "c" not in tunable_parameters(rr)
+    assert "total" not in tunable_parameters(rr)
     assert "c" not in infer_observables(rr)
 
 
@@ -82,3 +82,14 @@ def test_hash_stable_and_distinct():
     assert a == model_hash(ANTIMONY, "antimony")
     assert a != model_hash(ANTIMONY + " ", "antimony")
     assert a != model_hash(ANTIMONY, "sbml")
+
+
+def test_tunable_includes_constant_globals():
+    rr = load_engine(ANTIMONY, "antimony")  # k = 0.1 is an SBML constant
+    assert "k" in tunable_parameters(rr)
+    obs = infer_observables(rr)
+    assert {"S1", "S2"} <= set(obs)
+    assert "k" not in obs
+    rr2 = load_engine(ANTIMONY_RULE, "antimony")
+    tp = tunable_parameters(rr2)
+    assert {"k", "c"} <= set(tp) and "total" not in tp
