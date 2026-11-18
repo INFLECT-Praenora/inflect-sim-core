@@ -17,6 +17,8 @@ class ApiConfig:
     max_observables_per_call: int = 64
     request_timeout_s: float = 30.0
     register_compile_timeout_s: float = 60.0
+    max_twins: int = 64
+    twin_ttl_s: float = 3600.0
 
     @classmethod
     def from_env(cls) -> "ApiConfig":
