@@ -56,23 +56,81 @@ step it in real time or ask for tiered exact/surrogate predictions, including en
 
 - [`docs/api.md`](docs/api.md): reference, configuration, error contract, curl examples.
 - [`examples/digital_twin_demo.py`](examples/digital_twin_demo.py): narrated, runnable
-  walkthrough of every use. It runs in-process, so it needs no server:
+  walkthrough of every use. It runs in-process, so it needs no server (the `api`
+  extra pulls in FastAPI):
 
-      uv run python examples/digital_twin_demo.py
+      uv sync --extra api
+      uv run --extra api python examples/digital_twin_demo.py
 
-## Run it locally
+## Getting started
 
-    bash scripts/serve.sh      # workbench
-    pytest                     # fast tests (engine arms: pytest -m slow)
+You need [`uv`](https://docs.astral.sh/uv/) (and a C/C++ toolchain only for the
+optional native engine, below). Everything except the **real BioGears engine**
+works with no native build.
+
+    git clone https://github.com/INFLECT-Praenora/inflect-sim-core
+    cd inflect-sim-core
+    uv sync                       # installs the exact pinned dependency set
+
+That gives you the SBML/Antimony sepsis model, the digital-twin API, the
+workbench, the visualizations, and all committed comparison data — everything
+that does **not** require the real BioGears C++ engine.
+
+| Task | Command |
+|---|---|
+| Fast test suite | `uv run pytest` |
+| Slow / engine tests | `uv run pytest -m slow` (real-engine tests skip cleanly if BioGears isn't built) |
+| Workbench (browser UI) | `bash scripts/serve.sh` |
+| Digital-twin API server | `uv run --extra api python -m viva_simulation_core.api` |
+| API walkthrough (no server) | `uv run --extra api python examples/digital_twin_demo.py` |
+| Neural surrogate (torch) | add the `surrogate` extra: `uv sync --extra surrogate` |
 
 Code lives in `viva_simulation_core/`; `build_core()` in `core.py` registers the
 processes and composites.
 
-## Re-running the engine arms
+## Reproducible dependencies — read before you upgrade
 
-The SBML side and all committed comparison data reproduce without BioGears. The
-real-engine arms need BioGears 8.2.0 + pybiogears built from source:
+The ecosystem git dependencies (`viva-core`, `viva-tellurium`, `viva-biogears`,
+`viva-torch`, `vivarium-workbench`) are pinned to **explicit commits** in
+`pyproject.toml` (`rev = "…"`), not `branch = "main"`. This is deliberate: a bare
+`branch = "main"` drifts — the lockfile pins one commit while `main` moves on, so
+a later `uv lock --upgrade` silently mixes incompatible versions. That is exactly
+what once broke the real engine (a stale `viva-biogears` against a newer
+`pybiogears`, producing silent all-NaN physiology).
 
-    ~/code/pybiogears/scripts/install_biogears.sh      # -> ~/biogears-8.2.0-install
+**So:** `uv sync` always reproduces the known-good set. To upgrade a dependency,
+bump its `rev` in `pyproject.toml` **and** `pybiogears` together where they are
+coupled, then `uv lock` and run the engine smoke test below.
+
+## The real BioGears engine (optional)
+
+The SBML side and all committed comparison data reproduce **without** BioGears.
+Only the real-engine arm of the `biogears-sbml-sepsis` investigation needs the
+native BioGears 8.2.0 C++ engine plus its Python bindings (`pybiogears`). Build
+them together — do **not** mix a hand-built `pybiogears` with a different
+`viva-biogears` than the one pinned above, or the engine silently returns NaN.
+
+    # 1. Clone the pinned pybiogears (vivarium-collective fork):
+    git clone https://github.com/vivarium-collective/pybiogears ~/code/pybiogears
+
+    # 2. Build BioGears 8.2.0 + pybiogears together (this applies the macOS
+    #    load-path repair that a plain `pip install` skips):
+    ~/code/pybiogears/scripts/install_biogears.sh --with-pybiogears
+    #    (installs to ~/biogears-8.2.0-install; re-running is incremental)
+
+    # 3. If the --with-pybiogears step cannot find pip (uv venvs ship none),
+    #    install the binding into THIS project's env instead:
     CMAKE_PREFIX_PATH=~/biogears-8.2.0-install uv pip install -e ~/code/pybiogears
+
+    # 4. Point the engine at its runtime data (needed for every engine run):
     export BIOGEARS_RUNTIME=~/biogears-8.2.0-install/share/biogears/runtime
+
+**Smoke test** (must print a real `SBP=`, not `nan`):
+
+    cd workspace/investigations/biogears-sbml-sepsis
+    uv run python run_arms.py --engine engine --severity 3 --horizon-hours 0.2
+
+If you see `SBP=nan`: the native engine and `pybiogears` are out of step with the
+pinned `viva-biogears`. Rebuild `pybiogears` from the fork's current `main` and
+re-run step 3 — `pybiogears` must match the `viva-biogears` commit pinned in
+`pyproject.toml`.
