@@ -30,7 +30,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.4"]
+dev = ["pytest>=7.4", "httpx"]
+api = ["fastapi", "uvicorn[standard]", "pydantic"]
 cli = ["typer", "rich"]
 
 [project.scripts]
