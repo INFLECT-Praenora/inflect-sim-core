@@ -69,6 +69,7 @@ class Provenance(BaseModel):
 class PredictResponse(BaseModel):
     engine_used: str
     observables: dict
+    times: list[float] | None = None
     ensemble_stats: dict | None = None
     in_distribution: bool | None = None
     provenance: Provenance

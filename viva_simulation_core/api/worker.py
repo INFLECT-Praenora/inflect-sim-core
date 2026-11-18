@@ -230,6 +230,8 @@ def run_worker(source: str, model_format: str, observables, conn, interval_s: fl
             elif cmd == "_sleep":  # test affordance: simulate a hung worker
                 time.sleep(kw["seconds"])
                 res = None
+            elif cmd == "params":
+                res = modeling.tunable_parameters(eng.rr)
             elif cmd == "stats":
                 res = {"compiles": _COMPILES, "n_steps": eng.n_steps}
             elif cmd == "members":
@@ -375,6 +377,10 @@ class TwinWorker:
 
     def reset(self, timeout: float | None = None) -> dict:
         return self._call("reset", None, timeout)
+
+    def parameters(self, timeout: float | None = None) -> list[str]:
+        """Tunable parameter ids, read inside the worker (no roadrunner in the API process)."""
+        return self._call("params", None, timeout)
 
     def snapshot_probe(self, timeout: float | None = None) -> bytes:
         """Test affordance: the worker's current roadrunner saveState blob."""
