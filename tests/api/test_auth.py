@@ -3,7 +3,7 @@ from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 
 from viva_simulation_core.api.auth import (
-    TokenBucket, get_config, get_limiter, is_exempt, rate_limit, require_key,
+    TokenBucket, get_config, get_limiter, is_exempt, owner_id, rate_limit, require_key,
 )
 from viva_simulation_core.api.config import ApiConfig
 
@@ -44,7 +44,22 @@ CFG = ApiConfig(api_keys="k1,k2", rate_capacity=5, rate_refill_per_s=1,
 def test_valid_key_returns_key():
     c = TestClient(make_app(CFG, Clock()))
     r = c.get("/who", headers={"Authorization": "Bearer k2"})
-    assert r.status_code == 200 and r.json() == {"key": "k2"}
+    assert r.status_code == 200
+    oid = r.json()["key"]
+    assert oid.startswith("k_") and "k2" != oid and oid == owner_id("k2")
+    r2 = c.get("/who", headers={"Authorization": "Bearer k2"})
+    assert r2.json()["key"] == oid  # deterministic
+    r3 = c.get("/who", headers={"Authorization": "Bearer k1"})
+    assert r3.json()["key"] != oid
+
+
+def test_bucket_keyed_on_derived_id_isolates_keys():
+    c = TestClient(make_app(CFG, Clock()))
+    h1, h2 = {"Authorization": "Bearer k1"}, {"Authorization": "Bearer k2"}
+    for _ in range(5):
+        assert c.get("/step", headers=h1).status_code == 200
+    assert c.get("/step", headers=h1).status_code == 429
+    assert c.get("/step", headers=h2).status_code == 200
 
 
 @pytest.mark.parametrize("hdr", [None, "Bearer nope", "Basic k1", "Bearer "])

@@ -1,6 +1,7 @@
 """Bearer-key auth and per-key weighted token-bucket rate limiting."""
 from __future__ import annotations
 
+import hashlib
 import math
 import secrets
 import threading
@@ -25,11 +26,16 @@ def get_config() -> ApiConfig:
     return ApiConfig.from_env()
 
 
+def owner_id(key: str) -> str:
+    """Stable non-secret identity derived from a key (safe to persist/log)."""
+    return "k_" + hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
+
+
 def require_key(
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
     config: ApiConfig = Depends(get_config),
 ) -> str:
-    """Validate the bearer key (constant-time); return it as the owner identity."""
+    """Validate the bearer key (constant-time); return a derived, non-secret owner id."""
     unauth = HTTPException(401, "invalid or missing API key",
                            headers={"WWW-Authenticate": "Bearer"})
     if creds is None or creds.scheme.lower() != "bearer" or not creds.credentials:
@@ -40,7 +46,7 @@ def require_key(
         ok |= secrets.compare_digest(given, k.encode("utf-8"))
     if not ok:
         raise unauth
-    return creds.credentials
+    return owner_id(creds.credentials)
 
 
 class TokenBucket:
