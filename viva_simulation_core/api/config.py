@@ -21,6 +21,7 @@ class ApiConfig:
     twin_ttl_s: float = 3600.0
     db_path: str = ""  # SQLite file for twin persistence; "" = no persistence
     api_keys: str = ""  # comma-separated bearer keys (INFLECT_API_API_KEYS); empty = all rejected
+    checkpoint_dir: str = ""  # INFLECT_API_CHECKPOINT_DIR; operator-curated surrogate sidecars; "" = NullBackend
     rate_capacity: float = 100.0  # token-bucket burst size per key
     rate_refill_per_s: float = 10.0  # tokens refilled per second per key
     cost_step: float = 1.0
