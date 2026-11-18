@@ -279,3 +279,31 @@ def test_real_timeout_504_and_recovery(make_client):
     assert c.get("/healthz").status_code == 200
     r = c.post(f"/twins/{tid}/step", json={"dt_s": 1.0}, headers=H1)
     assert r.status_code == 200 and sess.worker is not real  # rebuilt
+
+
+def _raising_backend():
+    from viva_simulation_core.api.surrogate_backend import SurrogateUnavailable
+    entry = SurrogateEntry(checkpoint_ref="x", targets=["S1"], horizon_s=100.0,
+                           param_ranges={}, state_ranges={})
+
+    def boom(e, req):
+        raise SurrogateUnavailable("stub")
+    return FakeBackend(entry, boom)
+
+
+def test_auto_falls_back_to_exact_when_surrogate_unavailable(make_client):
+    c = make_client(backend=_raising_backend())
+    tid = register(c)["twin_id"]
+    r = c.post(f"/twins/{tid}/predict", json=PRED, headers=H1)
+    assert r.status_code == 200
+    assert r.json()["engine_used"] == "exact"
+    r = c.post(f"/twins/{tid}/predict", json={**PRED, "engine": "surrogate"}, headers=H1)
+    assert r.status_code == 409
+
+
+def test_predict_nonfinite_horizon_422(client):
+    import json
+    tid = register(client)["twin_id"]
+    r = client.post(f"/twins/{tid}/predict", content=json.dumps({**PRED, "horizon_s": float("nan")}),
+                    headers={**H1, "content-type": "application/json"})
+    assert r.status_code == 422

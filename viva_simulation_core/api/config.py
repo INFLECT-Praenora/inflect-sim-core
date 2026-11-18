@@ -47,4 +47,8 @@ class ApiConfig:
                 continue
             kind = type(f.default) if f.default is not MISSING else float
             kwargs[f.name] = kind(raw)
-        return cls(**kwargs)
+        cfg = cls(**kwargs)
+        for name, c in cfg.costs.items():
+            if c < 0:
+                raise ValueError(f"cost_{name} must be >= 0 (got {c})")
+        return cfg

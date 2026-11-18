@@ -19,3 +19,10 @@ def test_config_env_override(monkeypatch):
     c = ApiConfig.from_env()
     assert c.max_ensemble_n == 8
     assert c.request_timeout_s == 2.5
+
+
+def test_negative_cost_rejected(monkeypatch):
+    import pytest
+    monkeypatch.setenv("INFLECT_API_COST_STEP", "-1")
+    with pytest.raises(ValueError):
+        ApiConfig.from_env()

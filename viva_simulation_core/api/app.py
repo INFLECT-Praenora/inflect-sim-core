@@ -209,6 +209,8 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
     @router.post("/twins/{twin_id}/predict", response_model=PredictResponse,
                  response_model_by_alias=True)
     def predict(twin_id: str, req: PredictRequest, owner: str = Depends(predict_limit)):
+        if not (math.isfinite(req.horizon_s) and math.isfinite(req.interval_s)):
+            raise HTTPException(422, "horizon_s/interval_s must be finite")
         if (req.horizon_s <= 0 or req.interval_s <= 0 or req.horizon_s > config.max_horizon_s
                 or req.horizon_s / req.interval_s > config.max_steps_per_call
                 or len(req.observables) > config.max_observables_per_call):
@@ -233,8 +235,17 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
                 return _ensemble_response(stats, req)
             entry = backend.lookup(s.model_hash)
             engine, in_dist = select_engine(req, entry, req.engine)
+            out = None
             if engine == "surrogate":
-                out = backend.predict(entry, req)
+                try:
+                    out = backend.predict(entry, req)
+                except HTTPException:
+                    raise
+                except Exception:  # SurrogateUnavailable or runtime failure
+                    if req.engine != "auto":
+                        raise
+                    engine, in_dist = "exact", None  # auto always falls back to exact
+            if engine == "surrogate":
                 series = out.get("observables", out) if isinstance(out, dict) else out
                 n = len(next(iter(series.values()))) if series else 0
                 times = out.get("times") if isinstance(out, dict) else None
