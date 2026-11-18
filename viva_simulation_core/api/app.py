@@ -5,6 +5,7 @@ uvicorn worker (``python -m viva_simulation_core.api`` enforces this).
 """
 from __future__ import annotations
 
+import math
 from contextlib import asynccontextmanager, contextmanager
 from typing import Any, Callable
 
@@ -110,10 +111,6 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
     async def _h422b(_: Request, e):
         return _err(422, "unknown_observable", str(e))
 
-    @app.exception_handler(ValueError)
-    async def _h422c(_: Request, e: ValueError):
-        return _err(422, "invalid_request", str(e))
-
     @app.exception_handler(WorkerError)
     async def _hworker(_: Request, e: WorkerError):
         if e.kind in _BAD_INPUT_KINDS:
@@ -146,18 +143,24 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
             registry.rebuild_if_crashed(session)
             yield session
 
+    def _ensure_params(s: TwinSession) -> list[str]:
+        """Parameter names, computed once per session (at registration) and cached."""
+        params = getattr(s, "_param_names", None)
+        if params is None:
+            with s.lock:
+                if s.evicted:
+                    raise UnknownTwin(s.twin_id)
+                registry.rebuild_if_crashed(s)
+                params = s.worker.parameters()
+                s._param_names = params  # type: ignore[attr-defined]
+        return params
+
     def _describe(s: TwinSession) -> RegisterResponse:
         engines = ["exact"]
         if backend.lookup(s.model_hash) is not None:
             engines.append("surrogate")
-        with s.lock:
-            registry.rebuild_if_crashed(s)
-            params = getattr(s, "_param_names", None)
-            if params is None:
-                params = s.worker.parameters()
-                s._param_names = params  # type: ignore[attr-defined]
         return RegisterResponse(twin_id=s.twin_id, observables=list(s.observables),
-                                parameters=params, engines_available=engines)
+                                parameters=_ensure_params(s), engines_available=engines)
 
     @router.post("/twins", response_model=RegisterResponse)
     def register(req: RegisterRequest, owner: str = Depends(rate_limit("register"))):
@@ -172,17 +175,22 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
         return _describe(s)
 
     @router.get("/twins/{twin_id}", response_model=RegisterResponse)
-    def get_twin(twin_id: str, owner: str = Depends(require_key)):
+    def get_twin(twin_id: str, owner: str = Depends(rate_limit("light"))):
         return _describe(registry.get(twin_id, owner))
 
     @router.delete("/twins/{twin_id}")
-    def delete_twin(twin_id: str, owner: str = Depends(require_key)):
+    def delete_twin(twin_id: str, owner: str = Depends(rate_limit("light"))):
         registry.get(twin_id, owner)  # 404 / 403
         registry.evict(twin_id)
         return {"deleted": twin_id}
 
     @router.post("/twins/{twin_id}/step", response_model=StepResponse, response_model_by_alias=True)
     def step(twin_id: str, req: StepRequest, owner: str = Depends(rate_limit("step"))):
+        if req.dt_s is not None and (not math.isfinite(req.dt_s) or req.dt_s < 0
+                                     or req.dt_s > config.max_horizon_s):
+            raise HTTPException(422, "dt_s must be finite, >= 0 and <= max_horizon_s")
+        if req.observables is not None and len(req.observables) > config.max_observables_per_call:
+            raise HTTPException(422, "too many observables")
         with locked(twin_id, owner) as s:
             res = s.worker.step(**req.model_dump(exclude_none=True))
         return StepResponse(t=res["t"], observables=res["observables"],
@@ -245,6 +253,8 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
                                in_distribution=in_dist, provenance=prov)
 
     def _ensemble_response(stats: dict, req: PredictRequest) -> PredictResponse:
+        if not isinstance(stats.get("mean"), dict):
+            raise HTTPException(502, "malformed ensemble result")
         prov = _provenance(stats.get("provenance"), "exact")
         reduce = req.return_ != "trajectory"
         keep = {k: v for k, v in stats.items() if k in ("mean", "p05", "p95", "quantiles", "members")}

@@ -86,6 +86,11 @@ def test_return_alias_roundtrip(client):
     assert p.status_code == 200
     assert isinstance(p.json()["observables"]["S1"], float)
     assert "return_" not in p.text
+    from viva_simulation_core.api.models import PredictRequest
+
+    dumped = PredictRequest.model_validate({**PRED, "return": "endpoint"}).model_dump(by_alias=True)
+    assert dumped["return"] == "endpoint" and "return_" not in dumped
+    assert "return" in client.app.openapi()["components"]["schemas"]["PredictRequest"]["properties"]
 
 
 def test_ensemble_stats(client):
@@ -225,3 +230,52 @@ def test_single_worker_guard():
         check_workers(2)
     with pytest.raises(SystemExit):
         main(["--workers", "2"])
+
+
+def test_get_does_not_take_worker_lock(client):
+    import threading
+
+    tid = register(client)["twin_id"]
+    sess = next(iter(client.app.state.registry._sessions.values()))
+    assert sess._param_names  # cached at registration
+    done = []
+    with sess.lock:  # simulate a long predict holding the lock in another thread
+        def go():
+            done.append(client.get(f"/twins/{tid}", headers=H1).status_code)
+        t = threading.Thread(target=go)
+        t.start()
+        t.join(timeout=5)
+        assert done == [200]
+
+
+def test_get_delete_are_rate_limited(make_client):
+    c = make_client(make_cfg(rate_capacity=1.0, rate_refill_per_s=0.0, cost_light=0.5))
+    assert c.get("/twins/x", headers=H1).status_code == 404
+    assert c.delete("/twins/x", headers=H1).status_code == 404
+    assert c.get("/twins/x", headers=H1).status_code == 429
+    assert c.delete("/twins/x", headers=H1).status_code == 429
+
+
+def test_step_dt_bounds(client):
+    tid = register(client)["twin_id"]
+    url = f"/twins/{tid}/step"
+    for dt in (-1.0, 1e12):
+        assert client.post(url, json={"dt_s": dt}, headers=H1).status_code == 422
+    r = client.post(url, content='{"dt_s": NaN}', headers={**H1, "content-type": "application/json"})
+    assert r.status_code == 422
+    many = [f"S{i}" for i in range(100)]
+    assert client.post(url, json={"observables": many}, headers=H1).status_code == 422
+    assert client.post(url, json={"dt_s": 1.0}, headers=H1).json()["t"] == 1.0  # state untouched
+
+
+def test_real_timeout_504_and_recovery(make_client):
+    c = make_client(make_cfg(request_timeout_s=0.5))
+    tid = register(c)["twin_id"]
+    sess = next(iter(c.app.state.registry._sessions.values()))
+    real = sess.worker
+    c.post(f"/twins/{tid}/step", json={"dt_s": 3.0}, headers=H1)
+    real.step = lambda **kw: real._call("_sleep", {"seconds": 5})  # genuinely hung worker
+    assert c.post(f"/twins/{tid}/step", json={}, headers=H1).status_code == 504
+    assert c.get("/healthz").status_code == 200
+    r = c.post(f"/twins/{tid}/step", json={"dt_s": 1.0}, headers=H1)
+    assert r.status_code == 200 and sess.worker is not real  # rebuilt

@@ -27,6 +27,7 @@ class ApiConfig:
     cost_step: float = 1.0
     cost_register: float = 10.0
     cost_ensemble: float = 20.0
+    cost_light: float = 0.25  # GET/DELETE on a twin (may trigger a re-warm)
 
     @property
     def key_set(self) -> tuple[str, ...]:
@@ -35,7 +36,7 @@ class ApiConfig:
     @property
     def costs(self) -> dict[str, float]:
         return {"step": self.cost_step, "register": self.cost_register,
-                "ensemble": self.cost_ensemble}
+                "ensemble": self.cost_ensemble, "light": self.cost_light}
 
     @classmethod
     def from_env(cls) -> "ApiConfig":
