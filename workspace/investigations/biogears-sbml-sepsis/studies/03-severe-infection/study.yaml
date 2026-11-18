@@ -39,7 +39,7 @@ expected_behavior:
       extraction over-dilates, so the sequence match is partial, not mechanistic.
   - name: severe-timing-divergence-quantified
     observable: "SBP<100 crossing time (engine vs SBML), MAP<65, SVR ratio"
-    condition: "divergence measured and mechanistically attributed (report: SBML SBP<100 ~37.5 h vs engine ~26-30 h; MAP<65 reached by engine ~45 h, not reached by SBML at 48 h; SVR min ~60% engine vs ~72% SBML)"
+    condition: "divergence measured and mechanistically attributed (SBML SBP<100 ~37.5 h vs engine ~26.6 h; MAP<65 reached by NEITHER arm within 48 h — MAP ≈ 72/70 mmHg at the horizon and still falling; SVR min ~60% engine vs ~72% SBML)"
     rationale: |
       This is the headline result: the ~8-10 h lag measured run-for-run against
       the real engine rather than against the paper milestones.
@@ -80,9 +80,10 @@ findings:
       plane and the divergence is purely a matter of which axis each moves along.
       From the shared baseline (CO ~5.8 L/min, SVR ~0.95) the engine slides along
       the CO axis (5.78 → 4.51 L/min, SVR ~flat 0.954 → 0.930) to MAP 72 — a
-      cold, low-output shock — while the extraction slides along the SVR axis
+      cold, low-output decline — while the extraction slides along the SVR axis
       (holds CO ~6.0, SVR swings 0.93 → 1.13 → 0.665) to MAP 70 — a warm,
-      vasodilatory shock. Same endpoint contour, orthogonal mechanisms; this is
+      vasodilatory decline (both still above the MAP<65 shock threshold at 48 h).
+      Same endpoint contour, orthogonal mechanisms; this is
       the geometric statement of the vasomotor overshoot characterized in
       study 05. See charts/05_severe_phase_portrait_co_svr.svg.
     status: supported

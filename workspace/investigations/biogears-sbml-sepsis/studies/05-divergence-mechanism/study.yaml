@@ -23,7 +23,7 @@ hypothesis: |
   metabolic subsystems the extraction simplifies or omits (nitric oxide, fever
   vasodilation, renal/urine handling, lactate, intracellular water, respiration,
   nutrition inputs) should drive every observable that diverges — and should do so
-  by a different shock mechanism under severe sepsis, not merely a time shift.
+  by a different decompensation mechanism under severe sepsis, not merely a time shift.
 
 objective: |
   Quantify peak divergence per observable in both arms; characterise the severe-arm
@@ -39,9 +39,10 @@ claim: |
   dynamics: even under mild infection, where outcomes agree, the engine's pressures
   fluctuate over an ~11 mmHg range (its nutrition schedule plus full homeostatic
   control) while the autonomous extraction — a closed ODE with no meal, respiration
-  or temperature inputs — sits within ~0.6 mmHg. (2) Shock mechanism: under severe
-  sepsis both reach MAP ≈ 70 mmHg by 48 h, but the engine collapses hypodynamically
-  (cardiac output 5.8 → 4.5 L/min, SVR ~flat at 0.93) while the extraction collapses
+  or temperature inputs — sits within ~0.6 mmHg. (2) Decompensation mechanism: under
+  severe sepsis both drive MAP down to ≈ 70 mmHg by 48 h — above the MAP<65 shock
+  threshold and still falling — but the engine declines hypodynamically
+  (cardiac output 5.8 → 4.5 L/min, SVR ~flat at 0.93) while the extraction declines
   hyperdynamically (SVR 0.93 → 1.13 → 0.67, cardiac output rebounding to 6.0). Peak
   divergence is 32% on cardiac output and 29% on SVR. The extraction's single
   AIR→sympathetic arc overshoots the vasomotor swing that the engine's omitted
@@ -84,10 +85,10 @@ findings:
   - summary: "Under severe sepsis the two reach the same hypotension by opposite mechanisms."
     detail: |
       Engine: cardiac output falls 5.78 → 4.51 L/min while SVR stays ~flat
-      (0.954 → 0.930) — hypodynamic, low-output shock. Extraction: SVR vasoconstricts
-      to 1.13 (compensation) then collapses to 0.665 (sympathetic fatigue) while
-      cardiac output rebounds to 5.96 — hyperdynamic, warm shock. Same MAP (~70 mmHg)
-      at 48 h, different route (MAP ≈ CO × SVR). The extraction's single
+      (0.954 → 0.930) — a hypodynamic, low-output pattern. Extraction: SVR vasoconstricts
+      to 1.13 (compensation) then falls to 0.665 (sympathetic fatigue) while
+      cardiac output rebounds to 5.96 — a hyperdynamic, warm pattern. Same MAP (~70 mmHg,
+      above the <65 shock threshold) at 48 h, different route (MAP ≈ CO × SVR). The extraction's single
       AIR→sympathetic vasomotor arc overshoots; the engine's full cardiovascular
       control, with the omitted vasodilatory pathways, stays muted within 48 h.
     status: supported
