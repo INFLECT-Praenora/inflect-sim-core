@@ -8,6 +8,7 @@ named by ``SurrogateEntry.checkpoint_ref``) is a TODO that plugs in behind
 from __future__ import annotations
 
 import json
+import math
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -63,7 +64,7 @@ class CheckpointStore:
             return None
         try:
             d = json.loads(path.read_text())
-            return SurrogateEntry(
+            entry = SurrogateEntry(
                 checkpoint_ref=str(d["checkpoint_ref"]),
                 targets=[str(t) for t in d["targets"]],
                 horizon_s=float(d["horizon_s"]),
@@ -71,6 +72,10 @@ class CheckpointStore:
                 state_ranges=_ranges(d.get("state_ranges")),
                 val_error=dict(d.get("val_error") or {}),
             )
+            bounds = [b for r in (*entry.param_ranges.values(), *entry.state_ranges.values()) for b in r]
+            if not all(math.isfinite(x) for x in (entry.horizon_s, *bounds)):
+                return None
+            return entry
         except (OSError, ValueError, KeyError, TypeError, IndexError):
             return None
 
@@ -97,7 +102,10 @@ def _within(values: dict | None, ranges: dict) -> bool:
     for k, v in (values or {}).items():
         if k in ranges:
             lo, hi = ranges[k]
-            if not (lo <= v <= hi):
+            try:
+                if not (lo <= v <= hi):
+                    return False
+            except TypeError:
                 return False
         else:
             return False  # unknown input: outside the validated envelope
