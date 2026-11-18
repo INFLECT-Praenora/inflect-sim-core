@@ -20,6 +20,21 @@ class ApiConfig:
     max_twins: int = 64
     twin_ttl_s: float = 3600.0
     db_path: str = ""  # SQLite file for twin persistence; "" = no persistence
+    api_keys: str = ""  # comma-separated bearer keys (INFLECT_API_API_KEYS); empty = all rejected
+    rate_capacity: float = 100.0  # token-bucket burst size per key
+    rate_refill_per_s: float = 10.0  # tokens refilled per second per key
+    cost_step: float = 1.0
+    cost_register: float = 10.0
+    cost_ensemble: float = 20.0
+
+    @property
+    def key_set(self) -> tuple[str, ...]:
+        return tuple(k.strip() for k in self.api_keys.split(",") if k.strip())
+
+    @property
+    def costs(self) -> dict[str, float]:
+        return {"step": self.cost_step, "register": self.cost_register,
+                "ensemble": self.cost_ensemble}
 
     @classmethod
     def from_env(cls) -> "ApiConfig":
