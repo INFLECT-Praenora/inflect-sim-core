@@ -47,7 +47,10 @@ def _reg(db, clock=None, **cfg):
 def test_restart_rewarms_to_t0(tmp_path):
     db = tmp_path / "t.db"
     a = _reg(db)
-    tid = a.register(ANT, "antimony", "k1").twin_id
+    sa = a.register(ANT, "antimony", "k1")
+    tid = sa.twin_id
+    adv = sa.worker.step(dt_s=5.0)
+    assert adv["t"] > 0 and adv["observables"]["S1"] < 10
     a.close()  # shutdown must NOT delete rows
     b = _reg(db)
     try:
@@ -55,6 +58,9 @@ def test_restart_rewarms_to_t0(tmp_path):
             b.get(tid, "k2")
         s = b.get(tid, "k1")
         assert s.worker.is_alive() and s.twin_id == tid
+        fresh = s.worker.step(dt_s=0)
+        assert fresh["t"] == 0
+        assert fresh["observables"]["S1"] == pytest.approx(10)
         assert b.get(tid, "k1") is s
         with pytest.raises(UnknownTwin):
             b.get("nope", "k1")
@@ -102,3 +108,25 @@ def test_ttl_eviction_keeps_row(tmp_path):
         assert s2 is not s and s2.worker.is_alive()
     finally:
         r.close()
+
+
+def test_rewarm_loses_race_with_evict(tmp_path, monkeypatch):
+    db = tmp_path / "t.db"
+    a = _reg(db)
+    tid = a.register(ANT, "antimony", "k1").twin_id
+    a.close()
+    b = _reg(db)
+    try:
+        orig = b._new_worker
+
+        def slow(*args):
+            w = orig(*args)
+            b.evict(tid)  # concurrent explicit evict lands mid-rewarm
+            return w
+
+        monkeypatch.setattr(b, "_new_worker", slow)
+        with pytest.raises(UnknownTwin):
+            b.get(tid, "k1")
+        assert tid not in b._sessions
+    finally:
+        b.close()

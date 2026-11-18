@@ -161,7 +161,10 @@ class TwinRegistry:
         worker = self._new_worker(meta.source, meta.model_format, requested)  # outside the lock
         with self._mu:
             hit = self._sessions.get(twin_id)  # lost a race with a concurrent re-warm
-            if hit is None:
+            if hit is None and self._store.get(twin_id) is None:
+                gone = True  # explicit evict landed mid-re-warm: it is authoritative
+            elif hit is None:
+                gone = False
                 now = self._clock()
                 session = TwinSession(
                     twin_id=twin_id, worker=worker, source=meta.source,
@@ -177,7 +180,11 @@ class TwinRegistry:
                         break
                     victims.append(min(others, key=lambda x: x.last_access))
             else:
+                gone = False
                 hit.last_access = self._clock()
+        if gone:
+            worker.close()
+            raise UnknownTwin(twin_id)
         if hit is not None:
             worker.close()
             return hit
