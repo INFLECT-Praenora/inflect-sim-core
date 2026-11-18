@@ -21,6 +21,15 @@ class HeavyPlane(Protocol):
         ...
 
 
+def _effective_n(request: Any) -> int:
+    ens = getattr(request, "ensemble", None)
+    if ens is None:
+        return 1
+    if getattr(ens, "n", None) is not None:
+        return ens.n
+    return len(getattr(ens, "members", None) or []) or 1
+
+
 class LocalHeavyPlane:
     """Phase-1 plane: runs locally up to ``config.max_ensemble_n``.
 
@@ -34,7 +43,7 @@ class LocalHeavyPlane:
         self._remote = remote
 
     def submit_ensemble(self, twin_id: str, request: Any) -> dict:
-        if request.ensemble.n > self._config.max_ensemble_n:
+        if _effective_n(request) > self._config.max_ensemble_n:
             if self._remote is None:
                 raise OverCapacity("ensemble exceeds live limits; use batch")
             return self._remote.submit_ensemble(twin_id, request)

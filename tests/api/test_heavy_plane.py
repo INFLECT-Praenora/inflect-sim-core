@@ -27,9 +27,28 @@ def test_over_cap_no_remote_raises():
 
 def test_over_cap_with_remote_delegates():
     remote = LocalHeavyPlane(lambda t, r: {"remote": True}, ApiConfig(max_ensemble_n=10**6))
-    plane = LocalHeavyPlane(_runner, ApiConfig(max_ensemble_n=8), remote=remote)
+    calls = []
+    plane = LocalHeavyPlane(lambda t, r: calls.append(t), ApiConfig(max_ensemble_n=8), remote=remote)
     assert plane.submit_ensemble("t1", _req(9)) == {"remote": True}
+    assert calls == []
 
 
 def test_protocol_satisfied():
     assert isinstance(LocalHeavyPlane(_runner, ApiConfig()), HeavyPlane)
+
+
+def _members(k):
+    return SimpleNamespace(ensemble=SimpleNamespace(n=None, members=[{}] * k))
+
+
+def test_members_over_cap_not_bypassed():
+    plane = LocalHeavyPlane(_runner, ApiConfig(max_ensemble_n=8))
+    with pytest.raises(OverCapacity):
+        plane.submit_ensemble("t1", _members(10_000))
+
+
+def test_none_ensemble_and_short_members_run_locally():
+    plane = LocalHeavyPlane(lambda t, r: "ok", ApiConfig(max_ensemble_n=8))
+    assert plane.submit_ensemble("t1", SimpleNamespace(ensemble=None)) == "ok"
+    assert plane.submit_ensemble("t1", _members(3)) == "ok"
+    assert plane.submit_ensemble("t1", _members(0)) == "ok"
