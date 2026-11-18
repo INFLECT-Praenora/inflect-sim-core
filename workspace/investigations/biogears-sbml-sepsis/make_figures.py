@@ -86,11 +86,11 @@ a2.annotate("engine: SVR ~flat (0.93)",(30,0.90),color=ENGINE,fontsize=9,ha="cen
 fig.suptitle("Same hypotension, opposite mechanism (MAP ≈ CO × SVR)",fontsize=14,fontweight="bold")
 fig.tight_layout()
 save(fig,"03-severe-infection","04_severe_mechanism_co_svr",
-     "The two reach MAP≈70 mmHg by different routes: the engine collapses via cardiac-output "
-     "failure with near-constant SVR (hypodynamic/low-output shock), while the extraction holds "
-     "output and swings SVR — vasoconstriction then sympathetic-fatigue vasodilation "
-     "(hyperdynamic/warm shock). The extraction's single AIR→sympathetic arc overshoots the "
-     "vasomotor response the engine's full cardiovascular control keeps muted.")
+     "The two drive MAP down to ≈70 mmHg (still above the MAP<65 shock threshold at 48 h) by "
+     "different routes: the engine declines via cardiac-output failure with near-constant SVR "
+     "(hypodynamic/low-output), while the extraction holds output and swings SVR — vasoconstriction "
+     "then sympathetic-fatigue vasodilation (hyperdynamic/warm). The extraction's single AIR→sympathetic "
+     "arc overshoots the vasomotor response the engine's full cardiovascular control keeps muted.")
 
 # --------------------------------------------------------- mild fluctuation
 tem,Em = load("02-mild-infection","engine-sev1.json")
@@ -135,7 +135,7 @@ save(fig,S5,"01_divergence_heatmap",
      "Peak relative divergence between engine and extraction, per observable and condition. "
      "The inflammation states (tissue integrity, blood pathogen) agree to well under 0.1% in both "
      "arms; the hemodynamic states carry all the divergence — small but nonzero at mild (the "
-     "engine's fluctuation) and large at severe (the different shock mechanism and ~11 h lag).")
+     "engine's fluctuation) and large at severe (the different decompensation mechanism and ~11 h lag).")
 
 # ---- milestone dumbbell (severe timing lag)
 ms = json.load(open(STUDIES/"03-severe-infection"/"out"/"compare-sev3.json"))["milestones"]
