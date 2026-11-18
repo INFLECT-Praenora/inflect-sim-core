@@ -1,9 +1,8 @@
 """Tiered-engine layer: surrogate protocol, operator-curated checkpoint sidecars,
 and the envelope-gated engine selector.
 
-No torch here by design. The real viva-torch adapter (which loads the checkpoint
-named by ``SurrogateEntry.checkpoint_ref``) is a TODO that plugs in behind
-``SurrogateBackend``.
+No torch here by design. The real viva-torch adapter lives in the import-guarded
+``surrogate_torch`` module and plugs in behind ``SurrogateBackend``.
 """
 from __future__ import annotations
 
@@ -27,19 +26,21 @@ class SurrogateEntry:
     param_ranges: dict[str, tuple[float, float]] = field(default_factory=dict)
     state_ranges: dict[str, tuple[float, float]] = field(default_factory=dict)
     val_error: dict = field(default_factory=dict)
+    # min/max of each target over the WHOLE training trajectories (not just the ICs)
+    target_bounds: dict[str, tuple[float, float]] = field(default_factory=dict)
 
 
 class SurrogateBackend(Protocol):
     def lookup(self, model_hash: str) -> SurrogateEntry | None: ...
 
-    def predict(self, entry: SurrogateEntry, request: Any) -> dict: ...
+    def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict: ...
 
 
 class NullBackend:
     def lookup(self, model_hash: str) -> SurrogateEntry | None:
         return None
 
-    def predict(self, entry: SurrogateEntry, request: Any) -> dict:
+    def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict:
         raise SurrogateUnavailable("no surrogate backend configured")
 
 
@@ -71,16 +72,17 @@ class CheckpointStore:
                 param_ranges=_ranges(d.get("param_ranges")),
                 state_ranges=_ranges(d.get("state_ranges")),
                 val_error=dict(d.get("val_error") or {}),
+                target_bounds=_ranges(d.get("target_bounds")),
             )
-            bounds = [b for r in (*entry.param_ranges.values(), *entry.state_ranges.values()) for b in r]
+            bounds = [b for r in (*entry.param_ranges.values(), *entry.state_ranges.values(), *entry.target_bounds.values()) for b in r]
             if not all(math.isfinite(x) for x in (entry.horizon_s, *bounds)):
                 return None
             return entry
         except (OSError, ValueError, KeyError, TypeError, IndexError):
             return None
 
-    def predict(self, entry: SurrogateEntry, request: Any) -> dict:
-        # TODO: real viva-torch adapter loads entry.checkpoint_ref and runs inference.
+    def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict:
+        # Sidecar-only store; the torch runtime is ``surrogate_torch.TorchCheckpointBackend``.
         raise SurrogateUnavailable("sidecar known, runtime adapter not installed")
 
 
@@ -94,8 +96,27 @@ class FakeBackend:
     def lookup(self, model_hash: str) -> SurrogateEntry | None:
         return self.entry
 
-    def predict(self, entry: SurrogateEntry, request: Any) -> dict:
+    def predict(self, entry: SurrogateEntry, request: Any, seed_state: dict | None = None) -> dict:
         return self.predict_fn(entry, request)
+
+
+def seed_in_bounds(entry: SurrogateEntry, seed_state: dict | None) -> bool:
+    """True if the live seed lies inside the trained region (``target_bounds``).
+
+    All of the entry's targets are checked, not only the requested ones, because
+    the rollout is coupled across targets. Entries without bounds are unconstrained.
+    """
+    for k, (lo, hi) in entry.target_bounds.items():
+        v = (seed_state or {}).get(k)
+        if v is None:
+            continue
+        tol = 1e-9 * max(1.0, abs(lo), abs(hi))
+        try:
+            if not (lo - tol <= float(v) <= hi + tol):
+                return False
+        except (TypeError, ValueError):
+            return False
+    return True
 
 
 def _within(values: dict | None, ranges: dict) -> bool:

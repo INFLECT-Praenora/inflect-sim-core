@@ -33,6 +33,9 @@ dependencies = [
 dev = ["pytest>=7.4", "httpx"]
 api = ["fastapi", "uvicorn[standard]", "pydantic"]
 cli = ["typer", "rich"]
+# Heavy PyTorch surrogate stack; opt-in only (base + [api] install stays torch-free).
+# Enables the live neural-surrogate tier (viva_simulation_core/api/surrogate_backend.py).
+surrogate = ["viva-torch"]
 
 [project.scripts]
 simulation-core = "viva_simulation_core.cli.__main__:main"
@@ -58,6 +61,7 @@ viva-core = { git = "https://github.com/vivarium-collective/viva-core", branch =
 viva-tellurium = { git = "https://github.com/vivarium-collective/viva-tellurium", branch = "main" }
 viva-biogears = { git = "https://github.com/vivarium-collective/viva-biogears", branch = "main" }
 vivarium-workbench = { git = "https://github.com/vivarium-collective/vivarium-workbench.git", branch = "main" }
+viva-torch = { git = "https://github.com/vivarium-collective/viva-torch", branch = "main" }
 
 [tool.pytest.ini_options]
 markers = ["slow: real-engine / roadrunner-heavy integration tests (run with `pytest -m slow`)"]
