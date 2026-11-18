@@ -42,6 +42,17 @@ near bit-for-bit; the SBML hemodynamic collapse lags ~11 h under severe sepsis. 
 S4 re-runs the SBML arm under both `process-bigraph` (Python) and `viva-core` (Rust)
 and confirms they agree bit-for-bit.
 
+## Digital-twin simulation API
+
+A FastAPI service for live digital twins: register a model once (Antimony or SBML), then
+step it in real time or ask for tiered exact/surrogate predictions, including ensembles.
+
+- [`docs/api.md`](docs/api.md): reference, configuration, error contract, curl examples.
+- [`examples/digital_twin_demo.py`](examples/digital_twin_demo.py): narrated, runnable
+  walkthrough of every use. It runs in-process, so it needs no server:
+
+      uv run python examples/digital_twin_demo.py
+
 ## Run it locally
 
     bash scripts/serve.sh      # workbench
