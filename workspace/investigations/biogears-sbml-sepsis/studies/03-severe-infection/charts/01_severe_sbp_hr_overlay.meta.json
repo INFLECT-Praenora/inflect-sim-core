@@ -1,5 +1,5 @@
 {
-"title": "01_severe_sbp_hr_overlay",
-"interpretation": "Severe arm: SBP and HR, engine vs SBML extraction. The extraction crosses SBP<100 at 37.5h vs 26.6h in the real engine (10.9h lag); HR>90 shows the same ~11h lag.",
-"caption": "Severe arm: SBP and HR, engine vs SBML extraction. The extraction crosses SBP<100 at 37.5h vs 26.6h in the real engine (10.9h lag); HR>90 shows the same ~11h lag."
+ "title": "01_severe_sbp_hr_overlay",
+ "interpretation": "Severe arm over 72 h: the extraction's systolic-pressure and heart-rate milestones lag the engine by ~11 h (SBP<100 at 37.5 h vs 26.6 h; HR>90 at 37.6 h vs 26.8 h). Dotted lines mark the SBP<100 and HR>90 thresholds. This is the systolic half of the picture; on the MAP<65 shock threshold the order flips (see the study-05 milestone dumbbell).",
+ "caption": "Severe arm over 72 h: the extraction's systolic-pressure and heart-rate milestones lag the engine by ~11 h (SBP<100 at 37.5 h vs 26.6 h; HR>90 at 37.6 h vs 26.8 h). Dotted lines mark the SBP<100 and HR>90 thresholds. This is the systolic half of the picture; on the MAP<65 shock threshold the order flips (see the study-05 milestone dumbbell)."
 }

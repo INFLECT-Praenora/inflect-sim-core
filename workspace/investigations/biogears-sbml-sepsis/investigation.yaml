@@ -38,33 +38,36 @@ executive:
     (the numerical solver).
   verdict: |
     The extraction's inflammation core is bit-identical to the engine, and ALL
-    divergence lives in the hemodynamic layer. Run-for-run over 48 h: baseline
-    parity holds; mild stays controlled on both sides; tissue integrity (0.325/0.325)
-    and pathogen load (60.5/60.6) match to <0.1% in every arm. But the hemodynamics
-    diverge two ways. (1) Even at mild infection the engine fluctuates continuously
-    (SBP range ~11 mmHg, from its nutrition schedule and full homeostatic control)
-    while the autonomous extraction sits within ~0.6 mmHg. (2) Under severe sepsis
-    both drive MAP down toward shock by OPPOSITE mechanisms — to MAP ≈ 72/70 mmHg
-    at 48 h, still above the MAP<65 shock threshold and still falling on both arms
-    (MAP_min == MAP_end) — the engine by a hypodynamic, low-output route (cardiac
-    output 5.8 → 4.5 L/min, SVR ~flat) while the extraction by a hyperdynamic,
-    vasodilatory route (SVR swings 0.93 → 1.13 → 0.67, cardiac output rebounds
-    to 6.0), with a consistent ~11 h timing lag (SBP<100 at 37.5 h vs 26.6 h). Both
-    the mechanism split and the lag trace to the vasomotor/fluid/metabolic subsystems
+    divergence lives in the hemodynamic layer. Run-for-run (mild 48 h, severe
+    extended to 72 h): baseline parity holds; mild stays controlled on both sides;
+    at the severe horizon tissue integrity (0.243/0.243) and pathogen load
+    (330.2/330.6) match to ~0.1% in every arm. But the hemodynamics diverge two ways.
+    (1) Even at mild infection the engine fluctuates continuously (SBP range ~11 mmHg,
+    from its nutrition schedule and full homeostatic control) while the autonomous
+    extraction sits within ~0.6 mmHg. (2) Under severe sepsis both arms cross into
+    MAP<65 shock by OPPOSITE mechanisms and in FLIPPED order — the engine by a
+    hypodynamic, low-output route (cardiac output 5.8 → 4.0 L/min, SVR ~flat, MAP<65
+    at 69.3 h) while the extraction by a hyperdynamic, vasodilatory route (SVR swings
+    0.93 → 1.13 → 0.60, cardiac output rebounds to 5.5, MAP<65 at 54.1 h). The
+    extraction lags the engine by ~11 h on systolic pressure (SBP<100 at 37.5 h vs
+    26.6 h) yet reaches the MAP<65 shock threshold ~15 h EARLIER, because its deeper
+    SVR vasodilation drags MAP = CO·SVR down first. Both the mechanism split and the
+    flipped timing trace to the vasomotor/fluid/metabolic subsystems
     the extraction omits (inert nitric oxide, absent fever vasodilation, no renal
     fluid handling, no lactate, no intracellular water). This is the engine-vs-
     extraction comparison the report could not make.
   verdict_status: complete
   verdict_detail: |
-    All four 48 h arms ran (severity 1 & 3 × engine & SBML, locally-built BioGears
-    8.2.0), plus a synthesis study (05) that maps every divergence to a specific
-    BioGears subsystem. Parity gate closed; cross-engine runtime axis bit-identical.
-    The extraction is a faithful surrogate for the inflammation core and for
-    qualitative outcomes, but it is NOT a drop-in replacement for BioGears'
-    cardiovascular dynamics: it misses the engine's ambient physiological variation
-    and drives MAP toward shock by a different hemodynamic route (MAP still ≥ 65 at
-    the 48 h horizon on both arms — the shock threshold is approached, not crossed
-    in-window).
+    All four arms ran (severity 1 & 3 × engine & SBML, locally-built BioGears
+    8.2.0; mild to 48 h, severe extended to 72 h), plus a synthesis study (05) that
+    maps every divergence to a specific BioGears subsystem. Parity gate closed;
+    cross-engine runtime axis bit-identical. The extraction is a faithful surrogate
+    for the inflammation core and for qualitative outcomes, but it is NOT a drop-in
+    replacement for BioGears' cardiovascular dynamics: it misses the engine's ambient
+    physiological variation and reaches MAP<65 shock by a different hemodynamic route
+    and in flipped order — both arms cross the <65 threshold within 72 h (extraction
+    at 54.1 h, engine at 69.3 h), the extraction ~15 h ahead despite lagging ~11 h on
+    systolic pressure.
 
     On performance (study 06), the SBML route is not a shortcut to speed by way of a
     faster integrator. The sepsis ODE is stiff, so the one solver class that works is
@@ -83,15 +86,16 @@ scientific_argument:
     The SBML extraction faithfully reproduces the BioGears sepsis core's inflammation
     (bit-identical) and its qualitative outcomes, but it is not a drop-in replacement
     for the engine's cardiovascular behaviour: it lacks the engine's ambient
-    physiological fluctuation, and under severe sepsis it reaches hypotension by a
-    different hemodynamic mechanism and ~11 h later — divergences that map cleanly
-    onto the vasomotor, fluid and metabolic subsystems the extraction omits.
+    physiological fluctuation, and under severe sepsis it reaches MAP<65 shock by a
+    different hemodynamic mechanism and on a flipped timeline (lagging ~11 h on
+    systolic pressure but reaching MAP<65 shock ~15 h earlier) — divergences that map
+    cleanly onto the vasomotor, fluid and metabolic subsystems the extraction omits.
   evidence_for:
     - "Inflammation states (tissue integrity, blood pathogen) agree to <0.1% in both arms (study 05 heatmap)."
     - "SBML baseline matches BioGears StandardMale targets within tolerance (study 01)."
     - "Mild infection controlled on both sides with no hypotension (study 02)."
   evidence_against:
-    - "Severe decompensation mechanism differs: engine hypodynamic (CO-failure), extraction hyperdynamic (vasodilatory) — 32% CO / 29% SVR peak divergence (study 03/05); MAP falls toward but does not cross the <65 shock threshold in 48 h."
+    - "Severe decompensation mechanism differs: engine hypodynamic (CO-failure), extraction hyperdynamic (vasodilatory) — 38% CO / 36% SVR peak divergence over 72 h (study 03/05); both arms cross the <65 shock threshold, the extraction ~15 h before the engine (MAP<65 at 54.1 h vs 69.3 h)."
     - "Severe hemodynamic milestones lag ~11 h (SBP<100 at 37.5 h vs 26.6 h; study 03)."
     - "Engine fluctuates continuously even at mild; the autonomous extraction is near-flat (study 02/05)."
     - "Omitted/inert subsystems — nitric oxide, fever vasodilation, renal/urine, lactate, intracellular water — are exactly the pathways that move the divergent observables (study 05)."
@@ -104,7 +108,7 @@ scientific_argument:
   caveats:
     - "'Functional-difference' attributions (study 05) come from the extraction report's own 'Differences from BioGears' inventory; they are documented omissions, not newly-measured mechanisms."
     - "viva-biogears runs its InfectionModerate nutrition schedule; the extraction models no meals — a documented scenario delta that accounts for much of the mild-arm fluctuation."
-    - "Both arms are single 48 h runs per severity; no multi-seed ensemble (the engine is deterministic for a fixed scenario)."
+    - "Single runs per severity (mild 48 h, severe 72 h); no multi-seed ensemble (the engine is deterministic for a fixed scenario)."
     - "The integrator benchmark (study 06) is run on a 60 s window with step counts extrapolated to 48 h, and uses roadrunner's own rk4/rk45/cvode integrators (rk4 is the same algorithm as the viva-hybrid Rust engine, not viva-hybrid itself); the ~2x Rust-vs-compiled figure is carried over from the viva-hybrid repo's non-stiff benchmark, not re-measured on the sepsis model."
 
 inputs:
@@ -152,7 +156,7 @@ acceptance_criteria:
 at_a_glance:
   - {study: 01-baseline-parity, role: "Parity gate — both sides hold the StandardMale baseline at rest, so later divergence is the model, not the starting state."}
   - {study: 02-mild-infection, role: "Agreement case — mild infection controlled on both sides; also the first sign of the engine's ambient fluctuation."}
-  - {study: 03-severe-infection, role: "Headline — the full 9-observable severe comparison: ~11 h lag and the opposite decompensation mechanism (MAP toward, not past, the <65 shock threshold in 48 h)."}
+  - {study: 03-severe-infection, role: "Headline — the full 9-observable severe comparison over 72 h: opposite decompensation mechanisms and a flipped milestone order (engine leads on SBP, extraction leads on MAP<65 shock; both cross the <65 threshold)."}
   - {study: 04-engine-runtime, role: "Runtime axis (composition engine) — the SBML composite is bit-identical under process-bigraph (Python) and viva-core (Rust); engine swap moves only framework overhead."}
   - {study: 05-divergence-mechanism, role: "Synthesis — maps every divergence to the BioGears subsystem the extraction omits or simplifies."}
   - {study: 06-ode-integrator-runtime, role: "Runtime axis (ODE integrator) — the sepsis ODE is stiff, so an explicit/Rust integrator (viva-hybrid-style) cannot speed it up; the speed levers are a better stiff solver, GPU-parallel patients, or a surrogate."}
@@ -176,9 +180,9 @@ biological_story: |
   autonomous ODE: it holds those inputs at baseline, so the same infection produces a
   smooth, near-flat trace. Same clinical outcome, no ambient life.
 
-  Under severe sepsis the two push blood pressure down toward shock by opposite
-  routes (MAP ≈ 72/70 mmHg at 48 h, still above the MAP<65 threshold and still
-  falling). The real engine fails as a pump — cardiac output falls while vascular
+  Under severe sepsis the two push blood pressure down into shock by opposite
+  routes (over 72 h both cross the MAP<65 threshold — the engine to MAP 64 at 69 h,
+  the extraction to MAP 58 at 54 h). The real engine fails as a pump — cardiac output falls while vascular
   tone holds — a hypodynamic, low-output decline. The extraction instead keeps
   output up and gives up its vascular tone, swinging from vasoconstriction into
   vasodilation (a warm, hyperdynamic pattern), because its one remaining vasomotor
@@ -186,5 +190,7 @@ biological_story: |
   sympathetic arc) has to carry a response the engine spreads across nitric oxide,
   fever vasodilation and renal fluid handling — pathways the extraction omits or
   leaves inert. Strip those out and the model still gets sepsis right in outline, but
-  it gets the body's hemodynamic defence of blood pressure wrong in mechanism and ~11
-  hours late in timing. That is the functional difference between the two runtimes.
+  it gets the body's hemodynamic defence of blood pressure wrong in mechanism and on
+  a flipped timeline — ~11 hours late to systolic hypotension, yet ~15 hours early to
+  MAP<65 shock, because its one vasodilatory arc overshoots. That is the functional
+  difference between the two runtimes.

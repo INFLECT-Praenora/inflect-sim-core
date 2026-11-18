@@ -22,15 +22,16 @@ hypothesis: |
   intracellular water).
 
 objective: |
-  Run severity 3 on both engines over 48 h, align observables, and quantify the
+  Run severity 3 on both engines over 72 h, align observables, and quantify the
   divergence: SBP<100 and MAP<65 crossing times, SVR-vs-baseline minimum, and the
   magnitude of the timing lag — the run-for-run comparison the extraction report
-  could not do.
+  could not do. The horizon was extended from 48 h to 72 h so both arms reach the
+  MAP<65 shock threshold and the crossing times can be measured, not extrapolated.
 
 expected_behavior:
   - name: severe-collapse-sequence-matches
     observable: "SBP, MAP, HR, SVR, tissue_integrity, blood_pathogen"
-    condition: "same timing-shifted collapse with matched inflammation, but a divergent hemodynamic mechanism (engine SVR min 0.952 vs extraction 0.715: the extraction over-shoots vasodilation)"
+    condition: "same collapse into MAP<65 shock on both arms with matched inflammation, but a divergent hemodynamic mechanism (engine SVR ratio min 0.95 vs extraction 0.65: the extraction over-shoots vasodilation)"
     rationale: |
       Report: the Antimony model reproduces the severe sequence (capillary leak →
       compensation → sympathetic-fatigue decompensation). Run-for-run, the
@@ -39,57 +40,69 @@ expected_behavior:
       extraction over-dilates, so the sequence match is partial, not mechanistic.
   - name: severe-timing-divergence-quantified
     observable: "SBP<100 crossing time (engine vs SBML), MAP<65, SVR ratio"
-    condition: "divergence measured and mechanistically attributed (SBML SBP<100 ~37.5 h vs engine ~26.6 h; MAP<65 reached by NEITHER arm within 48 h — MAP ≈ 72/70 mmHg at the horizon and still falling; SVR min ~60% engine vs ~72% SBML)"
+    condition: "divergence measured and mechanistically attributed (SBML SBP<100 ~37.5 h vs engine ~26.6 h; MAP<65 reached by BOTH arms within 72 h but the order flips — extraction 54.1 h vs engine 69.3 h, MAP ends 58/64 mmHg; SVR ratio min 0.65 extraction vs 0.95 engine)"
     rationale: |
       This is the headline result: the ~8-10 h lag measured run-for-run against
       the real engine rather than against the paper milestones.
 
 claim: |
-  Run-for-run, the SBML extraction reproduces BioGears' severe-sepsis inflammation
-  almost exactly (tissue integrity 0.325/0.325, peak pathogen 60.5/60.6; values at the 48 h horizon, the severe course not yet at its true peak/min) but its
-  hemodynamic collapse arrives ~11 h LATE: SBP crosses 100 mmHg at 37.5 h in the
-  extraction vs 26.6 h in the real engine (a 10.9 h lag), with the same ~11 h lag
-  on the HR>90 compensation. This is the engine-vs-extraction comparison the
-  extraction report could not make; it confirms and slightly exceeds its ~8-10 h
-  estimate against the paper.
+  Run-for-run over 72 h, the SBML extraction reproduces BioGears' severe-sepsis
+  inflammation almost exactly (tissue integrity 0.243/0.243, peak pathogen
+  330.2/330.6) while its hemodynamic collapse diverges in BOTH timing and
+  mechanism. On the systolic milestone the extraction LAGS: SBP crosses 100 mmHg
+  at 37.5 h vs 26.6 h in the engine (a 10.9 h lag), with the same ~11 h lag on the
+  HR>90 compensation. But on mean arterial pressure the order FLIPS — the
+  extraction reaches the MAP<65 shock threshold FIRST, at 54.1 h vs the engine's
+  69.3 h (15.3 h earlier), because its deeper SVR vasodilation (ratio min 0.65 vs
+  the engine's ~flat 0.95) drags MAP = CO·SVR down faster. Both arms now cross into
+  sustained hypotensive shock within 72 h (MAP ends 58 mmHg extraction, 64 mmHg
+  engine); neither course fully resolves. This is the engine-vs-extraction
+  comparison the extraction report could not make.
 
 findings:
-  - summary: "Severe hemodynamic collapse lags the real engine by ~11 h (SBP<100: 37.5 h vs 26.6 h)."
+  - summary: "Over 72 h both arms cross into MAP<65 shock, but the milestone order flips: engine leads on SBP (−11 h), extraction leads on MAP (−15 h)."
     detail: |
-      Both arms, severity 3, 48 h, infection at t=0, run-for-run:
-      - SBP < 100 mmHg: engine 26.55 h, extraction 37.47 h -> +10.9 h lag.
-      - HR > 90 /min: engine 26.77 h, extraction 37.55 h -> +10.8 h lag.
-      - MAP < 65 mmHg: neither crossed (sustained) by 48 h.
-      - SVR ratio minimum: engine 0.952, extraction 0.715 — the extraction
-        over-shoots the vasodilation.
-      The delay most likely comes from processes the extraction does not translate
-      (urine loss, fever-driven skin vasodilation, lactate, intracellular water).
+      Both arms, severity 3, 72 h, infection at t=0, run-for-run:
+      - SBP < 100 mmHg: engine 26.55 h, extraction 37.47 h -> extraction +10.9 h LATE.
+      - HR > 90 /min:  engine 26.77 h, extraction 37.55 h -> extraction +10.8 h LATE.
+      - MAP < 65 mmHg: engine 69.33 h, extraction 54.07 h -> extraction 15.3 h EARLY.
+      - SVR ratio minimum: engine 0.949 (barely dips), extraction 0.646 — the
+        extraction over-shoots the vasodilation.
+      The flip is mechanistic: the engine's cold, low-output decline (CO falls,
+      SVR ~flat) drops systolic pressure early but holds MAP up longer, while the
+      extraction's deep SVR vasodilation collapses MAP (= CO·SVR) first even though
+      its SBP lags. The systolic lag most likely comes from processes the extraction
+      does not translate (urine loss, fever-driven skin vasodilation, lactate,
+      intracellular water); the early MAP crossing comes from its un-tempered
+      vasodilatory arc.
     status: supported
   - summary: "The inflammation / pathogen core matches the engine almost bit-for-bit."
     detail: |
-      tissue_integrity minimum 0.3248 (engine) vs 0.3248 (extraction); peak
-      blood_pathogen 60.55 vs 60.60 (both are 48 h-horizon values; *_h = 48.0, so the true peak/min is not yet reached). The Acute Inflammatory Response the extraction
-      copied from BioGears reproduces the engine's dynamics to ~1e-4 for tissue integrity (~1e-3 for peak pathogen); divergence is
-      confined to the hemodynamic response, not the inflammation model.
+      tissue_integrity minimum 0.2431 (engine) vs 0.2430 (extraction); peak
+      blood_pathogen 330.2 vs 330.6 at the 72 h horizon (neither course has fully
+      resolved — resolved = false on both arms). The Acute Inflammatory Response the
+      extraction copied from BioGears reproduces the engine's dynamics to ~1e-4 for
+      tissue integrity (~1e-3 relative on peak pathogen); divergence is confined to
+      the hemodynamic response, not the inflammation model.
     status: supported
-  - summary: "In CO–SVR phase space the two arms are orthogonal: MAP = 17.34·CO·SVR holds in both, so each reaches the same low-MAP contour by a different axis."
+  - summary: "In CO–SVR phase space the two arms are orthogonal: MAP = 17.34·CO·SVR holds in both, so each reaches MAP<65 shock by a different axis."
     detail: |
       MAP decomposes as MAP = k·CO·SVR with k = 17.34 mmHg·min·mL/(L·s), a
       relation that holds to <0.5% (CV 0.26% engine, 0.45% extraction) with the
       SAME constant in both arms — so the two trajectories live in one CO–SVR
-      plane and the divergence is purely a matter of which axis each moves along.
-      From the shared baseline (CO ~5.8 L/min, SVR ~0.95) the engine slides along
-      the CO axis (5.78 → 4.51 L/min, SVR ~flat 0.954 → 0.930) to MAP 72 — a
-      cold, low-output decline — while the extraction slides along the SVR axis
-      (holds CO ~6.0, SVR swings 0.93 → 1.13 → 0.665) to MAP 70 — a warm,
-      vasodilatory decline (both still above the MAP<65 shock threshold at 48 h).
-      Same endpoint contour, orthogonal mechanisms; this is
-      the geometric statement of the vasomotor overshoot characterized in
-      study 05. See charts/05_severe_phase_portrait_co_svr.svg.
+      plane and the divergence is purely which axis each moves along. From the
+      shared baseline (CO ~5.8 L/min, SVR ~0.95) the engine slides along the CO
+      axis (5.78 → 3.99 L/min, SVR ~flat 0.95) to MAP 64 — a cold, low-output
+      decline — while the extraction slides along the SVR axis (CO holds/rebounds
+      4.56 → 5.5, SVR swings 0.93 → 1.13 → 0.60) to MAP 58 — a warm, vasodilatory
+      decline. Both now cross the MAP<65 shock threshold (engine at 69.3 h, MAP end
+      64.0; extraction at 54.1 h, MAP end 58.1), by orthogonal mechanisms; this is
+      the geometric statement of the vasomotor overshoot characterized in study 05.
+      See charts/05_severe_phase_portrait_co_svr.svg.
     status: supported
 
 visualizations:
-  - name: "Severe sepsis: all 9 observables, engine vs SBML over 48 h"
+  - name: "Severe sepsis: all 9 observables, engine vs SBML over 72 h"
     address: image:charts/03_severe_9panel_engine_vs_sbml.svg
     display: primary
   - name: "CO–SVR phase portrait: same hypotension endpoint, opposite mechanism (orthogonal paths to the same iso-MAP contour)"
@@ -107,14 +120,14 @@ baseline:
     composite: viva_biogears.composites.sepsis.biogears_sepsis
     config: {severity: 3}
     status: ran
-    note: "Real BioGears 8.2.0 engine, severity 3, 48 h. SBP<100 at 26.6 h; tissue integrity min 0.325."
+    note: "Real BioGears 8.2.0 engine, severity 3, 72 h. SBP<100 at 26.6 h; MAP<65 at 69.3 h; tissue integrity min 0.243."
 
 variants:
   - name: sbml-severe
     composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
     config: {severity: 3}
     status: ran
-    note: "SBML extraction via viva-tellurium, severity 3, 48 h. SBP<100 at 37.5 h (~11 h late); tissue integrity min 0.325."
+    note: "SBML extraction via viva-tellurium, severity 3, 72 h. SBP<100 at 37.5 h (~11 h late); MAP<65 at 54.1 h (~15 h early); tissue integrity min 0.243."
 
 interventions: []
 runs:
@@ -124,11 +137,11 @@ runs:
     outcomes:
       severe-timing-divergence-quantified:
         result: passed
-        detail: "SBP<100 engine 26.55 h vs SBML 37.47 h (10.9 h lag); HR>90 26.77 h vs 37.55 h — divergence quantified run-for-run (compare-sev3.json)."
+        detail: "SBP<100 engine 26.55 h vs SBML 37.47 h (SBML +10.9 h); MAP<65 engine 69.33 h vs SBML 54.07 h (SBML −15.3 h — order flips); HR>90 26.77 h vs 37.55 h — divergence quantified run-for-run over 72 h (compare-sev3.json)."
         evidence_refs: [out/compare-sev3.json]
       severe-collapse-sequence-matches:
         result: partial
-        detail: "Same qualitative collapse sequence on both sides, but a qualified match: the vasodilation mechanism diverges (SVR min 0.952 engine vs 0.715 SBML) and the timing lags ~11 h."
+        detail: "Both arms reach MAP<65 shock within 72 h, but a qualified match: the vasodilation mechanism diverges (SVR ratio min 0.949 engine vs 0.646 SBML) and the milestone order flips (engine leads on SBP, SBML leads on MAP)."
         evidence_refs: [out/compare-sev3.json]
     note: "Aligned comparison in out/compare-sev3.json; per-arm series + milestones in out/. Note: passed:false there is the EXPECTED result (the 5% numeric tolerance failing on hemodynamics is the finding); the parity gate that must pass is study 01 (baseline), which is test-backed."
 
@@ -136,10 +149,11 @@ conclusion_logic:
   if_primary_tests_fail:
     diagnose:
       - observation: >
-          The severe arm reaches the same hypotension endpoint but by the opposite
-          hemodynamic mechanism and ~11 h late (SVR min 0.952 engine vs 0.715 SBML;
-          SBP<100 at 26.6 h vs 37.5 h) — a qualified, needs-calibration match rather
-          than a mechanistic one.
+          Both arms reach MAP<65 shock within 72 h but by opposite hemodynamic
+          mechanisms, and the milestone order flips (SVR ratio min 0.949 engine vs
+          0.646 SBML; SBP<100 at 26.6 h engine vs 37.5 h SBML, but MAP<65 at 69.3 h
+          engine vs 54.1 h SBML) — a qualified, needs-calibration match rather than
+          a mechanistic one.
         hypothesis: >
           The divergence is confined to the hemodynamic layer and maps to the
           vasomotor, fluid and metabolic subsystems the extraction omits or holds at

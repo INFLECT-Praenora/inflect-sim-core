@@ -1,12 +1,12 @@
 {
  "sbp_below_100_h": 37.46666666666667,
- "map_below_65_h": null,
+ "map_below_65_h": 54.06666666666667,
  "hr_above_90_h": 37.55,
- "svr_ratio_min": 0.7153919523451178,
- "svr_ratio_min_h": 48.0,
- "tissue_integrity_min": 0.3248017881026704,
- "tissue_integrity_min_h": 48.0,
- "peak_blood_pathogen": 60.600718727624525,
- "peak_blood_pathogen_h": 48.0,
+ "svr_ratio_min": 0.6456243281646542,
+ "svr_ratio_min_h": 72.0,
+ "tissue_integrity_min": 0.2430415498482967,
+ "tissue_integrity_min_h": 72.0,
+ "peak_blood_pathogen": 330.5956780085353,
+ "peak_blood_pathogen_h": 72.0,
  "resolved": false
 }
