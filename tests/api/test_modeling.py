@@ -52,8 +52,29 @@ def test_reject_import():
     with pytest.raises(UnsafeModelError):
         reject_unsafe("import 'x.txt'\n" + ANTIMONY, "antimony")
     with pytest.raises(UnsafeModelError):
+        reject_unsafe('/* c */ import "/etc/x"\n' + ANTIMONY, "antimony")
+    with pytest.raises(UnsafeModelError):
+        reject_unsafe('import "/abs/local/path.ant"\n' + ANTIMONY, "antimony")
+    with pytest.raises(UnsafeModelError):
+        reject_unsafe('S1 identity "http://x/y"; import "/etc/x";\n' + ANTIMONY, "antimony")
+    with pytest.raises(UnsafeModelError):
         reject_unsafe("  IMPORT \"http://x/y.sbml\"\n" + ANTIMONY, "antimony")
     reject_unsafe(ANTIMONY, "antimony")
+    # commented-out import and URL annotations are fine
+    reject_unsafe('// import "x"\n' + ANTIMONY + ' S1 identity "http://identifiers.org/a";', "antimony")
+
+
+def test_sepsis_sbml_not_rejected():
+    from pathlib import Path
+
+    p = (Path(__file__).resolve().parents[2]
+         / "workspace/investigations/biogears-sbml-sepsis/sources/biogears_sepsis.xml")
+    reject_unsafe(p.read_text(), "sbml")
+
+
+def test_validate_accepts_constant_id():
+    rr = load_engine(ANTIMONY, "antimony")
+    assert validate_observables(rr, ["k"]) == {"k": "k"}
 
 
 def test_reject_sbml_external():
@@ -70,6 +91,12 @@ def test_reject_sbml_external():
         reject_unsafe('<sbml><model><x href="http://evil/x"/></model></sbml>', "sbml")
     with pytest.raises(UnsafeModelError):
         reject_unsafe("<sbml><model><x src='file:///x'/></model></sbml>", "sbml")
+    with pytest.raises(UnsafeModelError):
+        reject_unsafe('<sbml><x xmlns:c="u" c:source="m.xml"/></sbml>', "sbml")
+    with pytest.raises(UnsafeModelError):
+        reject_unsafe('<?xml version="1.0"?><!DOCTYPE s [<!ENTITY x SYSTEM "file:///etc/passwd">]><sbml/>', "sbml")
+    reject_unsafe('<sbml xmlns="http://www.sbml.org/x"><csymbol definitionURL="http://www.sbml.org/sbml/symbols/time"/>'
+                  '<r xmlns:rdf="u" rdf:resource="http://identifiers.org/a"/></sbml>', "sbml")
 
 
 def test_unknown_format():

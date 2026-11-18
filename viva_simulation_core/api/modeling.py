@@ -42,35 +42,57 @@ def model_hash(source: str, model_format: str) -> str:
     return h.hexdigest()
 
 
-# Antimony: `import "file"` at statement start (line start or after ';').
-_ANT_IMPORT = re.compile(r"(?:^|[;\n\r{])\s*import\b", re.IGNORECASE)
-_URL_OR_FILE = re.compile(r"(?:https?|ftp|file|jar)://|\bfile:", re.IGNORECASE)
+# Antimony: strip comments (string-aware, so "http://..." does not start a
+# comment and hide a later `import`), then look for `import "<target>"`.
+_ANT_TOKENS = re.compile(
+    r"""("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(/\*.*?\*/|//[^\n\r]*|\#[^\n\r]*)""",
+    re.DOTALL,
+)
+_ANT_IMPORT = re.compile(r"\bimport\s*[\"']", re.IGNORECASE)
+_EXTERNAL_URI = re.compile(r"^\s*(?:https?|ftp|file|jar):", re.IGNORECASE)
+
+
+def _strip_antimony_comments(source: str) -> str:
+    return _ANT_TOKENS.sub(lambda m: m.group(1) if m.group(1) is not None else " ", source)
+
+
+def _local(name: str) -> str:
+    return name.rsplit("}", 1)[-1].rsplit(":", 1)[-1]
 
 
 def reject_unsafe(source: str, model_format: str) -> None:
     """Raise UnsafeModelError on imports or external model/file/URL references.
 
-    Deliberately conservative: any URL/file scheme in SBML (other than XML
-    namespace/schema declarations) is rejected.
+    Antimony: only `import` statements matter. SBML: structural check on the
+    parsed XML (benign URLs in xmlns/definitionURL/rdf:resource/annotations
+    are allowed).
     """
     _check_format(model_format)
     if model_format == "antimony":
-        if _ANT_IMPORT.search(source):
+        if _ANT_IMPORT.search(_strip_antimony_comments(source)):
             raise UnsafeModelError("Antimony 'import' statements are not allowed")
-        if _URL_OR_FILE.search(source):
-            raise UnsafeModelError("URL/file references are not allowed in Antimony source")
         return
-    if re.search(r"externalModelDefinition", source, re.IGNORECASE):
-        raise UnsafeModelError("SBML externalModelDefinition is not allowed")
-    if re.search(r"<!ENTITY|<!DOCTYPE", source, re.IGNORECASE):
+    if re.search(r"<!DOCTYPE|<!ENTITY", source, re.IGNORECASE):
         raise UnsafeModelError("SBML DOCTYPE/ENTITY declarations are not allowed")
-    # Strip xmlns declarations (legit URLs), then look for any remaining URL/file ref.
-    stripped = re.sub(r"""xmlns(?::[\w.-]+)?\s*=\s*(?:"[^"]*"|'[^']*')""", "", source)
-    stripped = re.sub(r"""xsi:schemaLocation\s*=\s*(?:"[^"]*"|'[^']*')""", "", stripped)
-    if _URL_OR_FILE.search(stripped):
-        raise UnsafeModelError("External file/URL references are not allowed in SBML")
-    if re.search(r"""\b(?:comp:)?source\s*=""", stripped):
-        raise UnsafeModelError("SBML 'source' attributes (external references) are not allowed")
+    import xml.etree.ElementTree as ET
+
+    try:
+        root = ET.fromstring(source)
+    except ET.ParseError as e:
+        raise UnsafeModelError(f"SBML is not well-formed XML: {e}") from e
+    for el in root.iter():
+        if not isinstance(el.tag, str):
+            continue
+        if _local(el.tag) == "externalModelDefinition":
+            raise UnsafeModelError("SBML externalModelDefinition is not allowed")
+        for attr, val in el.attrib.items():
+            name = _local(attr)
+            if name == "source":
+                raise UnsafeModelError("SBML 'source' attributes (external models) are not allowed")
+            if name in ("href", "src") and _EXTERNAL_URI.match(val):
+                raise UnsafeModelError(f"External reference in SBML '{name}' attribute")
+            if re.match(r"^\s*file:", val, re.IGNORECASE):
+                raise UnsafeModelError("file: URIs are not allowed in SBML")
 
 
 def load_engine(source: str, model_format: str):
@@ -87,7 +109,7 @@ def _global_params(rr) -> list[str]:
     return list(rr.model.getGlobalParameterIds())
 
 
-def _nonconstant_flags(rr) -> dict[str, bool]:
+def _constant_flags(rr) -> dict[str, bool]:
     """Map global parameter id -> SBML `constant` flag, read from the current SBML."""
     import libsbml
 
@@ -98,7 +120,7 @@ def _nonconstant_flags(rr) -> dict[str, bool]:
 def _nonconstant_globals(rr) -> list[str]:
     # Assignment-rule / rate-rule targets are non-constant by SBML definition;
     # getCurrentSBML reports constant=False for them.
-    flags = _nonconstant_flags(rr)
+    flags = _constant_flags(rr)
     return [p for p in _global_params(rr) if flags.get(p) is False]
 
 
