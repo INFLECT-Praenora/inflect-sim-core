@@ -958,6 +958,48 @@ non-stiff model.
   
   
 
+  
+  <div class="overview-section" id="study-variants-section">
+    <h3>Variants <span class="muted" style="font-size:0.85em;font-weight:normal">— perturbations of the baseline to compare</span></h3>
+    
+    <p class="muted" style="font-size:0.88em;margin:0 0 10px">No variants yet — add one to perturb the baseline and compare against it.</p>
+    
+    
+    <form class="study-variant-add-form" onsubmit="return _submitStudyVariantAdd(this)" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
+      <label style="font-size:0.78em;color:#475569">Name<br>
+        <input name="name" required pattern="[a-zA-Z0-9_-]+" placeholder="hi-dnaa"
+               style="font-family:monospace;font-size:0.82em;padding:3px 6px;min-width:130px"></label>
+      <label style="font-size:0.78em;color:#475569">Base<br>
+        <select name="base_composite" style="font-size:0.82em;padding:3px 6px">
+          <option value="sbml-sepsis-composite">sbml-sepsis-composite</option>
+        </select></label>
+      <label style="font-size:0.78em;color:#475569">Parameter overrides (JSON)<br>
+        <input name="overrides" placeholder='{"k_synth": 2.0}'
+               style="font-family:monospace;font-size:0.82em;padding:3px 6px;min-width:180px"></label>
+      <button type="submit" class="action-btn" style="font-size:0.82em">+ Add variant</button>
+    </form>
+    <div class="study-variant-add-status muted" style="font-size:0.8em;margin-top:4px"></div>
+    
+  </div>
+
+  
+  <div class="overview-section" id="study-interventions-section">
+    <h3>Interventions <span class="muted" style="font-size:0.85em;font-weight:normal">— named perturbations applied in this study</span></h3>
+    
+    <p class="muted" style="font-size:0.88em;margin:0 0 10px">No interventions yet.</p>
+    
+    <form class="study-intervention-add-form" onsubmit="return _submitStudyInterventionAdd(this)" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
+      <label style="font-size:0.78em;color:#475569">Name<br>
+        <input name="name" required pattern="[a-zA-Z0-9_-]+" placeholder="knockout-dnaA"
+               style="font-family:monospace;font-size:0.82em;padding:3px 6px;min-width:140px"></label>
+      <label style="font-size:0.78em;color:#475569;flex:1;min-width:200px">Description<br>
+        <input name="description" placeholder="what the intervention does"
+               style="width:100%;font-size:0.82em;padding:3px 6px"></label>
+      <button type="submit" class="action-btn" style="font-size:0.82em">+ Add intervention</button>
+    </form>
+    <div class="study-intervention-add-status muted" style="font-size:0.8em;margin-top:4px"></div>
+  </div>
+
 
 
   
@@ -1458,6 +1500,53 @@ non-stiff model.
   </div>
 
   
+  <div class="overview-section" id="study-findings-authoring">
+    <h2 class="overview-label">Record a finding</h2>
+    
+    <ul class="synthesis-list" style="margin:0 0 12px">
+      
+      <li style="display:flex;align-items:flex-start;gap:8px">
+        
+        <span>The sepsis ODE is stiff; explicit fixed-step RK4 (viva-hybrid&#39;s integrator) is unstable. <span class="muted small">(supported)</span></span>
+      </li>
+      
+      <li style="display:flex;align-items:flex-start;gap:8px">
+        
+        <span>Even at 173 M steps per 48 h, the fast cardiovascular states are still wrong. <span class="muted small">(supported)</span></span>
+      </li>
+      
+      <li style="display:flex;align-items:flex-start;gap:8px">
+        
+        <span>The adaptive explicit solver is stability-limited; the stiff solver is already compiled C. <span class="muted small">(supported)</span></span>
+      </li>
+      
+      <li style="display:flex;align-items:flex-start;gap:8px">
+        
+        <span>Independent viva-hybrid trial: a Rust integrator beats compiled numba by only ~2x. <span class="muted small">(supported)</span></span>
+      </li>
+      
+    </ul>
+    
+    <form class="study-finding-add-form" onsubmit="return _submitStudyFindingAdd(this)" style="display:flex;flex-direction:column;gap:8px;max-width:680px">
+      <textarea name="statement" required rows="2" placeholder="What did this study show? (one sentence)"
+                style="font-size:0.9em;padding:6px 8px;resize:vertical"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <label style="font-size:0.78em;color:#475569">Status<br>
+          <select name="status" style="font-size:0.82em;padding:3px 6px">
+            <option value="novel">novel</option>
+            <option value="confirms">confirms literature</option>
+            <option value="partial">partial</option>
+            <option value="contradicts">contradicts</option>
+          </select></label>
+        <label style="font-size:0.78em;color:#475569;flex:1;min-width:200px">Why / mechanism (optional)<br>
+          <input name="explanation" style="width:100%;font-size:0.82em;padding:3px 6px"></label>
+        <button type="submit" class="action-btn" style="font-size:0.82em">+ Add finding</button>
+      </div>
+    </form>
+    <div class="study-finding-add-status muted" style="font-size:0.8em;margin-top:4px"></div>
+  </div>
+
+  
   <div class="overview-section"><h2 class="overview-label">Follow-ups &amp; decisions</h2>
 
     
@@ -1490,7 +1579,7 @@ non-stiff model.
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "0bb9f95efa9382850dd39107718b3bc45909f7ed", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/0bb9f95efa9382850dd39107718b3bc45909f7ed", "branch": "main", "lockfile": "uv.lock@48c70b2e1587", "generated_at": "2026-11-17 03:16 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "5b7d997a37c99862d1f18430979a7ab1a8a78f16", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/5b7d997a37c99862d1f18430979a7ab1a8a78f16", "branch": "main", "lockfile": "uv.lock@cdec224ff368", "generated_at": "2026-11-18 16:43 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>
 <script>
