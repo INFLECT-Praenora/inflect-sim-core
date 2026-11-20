@@ -1,6 +1,5 @@
 {
   "mode": "snapshot",
-  "smsApiBase": "",
   "repo": "https://github.com/INFLECT-Praenora/inflect-sim-core.git",
   "commit": "a06ce0cd25d460cef5c6a9e2eb9cccb4cc20df02",
   "generated_from_ref": "main"

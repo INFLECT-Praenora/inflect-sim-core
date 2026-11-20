@@ -4274,7 +4274,7 @@
   // Composite Explorer Test Run panel) -- before a remote-pinned deployment
   // dispatches to AWS Batch, fetch the server-resolved
   // repo/branch/commit/simulator_id and require explicit confirmation
-  // (mirrors study-detail.js's _dispatchRemotePinned), so a workspace-
+  // (mirrors sms-launch.js's _dispatchRemotePinned), so a workspace-
   // identity mismatch is caught here, before money gets spent, not
   // discovered afterward via aws batch describe-jobs. A plain local-engine
   // run (unchanged, pre-existing behavior) fires with no confirm.
@@ -19624,9 +19624,15 @@
   function _sortActiveRuns(list) {
     // Newest dispatch first among the active runs — the remote simulation_id is
     // monotonic and trustworthy (unlike the frozen timestamp), else fall to time.
+    // Opaque run ids: only an integer id is ordered by value; any other id (a /viva/v1 or
+    // compose-api string) counts as 0 here and falls through to the time order.
+    function _simIdNum(r) {
+      var v = (r.remote_origin || {}).simulation_id;
+      return /^\d+$/.test(String(v == null ? '' : v).trim()) ? Number(v) : 0;
+    }
     return list.slice().sort(function (a, b) {
-      var ai = ((a.remote_origin || {}).simulation_id) || 0;
-      var bi = ((b.remote_origin || {}).simulation_id) || 0;
+      var ai = _simIdNum(a);
+      var bi = _simIdNum(b);
       if (ai !== bi) return bi - ai;
       return (b.completed_at || b.started_at || 0) - (a.completed_at || a.started_at || 0);
     });
@@ -19998,37 +20004,54 @@
       if (!chipHost) continue;
       var simId = tr.getAttribute('data-remote-sim-id');
       if (!simId) continue;
+      // The run's deployment and study, so the server finds its record (docs/backend-adapters.md step 1c); the
+      // cache is keyed by both, since two deployments can each have a run with the same integer id.
+      var where = {deployment: tr.getAttribute('data-remote-deployment') || '',
+                   study: tr.getAttribute('data-study') || ''};
+      var cacheKey = where.deployment + '|' + simId;
 
       // Already known terminal from an earlier poll this page session --
       // reapply immediately (no request, no visible flicker) instead of
       // leaving this tick's fresh-from-DB "running" render stand until the
       // next poll gets around to it.
-      var cachedPhase = window._remoteTerminalCache[simId];
+      var cachedPhase = window._remoteTerminalCache[cacheKey];
       if (cachedPhase) {
         chipHost.innerHTML = window.SimTable.statusChip(cachedPhase);
+        if (window._remoteRefusalReason && window._remoteRefusalReason[cacheKey]) {
+          chipHost.title = window._remoteRefusalReason[cacheKey];  // the refusal's reason survives a re-render
+        }
         continue;
       }
 
       if (!/running/i.test(chipHost.textContent)) continue;
       if (checked >= 20) continue;  // defensive cap, not expected to bind in practice
       checked++;
-      (function (host, id) {
-        apiFetch('GET', '/api/remote-run-poll?simulation_id=' + encodeURIComponent(id))
+      (function (host, id, key, where) {
+        apiFetch('GET', '/api/remote-run-poll?simulation_id=' + encodeURIComponent(id) +
+                 (where.deployment ? '&deployment=' + encodeURIComponent(where.deployment) : '') +
+                 (where.study ? '&study=' + encodeURIComponent(where.study) : ''))
           .then(function (r) { return r.json(); })
           .then(function (body) {
             var phase = body && body.phase;
             if (phase === 'done') {
-              window._remoteTerminalCache[id] = 'completed';
+              window._remoteTerminalCache[key] = 'completed';
               host.innerHTML = window.SimTable.statusChip('completed');
             } else if (phase === 'failed') {
-              window._remoteTerminalCache[id] = 'failed';
+              window._remoteTerminalCache[key] = 'failed';
               host.innerHTML = window.SimTable.statusChip('failed');
+            } else if (body && body.terminal) {
+              // Refused: the run belongs to another backend. Never re-polled; the reason is the chip's tooltip.
+              window._remoteTerminalCache[key] = 'other backend';
+              window._remoteRefusalReason = window._remoteRefusalReason || {};
+              window._remoteRefusalReason[key] = body.error || '';
+              host.innerHTML = window.SimTable.statusChip('other backend');
+              host.title = body.error || '';
             }
             // running / queued / unreachable: leave the chip as-is, the next
             // 15s auto-refresh tick will check again.
           })
           .catch(function () { /* transient -- next tick retries */ });
-      })(chipHost, simId);
+      })(chipHost, simId, cacheKey, where);
     }
   }
 
