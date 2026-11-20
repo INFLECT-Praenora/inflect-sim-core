@@ -289,4 +289,19 @@ def create_app(config: ApiConfig | None = None, registry: TwinRegistry | None = 
 
     app.include_router(open_router)
     app.include_router(router)
+
+    # Unified vivarium-workflow surface (/modules, /workflows) on the same app,
+    # under the same bearer auth. The workspace core is built lazily on first use
+    # so creating the app (and the twin tests) pays nothing for it.
+    from .workflow import make_workflow_router
+
+    _core_box: dict[str, Any] = {}
+
+    def _core_provider() -> Any:
+        if "core" not in _core_box:
+            from viva_simulation_core.core import build_core
+            _core_box["core"] = build_core()
+        return _core_box["core"]
+
+    app.include_router(make_workflow_router(_core_provider))
     return app
