@@ -3176,6 +3176,7 @@ dependencies = [
     { name = "viva-core" },
     { name = "viva-emitters" },
     { name = "viva-tellurium" },
+    { name = "viva-torch" },
     { name = "vivarium-workbench" },
 ]
 
@@ -3192,9 +3193,6 @@ cli = [
 dev = [
     { name = "httpx" },
     { name = "pytest" },
-]
-surrogate = [
-    { name = "viva-torch" },
 ]
 
 [package.metadata]
@@ -3219,7 +3217,7 @@ requires-dist = [
     { name = "viva-core", git = "https://github.com/vivarium-collective/viva-core?rev=154d94c2f30050715e87aa89af2b93b04d5f77b7" },
     { name = "viva-emitters" },
     { name = "viva-tellurium", git = "https://github.com/vivarium-collective/viva-tellurium?rev=c65f8032f76935524912c2b3d384accb805b9e24" },
-    { name = "viva-torch", marker = "extra == 'surrogate'", git = "https://github.com/vivarium-collective/viva-torch?rev=bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" },
+    { name = "viva-torch", git = "https://github.com/vivarium-collective/viva-torch?rev=bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" },
     { name = "vivarium-workbench", git = "https://github.com/vivarium-collective/vivarium-workbench.git?rev=e6b1f40e00929bc75a88533bd19e15b5aeb54f56" },
 ]
 provides-extras = ["dev", "api", "cli", "surrogate"]

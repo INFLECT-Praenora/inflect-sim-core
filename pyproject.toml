@@ -27,15 +27,20 @@ dependencies = [
     "viva-tellurium",
     "viva-biogears",
     "viva-emitters",
+    # viva-torch (neural-surrogate stack) is a BASE dep, not an opt-in extra: the
+    # surrogate tier + the NeuralProcess module are always installed and
+    # first-class (discoverable via build_core / GET /modules). Tradeoff: torch is
+    # heavy, so the base install is larger. Resolved via [tool.uv.sources] git pin.
+    "viva-torch",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.4", "httpx"]
 api = ["fastapi", "uvicorn[standard]", "pydantic"]
 cli = ["typer", "rich"]
-# Heavy PyTorch surrogate stack; opt-in only (base + [api] install stays torch-free).
-# Enables the live neural-surrogate tier (viva_simulation_core/api/surrogate_backend.py).
-surrogate = ["viva-torch"]
+# viva-torch is now a BASE dependency (see [project.dependencies]); this extra is
+# kept as an empty back-compat alias so `pip install .[surrogate]` still resolves.
+surrogate = []
 
 [project.scripts]
 simulation-core = "viva_simulation_core.cli.__main__:main"

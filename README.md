@@ -83,7 +83,7 @@ that does **not** require the real BioGears C++ engine.
 | Workbench (browser UI) | `bash scripts/serve.sh` |
 | Digital-twin API server | `uv run --extra api python -m viva_simulation_core.api` |
 | API walkthrough (no server) | `uv run --extra api python examples/digital_twin_demo.py` |
-| Neural surrogate (torch) | add the `surrogate` extra: `uv sync --extra surrogate` |
+| Neural surrogate (torch) | installed by default (`viva-torch` is a base dep); the `surrogate` extra is a kept-for-back-compat empty alias |
 
 Code lives in `viva_simulation_core/`; `build_core()` in `core.py` registers the
 processes and composites.
