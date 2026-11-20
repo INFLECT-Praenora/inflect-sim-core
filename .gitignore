@@ -21,6 +21,9 @@
 investigations/*/runs.db
 investigations/*/viz/
 investigations/*/.run.lock
+# Default process-bigraph emitter output (e.g. out/history.db) written when a
+# composite runs from the repo root — a regenerable runtime artifact.
+out/
 __pycache__/
 *.pyc
 *.egg-info/
