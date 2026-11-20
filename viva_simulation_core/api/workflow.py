@@ -125,7 +125,19 @@ def _node_type(cls: Any) -> str:
     return "step" if isinstance(cls, type) and issubclass(cls, Step) else "process"
 
 
-def call_module(core: Any, name: str, config: dict, inputs: dict, n_steps: int) -> dict:
+def _run_composite(comp: "Composite", n_steps: int, interval: float) -> None:
+    """Advance a composite n_steps ticks of duration `interval` each. Looping at a
+    fixed interval (rather than one run(n_steps) call) is required so time-based
+    processes — and a NeuralProcess, which refuses any interval != its trained
+    timestep — advance at the intended step size."""
+    steps = n_steps if n_steps and n_steps > 0 else 1
+    dt = interval if interval and interval > 0 else 1.0
+    for _ in range(steps):
+        comp.run(dt)
+
+
+def call_module(core: Any, name: str, config: dict, inputs: dict, n_steps: int,
+                interval: float = 1.0) -> dict:
     """Call one module as a 1-node composite: wire its ports to stores, run, read
     its outputs. Raises KeyError (unknown module) / ValueError (bad config or run)
     — the endpoint maps both to 422."""
@@ -150,7 +162,7 @@ def call_module(core: Any, name: str, config: dict, inputs: dict, n_steps: int) 
         "outputs": {port: [port] for port in out_ports},
     }
     comp = Composite({"state": state}, core=core)
-    comp.run(n_steps if n_steps and n_steps > 0 else 1)
+    _run_composite(comp, n_steps, interval)
     return {port: comp.state.get(port) for port in out_ports}
 
 
@@ -295,7 +307,8 @@ class WorkflowRegistry:
             sess.last_access = time.time()
             return sess
 
-    def run(self, wid: str, n_steps: int, overrides: dict) -> WorkflowRunResponse:
+    def run(self, wid: str, n_steps: int, overrides: dict,
+            interval: float = 1.0) -> WorkflowRunResponse:
         sess = self._get(wid)
         core = self._core_provider()
         spec = sess.spec
@@ -307,7 +320,7 @@ class WorkflowRegistry:
         t0 = time.perf_counter()
         with self._run_lock:  # serialize engine runs across the threadpool
             comp = Composite({"state": state}, core=core)
-            comp.run(n_steps if n_steps and n_steps > 0 else 1)
+            _run_composite(comp, n_steps, interval)
             result_state = comp.state
         emits = spec.emit or built.out_refs  # default emit: every output port
         observables = {}
@@ -345,7 +358,7 @@ def make_workflow_router(core_provider: Callable[[], Any]) -> APIRouter:
         core = core_provider()
         t0 = time.perf_counter()
         try:
-            outputs = call_module(core, name, req.config, req.inputs, req.n_steps)
+            outputs = call_module(core, name, req.config, req.inputs, req.n_steps, req.interval)
         except KeyError:
             raise HTTPException(status_code=422, detail=f"unknown module: {name}")
         except Exception as e:  # noqa: BLE001 — bad config/inputs/run → 422
@@ -368,7 +381,7 @@ def make_workflow_router(core_provider: Callable[[], Any]) -> APIRouter:
     @router.post("/workflows/{wid}/run")
     def post_workflow_run(wid: str, req: WorkflowRunRequest) -> WorkflowRunResponse:
         try:
-            return registry.run(wid, req.n_steps, req.overrides)
+            return registry.run(wid, req.n_steps, req.overrides, req.interval)
         except KeyError:
             raise HTTPException(status_code=404, detail=f"unknown workflow: {wid}")
         except Exception as e:  # noqa: BLE001 — a bad run → 422

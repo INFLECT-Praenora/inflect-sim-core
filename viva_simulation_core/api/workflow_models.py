@@ -39,6 +39,7 @@ class ModuleCallRequest(BaseModel):
     config: dict = Field(default_factory=dict)
     inputs: dict = Field(default_factory=dict)
     n_steps: int = 1
+    interval: float = 1.0  # time advanced per step (must match a trained surrogate's timestep)
 
 
 class ModuleCallResponse(BaseModel):
@@ -101,6 +102,7 @@ class WorkflowCreateResponse(BaseModel):
 
 class WorkflowRunRequest(BaseModel):
     n_steps: int = 1
+    interval: float = 1.0  # time advanced per step (must match a trained surrogate's timestep)
     overrides: dict = Field(default_factory=dict)
 
 
