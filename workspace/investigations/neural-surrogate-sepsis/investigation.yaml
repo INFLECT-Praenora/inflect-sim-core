@@ -1,0 +1,54 @@
+# neural-surrogate-sepsis/investigation.yaml — schema v2
+schema_version: 2
+name: neural-surrogate-sepsis
+title: "Neural surrogate for the sepsis SBML composite"
+created: '2026-11-17'
+status: in-progress
+
+question: |
+  Can a neural surrogate learn the 98-dimensional sepsis SBML dynamics
+  (Tellurium/roadrunner) well enough to replace the stiff integrator for fast
+  autonomous 48 h rollouts, across infection severities and infection timings it
+  was not trained on?
+
+hypothesis: |
+  A residual delta-MLP over the full 98-dim state can autoregress the sepsis
+  trajectory. One-step teacher-forced training is accurate per-step but
+  unstable in free rollout; unrolled (K-step) training should make it
+  contractive and stable at a large speedup over the integrator.
+
+executive:
+  what_is_this: |
+    A sweep -> train -> held-out-eval pipeline that builds a neural surrogate of
+    the sepsis SBML composite and quantifies rollout accuracy vs the real
+    roadrunner integrator. Partial result: honest negative baseline, solved
+    stability, data-limited accuracy.
+  verdict: |
+    Pipeline works. The baseline one-step surrogate is 40,463x faster than the
+    integrator but diverges on held-out 48 h rollouts (NRMSE ~7.5e31). Unrolled
+    K-step training fixes stability (bounded full-horizon rollouts, same
+    speedup; clinical-observable NRMSE 3-18 on a training-IC probe) but is not
+    yet clinically accurate (<1), diagnosed as data-limited at 7 training ICs.
+  verdict_status: in-progress
+  verdict_detail: |
+    See RESULTS.md for the full breakdown and figures. Two things remain, both
+    gated on dedicated compute: a held-out real-SBML eval of the STABLE model
+    (only the baseline has been through eval_parallel.py), and a denser sweep to
+    break the accuracy plateau (attempted, could not complete — the shared Mac
+    mini was saturated by unrelated v2ecoli work).
+  decisions_needed:
+    - question: "Provision dedicated compute for a denser sweep + stable-model held-out eval?"
+      context: |
+        The accuracy plateau is data-limited; a ~4x denser sweep (severities x
+        11 infection starts) plus a held-out real-SBML eval of surrogate_stable2.pt
+        are the next steps, but each roadrunner combo is ~1.7 h and needs a box
+        that isn't contended.
+
+at_a_glance:
+  - study: 01-sample-and-train
+    role: "Sweep the sepsis SBML dynamics, train baseline + stabilized surrogates, quantify held-out rollout accuracy and speedup."
+
+studies:
+  - 01-sample-and-train
+expert_docs: []
+acceptance_criteria: []

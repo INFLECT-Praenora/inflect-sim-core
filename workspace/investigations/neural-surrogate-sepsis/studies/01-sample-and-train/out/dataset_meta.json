@@ -1,9 +1,11 @@
 {
- "n_features": 100,
- "n_targets": 100,
- "n_transitions": 1300,
- "timestep_s": 30.0,
- "n_steps_per_trajectory": 100,
+ "n_features": 98,
+ "n_targets": 98,
+ "n_transitions": 5760,
+ "timestep_s": 300.0,
+ "n_steps_per_trajectory": 576,
+ "horizon_h": 48.0,
+ "workers": 8,
  "skip_steps": 2,
  "seed": 0,
  "parameterization": "delta",
@@ -15,15 +17,18 @@
  ],
  "infection_start_jitters_s": [
   0.0,
-  10.0,
-  30.0,
-  60.0
+  10800.0,
+  21600.0
  ],
+ "eval_jitters_s": [
+  10800.0
+ ],
+ "split_rationale": "eval = infection starts in eval_jitters_s held out across all infected severities: an unseen infection timing (collapse timing shifts with start) interpolated between trained starts; severity 0 is always train",
  "ic_fields": [
   "severity",
   "infection_start_s"
  ],
- "n_planned_ics": 13,
+ "n_planned_ics": 10,
  "traj_id_to_ic": [
   [
    0,
@@ -35,15 +40,11 @@
   ],
   [
    1,
-   10.0
+   10800.0
   ],
   [
    1,
-   30.0
-  ],
-  [
-   1,
-   60.0
+   21600.0
   ],
   [
    2,
@@ -51,15 +52,11 @@
   ],
   [
    2,
-   10.0
+   10800.0
   ],
   [
    2,
-   30.0
-  ],
-  [
-   2,
-   60.0
+   21600.0
   ],
   [
    3,
@@ -67,15 +64,11 @@
   ],
   [
    3,
-   10.0
+   10800.0
   ],
   [
    3,
-   30.0
-  ],
-  [
-   3,
-   60.0
+   21600.0
   ]
  ],
  "train_ics": [
@@ -89,11 +82,7 @@
   ],
   [
    1,
-   10.0
-  ],
-  [
-   1,
-   60.0
+   21600.0
   ],
   [
    2,
@@ -101,11 +90,7 @@
   ],
   [
    2,
-   10.0
-  ],
-  [
-   2,
-   60.0
+   21600.0
   ],
   [
    3,
@@ -113,43 +98,36 @@
   ],
   [
    3,
-   10.0
-  ],
-  [
-   3,
-   60.0
+   21600.0
   ]
  ],
  "eval_ics": [
   [
    1,
-   30.0
+   10800.0
   ],
   [
    2,
-   30.0
+   10800.0
   ],
   [
    3,
-   30.0
+   10800.0
   ]
  ],
  "train_traj_ids": [
   0,
   1,
-  2,
+  3,
   4,
-  5,
   6,
-  8,
-  9,
-  10,
-  12
+  7,
+  9
  ],
  "eval_traj_ids": [
-  3,
-  7,
-  11
+  2,
+  5,
+  8
  ],
  "target_paths": [
   [
@@ -641,16 +619,6 @@
    "stores",
    "parameters",
    "Vblood"
-  ],
-  [
-   "stores",
-   "parameters",
-   "TI"
-  ],
-  [
-   "stores",
-   "parameters",
-   "PB"
   ]
  ]
 }

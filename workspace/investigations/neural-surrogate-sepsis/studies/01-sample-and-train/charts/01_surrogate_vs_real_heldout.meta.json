@@ -1,0 +1,5 @@
+{
+ "title": "01_surrogate_vs_real_heldout",
+ "interpretation": "Neural surrogate (dashed) rolled out autonomously for 48 h from a held-out infection timing (severity 3, start 3 h \u2014 not in the training set) vs the real SBML/roadrunner trajectory (solid). Mean rollout NRMSE across all held-out timings 74528251004977659730018458140672.000; the surrogate runs 40463x faster.",
+ "caption": "Neural surrogate (dashed) rolled out autonomously for 48 h from a held-out infection timing (severity 3, start 3 h \u2014 not in the training set) vs the real SBML/roadrunner trajectory (solid). Mean rollout NRMSE across all held-out timings 74528251004977659730018458140672.000; the surrogate runs 40463x faster."
+}
