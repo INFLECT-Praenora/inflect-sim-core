@@ -1,11 +1,13 @@
-"""Narrated walkthrough of the INFLECT digital-twin API.
+"""Walkthrough of the digital-twin API — register a model, step it live, ask
+what-if questions, run ensembles.
 
-Runs entirely in-process via ``fastapi.testclient.TestClient`` -- no server, no
-hosting.  Every request and response below is real.
+Runs entirely in-process (no server); every request and response below is real.
+The companion walkthrough for the other half of the API is
+``examples/vivarium_workflow_demo.py`` (modules + workflows).
 
     uv run python examples/digital_twin_demo.py
 
-Full reference (routes, config, error contract): docs/api.md
+Reference: docs/api.md
 """
 from __future__ import annotations
 

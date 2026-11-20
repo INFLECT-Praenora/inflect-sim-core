@@ -1,8 +1,12 @@
-"""Live neural-surrogate tier demo: train, curate, serve, compare to exact.
+"""Neural-surrogate tier of the digital-twin API: train a surrogate, serve it, and
+compare it to the exact engine on the same twin.
 
-    /Users/eranagmon/code/venv/bin/python examples/live_surrogate_demo.py
+Runs in-process (no server). Needs the ``[api]`` extra for FastAPI; viva-torch is
+a base dependency, so the surrogate works out of the box.
 
-Needs the ``[api,surrogate]`` extras. Runs in-process via TestClient.
+    uv run --extra api python examples/live_surrogate_demo.py
+
+Reference: docs/api.md (the tier rule)
 """
 from __future__ import annotations
 

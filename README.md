@@ -81,9 +81,20 @@ that does **not** require the real BioGears C++ engine.
 | Fast test suite | `uv run pytest` |
 | Slow / engine tests | `uv run pytest -m slow` (real-engine tests skip cleanly if BioGears isn't built) |
 | Workbench (browser UI) | `bash scripts/serve.sh` |
-| Digital-twin API server | `uv run --extra api python -m viva_simulation_core.api` |
-| API walkthrough (no server) | `uv run --extra api python examples/digital_twin_demo.py` |
-| Neural surrogate (torch) | add the `surrogate` extra: `uv sync --extra surrogate` |
+| API server (twins + workflows) | `uv run --extra api python -m viva_simulation_core.api` |
+| Neural surrogate (torch) | installed by default (`viva-torch` is a base dep) |
+
+### API
+
+One FastAPI server, two ways to use it (same base URL, same key):
+
+| | What it does | Walkthrough (no server) | Reference |
+|---|---|---|---|
+| **Digital twins** | Register a model, step it live, ask what-if questions | `uv run --extra api python examples/digital_twin_demo.py` | [`docs/api.md`](docs/api.md) |
+| **Workflows** | List modules, run one, connect many, run the workflow | `uv run --extra api python examples/vivarium_workflow_demo.py` | [`docs/workflow-api.md`](docs/workflow-api.md) |
+
+Each walkthrough runs the whole API in-process and prints every real request and
+response — the fastest way to see what the API does.
 
 Code lives in `viva_simulation_core/`; `build_core()` in `core.py` registers the
 processes and composites.
