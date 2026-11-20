@@ -34,6 +34,12 @@ from .workflow_models import (GraphEdge, GraphNode, GraphResponse, ModuleCallReq
 # and must not collide with a port store name.
 _CALL_NODE = "callnode"
 
+# One shared lock serializes ALL process-bigraph engine access — module
+# instantiation (building a roadrunner/BioGears engine) and every Composite.run.
+# roadrunner/BioGears are not thread-safe and FastAPI runs sync endpoints in a
+# threadpool, so every path that builds or runs a composite holds this.
+_ENGINE_LOCK = threading.Lock()
+
 
 # ----------------------------------------------------------------------------
 # Module introspection (generic — reads the live registry, no hardcoding)
@@ -71,9 +77,10 @@ def _best_effort_ports(core: Any, cls: Any) -> tuple[dict | None, dict | None]:
     schemas. Many modules need a real config (a model, a checkpoint) to build, so
     this is best-effort: any failure yields ``None`` rather than propagating."""
     try:
-        inst = cls({}, core)
-        ins = inst.inputs() if callable(getattr(inst, "inputs", None)) else None
-        outs = inst.outputs() if callable(getattr(inst, "outputs", None)) else None
+        with _ENGINE_LOCK:  # instantiation may build a (non-thread-safe) engine
+            inst = cls({}, core)
+            ins = inst.inputs() if callable(getattr(inst, "inputs", None)) else None
+            outs = inst.outputs() if callable(getattr(inst, "outputs", None)) else None
         return (ins if isinstance(ins, dict) else None,
                 outs if isinstance(outs, dict) else None)
     except Exception:  # noqa: BLE001 — port introspection is best-effort
@@ -148,22 +155,23 @@ def call_module(core: Any, name: str, config: dict, inputs: dict, n_steps: int,
     cls = core.link_registry.get(resolved)
     if not isinstance(cls, type):
         raise ValueError(f"module {name} did not resolve to a class")
-    inst = cls(config, core)  # raises on bad config -> 422
-    in_ports = inst.inputs() or {}
-    out_ports = inst.outputs() or {}
-    state: dict[str, Any] = {}
-    for port in in_ports:  # seed every input store; caller value overrides the 0.0 default
-        state[port] = inputs.get(port, 0.0)
-    state[_CALL_NODE] = {
-        "_type": _node_type(cls),
-        "address": f"local:{resolved}",
-        "config": config,
-        "inputs": {port: [port] for port in in_ports},
-        "outputs": {port: [port] for port in out_ports},
-    }
-    comp = Composite({"state": state}, core=core)
-    _run_composite(comp, n_steps, interval)
-    return {port: comp.state.get(port) for port in out_ports}
+    with _ENGINE_LOCK:  # instantiation builds the engine; serialize with every other run
+        inst = cls(config, core)  # raises on bad config -> 422
+        in_ports = inst.inputs() or {}
+        out_ports = inst.outputs() or {}
+        state: dict[str, Any] = {}
+        for port in in_ports:  # seed every input store; caller value overrides the 0.0 default
+            state[port] = inputs.get(port, 0.0)
+        state[_CALL_NODE] = {
+            "_type": _node_type(cls),
+            "address": f"local:{resolved}",
+            "config": config,
+            "inputs": {port: [port] for port in in_ports},
+            "outputs": {port: [port] for port in out_ports},
+        }
+        comp = Composite({"state": state}, core=core)
+        _run_composite(comp, n_steps, interval)
+        return {port: comp.state.get(port) for port in out_ports}
 
 
 def _resolve_name(core: Any, name: str) -> str:
@@ -208,12 +216,16 @@ def spec_to_composite_state(spec: WorkflowSpec, core: Any) -> _Built:
             raise ValueError(f"node id may not start with '_': {nid}")
 
     # A wire makes a producer output port and a consumer input port share a store.
+    # Fan-out (one producer output -> many consumer inputs) reuses the producer's
+    # store for every consumer, so each consumer reads the produced value.
     port_store: dict[tuple[str, str], str] = {}
     for i, w in enumerate(spec.wires):
         pn, pp = _split_ref(w.from_)
         cn, cp = _split_ref(w.to)
-        path = f"wire{i}"
-        port_store[(pn, pp)] = path
+        path = port_store.get((pn, pp))
+        if path is None:
+            path = f"wire{i}_{pn}_{pp}"
+            port_store[(pn, pp)] = path
         port_store[(cn, cp)] = path
 
     state: dict[str, Any] = {}
@@ -276,13 +288,13 @@ class WorkflowRegistry:
     def __init__(self, core_provider: Callable[[], Any], max_workflows: int = 64):
         self._core_provider = core_provider
         self._sessions: dict[str, WorkflowSession] = {}
-        self._lock = threading.Lock()
-        self._run_lock = threading.Lock()
+        self._lock = threading.Lock()  # guards the sessions dict only
         self._max = max_workflows
 
     def define(self, spec: WorkflowSpec) -> tuple[str, GraphResponse]:
         core = self._core_provider()
-        spec_to_composite_state(spec, core)  # validate now (raises ValueError -> 422)
+        with _ENGINE_LOCK:  # validation instantiates modules (builds engines)
+            spec_to_composite_state(spec, core)  # raises ValueError -> 422
         wid = uuid.uuid4().hex[:12]
         with self._lock:
             if len(self._sessions) >= self._max:  # evict LRU
@@ -312,13 +324,13 @@ class WorkflowRegistry:
         sess = self._get(wid)
         core = self._core_provider()
         spec = sess.spec
-        built = spec_to_composite_state(spec, core)
-        state, ref_path = built.state, built.ref_path
-        for ref, val in (overrides or {}).items():  # override input stores by "node.port"
-            n, p = _split_ref(ref)
-            state[ref_path.get(ref, f"{n}__{p}")] = val
         t0 = time.perf_counter()
-        with self._run_lock:  # serialize engine runs across the threadpool
+        with _ENGINE_LOCK:  # instantiation + run serialized across the threadpool
+            built = spec_to_composite_state(spec, core)
+            state, ref_path = built.state, built.ref_path
+            for ref, val in (overrides or {}).items():  # override input stores by "node.port"
+                n, p = _split_ref(ref)
+                state[ref_path.get(ref, f"{n}__{p}")] = val
             comp = Composite({"state": state}, core=core)
             _run_composite(comp, n_steps, interval)
             result_state = comp.state
