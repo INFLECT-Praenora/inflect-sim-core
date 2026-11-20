@@ -6,6 +6,10 @@ what-if predictions and ensembles. Set `<key>` to one of your configured API key
 
 All endpoints except `/healthz` and `/version` need `Authorization: Bearer <key>`.
 
+> The same app also serves the unified **vivarium-workflow API** (`/modules`,
+> `/workflows`) — define/call modules and connect/call workflows over
+> process-bigraph. See [`workflow-api.md`](workflow-api.md).
+
 ## Flow: register, step, predict, ensemble
 
 **Register** a model (source string, `model_format` is `antimony` or `sbml`):
