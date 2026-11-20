@@ -13,7 +13,10 @@ mounted on the existing digital-twin FastAPI app so ``/twins``, ``/modules`` and
 """
 from __future__ import annotations
 
+import threading
 import time
+import uuid
+from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -21,8 +24,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from process_bigraph import Composite, Process, Step
 
 from .auth import require_key
-from .workflow_models import (ModuleCallRequest, ModuleCallResponse, ModuleCard,
-                              WorkflowProvenance)
+from .workflow_models import (GraphEdge, GraphNode, GraphResponse, ModuleCallRequest,
+                              ModuleCallResponse, ModuleCard, WorkflowCreateResponse,
+                              WorkflowProvenance, WorkflowRunRequest, WorkflowRunResponse,
+                              WorkflowSpec)
 
 # Fixed node key for a single-module call. Must not start with "_" (process-bigraph
 # treats leading-underscore top-level keys as reserved schema and never runs them)
@@ -163,6 +168,160 @@ def _resolve_name(core: Any, name: str) -> str:
 
 
 # ----------------------------------------------------------------------------
+# Workflows: spec -> composite, graph, in-process registry
+# ----------------------------------------------------------------------------
+def _split_ref(ref: str) -> tuple[str, str]:
+    node, _, port = ref.partition(".")
+    return node, port
+
+
+@dataclass
+class _Built:
+    state: dict
+    ref_path: dict  # "node.port" -> store path (inputs and outputs)
+    out_refs: list  # "node.port" for every output port (default emit set)
+
+
+def spec_to_composite_state(spec: WorkflowSpec, core: Any) -> _Built:
+    """Translate a WorkflowSpec to a process-bigraph composite state dict, plus the
+    ``"node.port" -> store_path`` map (for seeding overrides and reading emits) and
+    the list of output refs (default emit set).
+    Raises ValueError on an unknown module or a bad node id -> the endpoint 422s.
+    """
+    ids = [n.id for n in spec.nodes]
+    if len(set(ids)) != len(ids):
+        raise ValueError("duplicate node id")
+    for nid in ids:
+        if nid.startswith("_"):
+            raise ValueError(f"node id may not start with '_': {nid}")
+
+    # A wire makes a producer output port and a consumer input port share a store.
+    port_store: dict[tuple[str, str], str] = {}
+    for i, w in enumerate(spec.wires):
+        pn, pp = _split_ref(w.from_)
+        cn, cp = _split_ref(w.to)
+        path = f"wire{i}"
+        port_store[(pn, pp)] = path
+        port_store[(cn, cp)] = path
+
+    state: dict[str, Any] = {}
+    ref_path: dict[str, str] = {}
+    out_refs: list[str] = []
+    for node in spec.nodes:
+        try:
+            resolved = _resolve_name(core, node.module)
+        except KeyError:
+            raise ValueError(f"unknown module: {node.module}")
+        cls = core.link_registry.get(resolved)
+        if not isinstance(cls, type):
+            raise ValueError(f"module {node.module} did not resolve to a class")
+        inst = cls(node.config, core)  # raises on bad config -> ValueError-ish -> 422
+        in_ports = inst.inputs() or {}
+        out_ports = inst.outputs() or {}
+        inputs_map, outputs_map = {}, {}
+        for p in in_ports:
+            path = port_store.get((node.id, p), f"{node.id}__{p}")
+            inputs_map[p] = [path]
+            ref_path[f"{node.id}.{p}"] = path
+            state.setdefault(path, 0.0)  # seed input store (overridden by a wire/override)
+        for p in out_ports:
+            path = port_store.get((node.id, p), f"{node.id}__{p}")
+            outputs_map[p] = [path]
+            ref_path[f"{node.id}.{p}"] = path
+            out_refs.append(f"{node.id}.{p}")
+        node_dict: dict[str, Any] = {
+            "_type": _node_type(cls),
+            "address": f"local:{resolved}",
+            "config": node.config,
+            "inputs": inputs_map,
+            "outputs": outputs_map,
+        }
+        if node.interval is not None:
+            node_dict["interval"] = node.interval
+        state[node.id] = node_dict
+    return _Built(state=state, ref_path=ref_path, out_refs=out_refs)
+
+
+def workflow_graph(spec: WorkflowSpec) -> GraphResponse:
+    nodes = [GraphNode(id=n.id, module=_short(n.module), label=_short(n.module))
+             for n in spec.nodes]
+    edges = [GraphEdge(from_=w.from_, to=w.to, label=None) for w in spec.wires]
+    return GraphResponse(nodes=nodes, edges=edges)
+
+
+@dataclass
+class WorkflowSession:
+    spec: WorkflowSpec
+    created: float = field(default_factory=time.time)
+    last_access: float = field(default_factory=time.time)
+
+
+class WorkflowRegistry:
+    """In-process, ephemeral workflow store (design scope). A module-level lock
+    serializes composite runs — process-bigraph engines (roadrunner) are not
+    thread-safe and FastAPI sync endpoints run in a threadpool."""
+
+    def __init__(self, core_provider: Callable[[], Any], max_workflows: int = 64):
+        self._core_provider = core_provider
+        self._sessions: dict[str, WorkflowSession] = {}
+        self._lock = threading.Lock()
+        self._run_lock = threading.Lock()
+        self._max = max_workflows
+
+    def define(self, spec: WorkflowSpec) -> tuple[str, GraphResponse]:
+        core = self._core_provider()
+        spec_to_composite_state(spec, core)  # validate now (raises ValueError -> 422)
+        wid = uuid.uuid4().hex[:12]
+        with self._lock:
+            if len(self._sessions) >= self._max:  # evict LRU
+                oldest = min(self._sessions, key=lambda k: self._sessions[k].last_access)
+                self._sessions.pop(oldest, None)
+            self._sessions[wid] = WorkflowSession(spec=spec)
+        return wid, workflow_graph(spec)
+
+    def graph(self, wid: str) -> GraphResponse:
+        return workflow_graph(self._get(wid).spec)
+
+    def delete(self, wid: str) -> None:
+        with self._lock:
+            if self._sessions.pop(wid, None) is None:
+                raise KeyError(wid)
+
+    def _get(self, wid: str) -> WorkflowSession:
+        with self._lock:
+            sess = self._sessions.get(wid)
+            if sess is None:
+                raise KeyError(wid)
+            sess.last_access = time.time()
+            return sess
+
+    def run(self, wid: str, n_steps: int, overrides: dict) -> WorkflowRunResponse:
+        sess = self._get(wid)
+        core = self._core_provider()
+        spec = sess.spec
+        built = spec_to_composite_state(spec, core)
+        state, ref_path = built.state, built.ref_path
+        for ref, val in (overrides or {}).items():  # override input stores by "node.port"
+            n, p = _split_ref(ref)
+            state[ref_path.get(ref, f"{n}__{p}")] = val
+        t0 = time.perf_counter()
+        with self._run_lock:  # serialize engine runs across the threadpool
+            comp = Composite({"state": state}, core=core)
+            comp.run(n_steps if n_steps and n_steps > 0 else 1)
+            result_state = comp.state
+        emits = spec.emit or built.out_refs  # default emit: every output port
+        observables = {}
+        for ref in emits:
+            n, p = _split_ref(ref)
+            observables[ref] = result_state.get(ref_path.get(ref, f"{n}__{p}"))
+        modules = sorted({_short(n.module) for n in spec.nodes})
+        prov = WorkflowProvenance(modules=modules, n_steps=n_steps,
+                                  wall_ms=(time.perf_counter() - t0) * 1000.0,
+                                  lib_versions=_lib_versions())
+        return WorkflowRunResponse(observables=observables, provenance=prov)
+
+
+# ----------------------------------------------------------------------------
 # Router
 # ----------------------------------------------------------------------------
 def make_workflow_router(core_provider: Callable[[], Any]) -> APIRouter:
@@ -195,5 +354,39 @@ def make_workflow_router(core_provider: Callable[[], Any]) -> APIRouter:
                                   wall_ms=(time.perf_counter() - t0) * 1000.0,
                                   lib_versions=_lib_versions())
         return ModuleCallResponse(outputs=outputs, provenance=prov)
+
+    registry = WorkflowRegistry(core_provider)
+
+    @router.post("/workflows")
+    def post_workflow(spec: WorkflowSpec) -> WorkflowCreateResponse:
+        try:
+            wid, graph = registry.define(spec)
+        except Exception as e:  # noqa: BLE001 — unknown module / bad wiring / config → 422
+            raise HTTPException(status_code=422, detail=str(e))
+        return WorkflowCreateResponse(workflow_id=wid, graph=graph)
+
+    @router.post("/workflows/{wid}/run")
+    def post_workflow_run(wid: str, req: WorkflowRunRequest) -> WorkflowRunResponse:
+        try:
+            return registry.run(wid, req.n_steps, req.overrides)
+        except KeyError:
+            raise HTTPException(status_code=404, detail=f"unknown workflow: {wid}")
+        except Exception as e:  # noqa: BLE001 — a bad run → 422
+            raise HTTPException(status_code=422, detail=str(e))
+
+    @router.get("/workflows/{wid}/graph")
+    def get_workflow_graph(wid: str) -> GraphResponse:
+        try:
+            return registry.graph(wid)
+        except KeyError:
+            raise HTTPException(status_code=404, detail=f"unknown workflow: {wid}")
+
+    @router.delete("/workflows/{wid}")
+    def delete_workflow(wid: str) -> dict:
+        try:
+            registry.delete(wid)
+        except KeyError:
+            raise HTTPException(status_code=404, detail=f"unknown workflow: {wid}")
+        return {"deleted": wid}
 
     return router
