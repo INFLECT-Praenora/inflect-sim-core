@@ -3197,7 +3197,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bigraph-schema", specifier = ">=1.8.1" },
+    { name = "bigraph-schema", specifier = ">=1.8.1,<1.8.4" },
     { name = "bigraph-viz", specifier = ">=2.0.3" },
     { name = "fastapi", marker = "extra == 'api'" },
     { name = "httpx", marker = "extra == 'dev'" },
