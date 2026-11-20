@@ -13,14 +13,21 @@ mounted on the existing digital-twin FastAPI app so ``/twins``, ``/modules`` and
 """
 from __future__ import annotations
 
+import time
 from typing import Any, Callable
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from process_bigraph import Process, Step
+from process_bigraph import Composite, Process, Step
 
 from .auth import require_key
-from .workflow_models import ModuleCard
+from .workflow_models import (ModuleCallRequest, ModuleCallResponse, ModuleCard,
+                              WorkflowProvenance)
+
+# Fixed node key for a single-module call. Must not start with "_" (process-bigraph
+# treats leading-underscore top-level keys as reserved schema and never runs them)
+# and must not collide with a port store name.
+_CALL_NODE = "callnode"
 
 
 # ----------------------------------------------------------------------------
@@ -28,6 +35,17 @@ from .workflow_models import ModuleCard
 # ----------------------------------------------------------------------------
 def _short(name: str) -> str:
     return name.rsplit(".", 1)[-1]
+
+
+def _lib_versions() -> dict[str, str]:
+    from importlib.metadata import PackageNotFoundError, version
+    out: dict[str, str] = {}
+    for pkg in ("process-bigraph", "bigraph-schema"):
+        try:
+            out[pkg] = version(pkg)
+        except PackageNotFoundError:
+            pass
+    return out
 
 
 def display_module_names(core: Any) -> list[str]:
@@ -98,6 +116,39 @@ def list_modules(core: Any) -> list[ModuleCard]:
     return cards
 
 
+def _node_type(cls: Any) -> str:
+    return "step" if isinstance(cls, type) and issubclass(cls, Step) else "process"
+
+
+def call_module(core: Any, name: str, config: dict, inputs: dict, n_steps: int) -> dict:
+    """Call one module as a 1-node composite: wire its ports to stores, run, read
+    its outputs. Raises KeyError (unknown module) / ValueError (bad config or run)
+    — the endpoint maps both to 422."""
+    try:
+        resolved = _resolve_name(core, name)
+    except KeyError:
+        raise
+    cls = core.link_registry.get(resolved)
+    if not isinstance(cls, type):
+        raise ValueError(f"module {name} did not resolve to a class")
+    inst = cls(config, core)  # raises on bad config -> 422
+    in_ports = inst.inputs() or {}
+    out_ports = inst.outputs() or {}
+    state: dict[str, Any] = {}
+    for port in in_ports:  # seed every input store; caller value overrides the 0.0 default
+        state[port] = inputs.get(port, 0.0)
+    state[_CALL_NODE] = {
+        "_type": _node_type(cls),
+        "address": f"local:{resolved}",
+        "config": config,
+        "inputs": {port: [port] for port in in_ports},
+        "outputs": {port: [port] for port in out_ports},
+    }
+    comp = Composite({"state": state}, core=core)
+    comp.run(n_steps if n_steps and n_steps > 0 else 1)
+    return {port: comp.state.get(port) for port in out_ports}
+
+
 def _resolve_name(core: Any, name: str) -> str:
     """Map a requested module name to a registered one (short or fqcn). Raises
     KeyError if unknown."""
@@ -129,5 +180,20 @@ def make_workflow_router(core_provider: Callable[[], Any]) -> APIRouter:
         except KeyError:
             raise HTTPException(status_code=404, detail=f"unknown module: {name}")
         return module_card(core, resolved, with_ports=True)
+
+    @router.post("/modules/{name}/call")
+    def post_module_call(name: str, req: ModuleCallRequest) -> ModuleCallResponse:
+        core = core_provider()
+        t0 = time.perf_counter()
+        try:
+            outputs = call_module(core, name, req.config, req.inputs, req.n_steps)
+        except KeyError:
+            raise HTTPException(status_code=422, detail=f"unknown module: {name}")
+        except Exception as e:  # noqa: BLE001 — bad config/inputs/run → 422
+            raise HTTPException(status_code=422, detail=str(e))
+        prov = WorkflowProvenance(modules=[_short(name)], n_steps=req.n_steps,
+                                  wall_ms=(time.perf_counter() - t0) * 1000.0,
+                                  lib_versions=_lib_versions())
+        return ModuleCallResponse(outputs=outputs, provenance=prov)
 
     return router
