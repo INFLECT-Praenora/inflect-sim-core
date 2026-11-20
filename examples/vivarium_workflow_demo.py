@@ -1,17 +1,16 @@
-"""Narrated walkthrough of the unified vivarium-workflow API — the four verbs.
+"""The Workflow API in four steps — list modules, run one, connect many, run it.
 
-Runs entirely in-process via ``fastapi.testclient.TestClient`` — no server, no
-hosting. Every request and response below is real, over real registered viva-
-modules (TelluriumUTCStep, viva_torch.NeuralProcess, BioGearsProcess,
-MathExpressionStep).
+Runs the whole API in-process (no server), printing every real request and the
+part of each response that matters. The four modules it uses are all real:
+TelluriumUTCStep (exact SBML), NeuralProcess (neural surrogate), BioGearsProcess
+(physiology), MathExpressionStep (math).
 
     uv run python examples/vivarium_workflow_demo.py
 
-Full reference (routes, config): docs/workflow-api.md
+Reference: docs/workflow-api.md
 """
 from __future__ import annotations
 
-import json
 import tempfile
 
 from fastapi.testclient import TestClient
@@ -24,65 +23,69 @@ KEY = "demo-key"
 H = {"Authorization": f"Bearer {KEY}"}
 
 
-def show(title: str, resp) -> dict:
-    print(f"\n=== {title} ===")
-    print(f"HTTP {resp.status_code}")
-    body = resp.json()
-    text = json.dumps(body, indent=2)
-    print(text if len(text) < 1400 else text[:1400] + " …")
-    return body
+def step(n: int, title: str) -> None:
+    print(f"\n{'─' * 70}\n{n}. {title}\n{'─' * 70}")
 
 
 def main() -> None:
     client = TestClient(create_app(ApiConfig(api_keys=KEY, rate_capacity=1e6,
                                              rate_refill_per_s=1e6, request_timeout_s=120.0)))
+    print("The Workflow API: snap simulation modules together and run them over HTTP.")
 
-    print("The unified vivarium-workflow API — define a module, call it, connect a")
-    print("workflow, call the workflow — all over process-bigraph's own primitives.")
+    # 1. LIST — what modules can I use?
+    step(1, "List the modules you can use   (GET /modules)")
+    modules = client.get("/modules", headers=H).json()
+    print(f"{len(modules)} modules are registered. This demo uses four of them:")
+    want = {"TelluriumUTCStep": "exact SBML model runner",
+            "NeuralProcess": "fast neural surrogate",
+            "BioGearsProcess": "physiology engine",
+            "MathExpressionStep": "evaluates a math expression"}
+    have = {m["name"]: m["kind"] for m in modules}
+    for name, what in want.items():
+        print(f"  • {name:<20} ({have.get(name, '?'):<7}) — {what}")
 
-    # 1. DEFINE / DISCOVER — the live module registry.
-    mods = show("1. define/discover modules  (GET /modules)",
-                client.get("/modules", headers=H))
-    names = {m["name"] for m in mods}
-    print(f"\n   {len(mods)} modules registered. The four this demo composes are all present: "
-          + ", ".join(n for n in ("TelluriumUTCStep", "NeuralProcess", "BioGearsProcess",
-                                   "MathExpressionStep") if n in names))
+    # 2. RUN ONE — call a single module.
+    step(2, "Run one module   (POST /modules/MathExpressionStep/call)")
+    print("Compute y = 2x + 3 at x = 5:")
+    r = client.post("/modules/MathExpressionStep/call",
+                    json={"config": {"expressions": [{"out": "y", "expr": "2*x + 3"}]},
+                          "inputs": {"x": 5.0}}, headers=H)
+    print(f"  → y = {r.json()['outputs']['y']}")
 
-    # 2. CALL A MODULE — one module as a 1-node composite.
-    show("2. call one module  (POST /modules/MathExpressionStep/call)  y = 2x+3, x=5",
-         client.post("/modules/MathExpressionStep/call",
-                     json={"config": {"expressions": [{"out": "y", "expr": "2*x + 3"}]},
-                           "inputs": {"x": 5.0}, "n_steps": 1}, headers=H))
-
-    # Train a tiny neural surrogate so the tiered workflow has a real checkpoint.
-    print("\n   (training a tiny neural surrogate of the small kinetic model …)")
+    print("\n(training a tiny neural surrogate so the workflow has a real checkpoint …)")
     with tempfile.TemporaryDirectory() as d:
         info = train_demo_surrogate(d)
+
+        # 3. CONNECT — wire modules into a workflow.
+        step(3, "Connect modules into a workflow   (POST /workflows)")
         spec = tiered_workflow_spec(checkpoint=info["checkpoint"], timestep=info["timestep"],
                                     feature_keys=info["feature_keys"], include_biogears=True)
+        created = client.post("/workflows", json=spec.model_dump(by_alias=True), headers=H).json()
+        graph = created["graph"]
+        print("Built a workflow from four real modules:")
+        for n in graph["nodes"]:
+            print(f"  • {n['id']:<10} = {n['module']}")
+        print("Wires (one node's output → another's input):")
+        for e in graph["edges"]:
+            print(f"  • {e['from']}  →  {e['to']}")
 
-        # 3. CONNECT A WORKFLOW — exact SBML + neural surrogate + physiology + derivation.
-        created = show("3. connect a workflow  (POST /workflows)  tiered engines",
-                       client.post("/workflows", json=spec.model_dump(by_alias=True), headers=H))
-        wid = created["workflow_id"]
-
-        # 4. CALL THE WORKFLOW — run the exact+surrogate+compare core at the trained timestep.
-        core_spec = tiered_workflow_spec(checkpoint=info["checkpoint"], timestep=info["timestep"],
-                                         feature_keys=info["feature_keys"], include_biogears=False)
-        core_wid = client.post("/workflows", json=core_spec.model_dump(by_alias=True),
-                               headers=H).json()["workflow_id"]
+        # 4. RUN — run the workflow.
+        step(4, "Run the workflow   (POST /workflows/{id}/run)")
+        core = tiered_workflow_spec(checkpoint=info["checkpoint"], timestep=info["timestep"],
+                                    feature_keys=info["feature_keys"], include_biogears=False)
+        wid = client.post("/workflows", json=core.model_dump(by_alias=True),
+                          headers=H).json()["workflow_id"]
         seed = {f"surrogate.{info['feature_keys'][0]}": 10.0}
-        show("4. call the workflow  (POST /workflows/{id}/run)  3 steps",
-             client.post(f"/workflows/{core_wid}/run",
-                         json={"n_steps": 3, "interval": info["timestep"], "overrides": seed},
-                         headers=H))
+        run = client.post(f"/workflows/{wid}/run",
+                          json={"n_steps": 3, "interval": info["timestep"], "overrides": seed},
+                          headers=H).json()
+        print("Ran the exact-engine + surrogate + compare workflow for 3 steps:")
+        for ref, val in run["observables"].items():
+            print(f"  • {ref:<34} = {val:.4f}")
 
-        # The graph — the same node/edge structure the workbench renders.
-        show("the workflow graph  (GET /workflows/{id}/graph)",
-             client.get(f"/workflows/{wid}/graph", headers=H))
-
-    print("\nAll four verbs, over real viva- modules, through one FastAPI surface.")
-    print("Full reference: docs/workflow-api.md")
+    print(f"\n{'─' * 70}")
+    print("Four verbs — list, run one, connect, run — over real modules, one API.")
+    print("Reference: docs/workflow-api.md")
 
 
 if __name__ == "__main__":

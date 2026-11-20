@@ -1,14 +1,16 @@
 # Digital-twin API
 
-HTTP API for registering an SBML or Antimony model as a "twin", stepping its live state, and running
-what-if predictions and ensembles. Set `<key>` to one of your configured API keys; the examples assume
-`BASE=http://localhost:8000`.
+Register a model once, then keep it live: **step** its state as new data arrives,
+and ask it **what-if** questions (single runs or ensembles) — fast, because the
+model stays warm in memory.
 
+This is one of the two faces of the simulation-core API, both on the same server:
+
+- **Digital twins** (this doc) — a warm, stateful model you step and query.
+- **[Workflows](workflow-api.md)** — snap modules together and run them.
+
+Set `<key>` to a configured API key; examples use `BASE=http://localhost:8000`.
 All endpoints except `/healthz` and `/version` need `Authorization: Bearer <key>`.
-
-> The same app also serves the unified **vivarium-workflow API** (`/modules`,
-> `/workflows`) — define/call modules and connect/call workflows over
-> process-bigraph. See [`workflow-api.md`](workflow-api.md).
 
 ## Flow: register, step, predict, ensemble
 

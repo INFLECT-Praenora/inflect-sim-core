@@ -1,103 +1,114 @@
-# Unified vivarium-workflow API
+# Workflow API
 
-One clean HTTP surface over process-bigraph's four verbs — **define a module, call
-a module, connect modules into a workflow, call the workflow** — delegating
-straight to `build_core()` + `Composite`. It is mounted on the **same FastAPI app
-as the digital-twin API**, so `/twins`, `/modules` and `/workflows` are one
-service under one bearer-auth scheme (see [`api.md`](api.md)). Set `<key>` to one
-of your configured API keys; the examples assume `BASE=http://localhost:8000`.
+Build simulations by snapping together ready-made parts, over HTTP.
 
-All endpoints need `Authorization: Bearer <key>`.
+- A **module** is one simulation building block — an SBML model runner, a neural
+  surrogate, a physiology engine, a math step. (These are process-bigraph
+  `Process`/`Step` classes; ~150 are registered.)
+- A **workflow** wires modules together and runs them as one.
 
-Run it with no server (in-process, every request real):
+The API has exactly **four verbs**:
+
+| Verb | Endpoint |
+|---|---|
+| **list** the modules you can use | `GET /modules` |
+| **run one** module on its own | `POST /modules/{name}/call` |
+| **connect** modules into a workflow | `POST /workflows` |
+| **run** the workflow | `POST /workflows/{id}/run` |
+
+It runs on the same server as the [digital-twin API](api.md) — same base URL, same
+key. Every request needs `Authorization: Bearer <key>`; examples use
+`BASE=http://localhost:8000`.
+
+## See it work in 10 seconds
+
+No server needed — this runs the whole API in-process and prints every real
+request and response:
 
 ```bash
 uv run python examples/vivarium_workflow_demo.py
 ```
 
-## 1. Define / discover a module
+## The four verbs
 
-Every registered process-bigraph module (149+ in this workspace) is listed from
-the live registry — no hardcoding.
+### 1. List modules
 
 ```bash
 curl -s $BASE/modules -H "Authorization: Bearer <key>"
-# [{"name": "TelluriumUTCStep", "address": "local:TelluriumUTCStep", "kind": "Step",
-#   "config_schema": {...}, "input_ports": null, "output_ports": null,
-#   "capability_label": "TelluriumUTCStep"}, ...]
-
-curl -s $BASE/modules/MathExpressionStep -H "Authorization: Bearer <key>"
-# one module's full card, incl. best-effort input_ports / output_ports
 ```
+Each entry is a card: `name`, `kind` (`Process`/`Step`), and `config_schema` (how
+to configure it). `GET /modules/{name}` returns one card with its input/output
+ports.
 
-## 2. Call a module
+### 2. Run one module
 
-A single module run as a 1-node composite. `config` configures it, `inputs` seeds
-its input ports, `n_steps` × `interval` is how far it advances.
+Give it a config and inputs; get its outputs back. Here a math step computes
+`y = 2x + 3` at `x = 5`:
 
 ```bash
 curl -s $BASE/modules/MathExpressionStep/call -H "Authorization: Bearer <key>" \
   -H 'Content-Type: application/json' \
-  -d '{"config": {"expressions": [{"out": "y", "expr": "2*x + 3"}]}, "inputs": {"x": 5}, "n_steps": 1}'
-# {"outputs": {"y": 13.0}, "provenance": {"modules": ["MathExpressionStep"], ...}}
+  -d '{"config": {"expressions": [{"out": "y", "expr": "2*x + 3"}]}, "inputs": {"x": 5}}'
+
+# → {"outputs": {"y": 13.0}, "provenance": {...}}
 ```
 
-## 3. Connect a workflow
+### 3. Connect a workflow
 
-A workflow is a process-bigraph composite: `nodes` reference registered modules,
-`wires` connect a producer's output port to a consumer's input port
-(`"<node>.<port>"`), and `emit` names the `"<node>.<port>"` values to read back.
-Returns a `workflow_id` and the graph (nodes + edges — the same structure the
-workbench renders).
+A workflow is a list of `nodes` (each is a module) plus `wires` that connect one
+node's output to another's input (`"node.port"`). `emit` names what to read back.
+
+This chains two steps — `a = x + 1`, then `b = a * 10`:
 
 ```bash
 curl -s $BASE/workflows -H "Authorization: Bearer <key>" -H 'Content-Type: application/json' \
-  -d '{"nodes": [
-         {"id": "inc",   "module": "MathExpressionStep", "config": {"expressions": [{"out": "a", "expr": "x + 1"}]}},
-         {"id": "scale", "module": "MathExpressionStep", "config": {"expressions": [{"out": "b", "expr": "a * 10"}]}}],
-       "wires": [{"from": "inc.a", "to": "scale.a"}],
-       "emit": ["scale.b"]}'
-# {"workflow_id": "ab12cd34ef56", "graph": {"nodes": [...], "edges": [{"from": "inc.a", "to": "scale.a"}]}}
+  -d '{
+    "nodes": [
+      {"id": "inc",   "module": "MathExpressionStep", "config": {"expressions": [{"out": "a", "expr": "x + 1"}]}},
+      {"id": "scale", "module": "MathExpressionStep", "config": {"expressions": [{"out": "b", "expr": "a * 10"}]}}
+    ],
+    "wires": [{"from": "inc.a", "to": "scale.a"}],
+    "emit":  ["scale.b"]
+  }'
+
+# → {"workflow_id": "ab12cd34ef56", "graph": {"nodes": [...], "edges": [...]}}
 ```
 
-## 4. Call the workflow
+The returned `graph` (nodes + edges) is the diagram of your workflow.
 
-Runs the composite `n_steps` ticks of `interval` each, seeding input stores from
-`overrides` (keyed `"<node>.<port>"`). Returns the emitted observables.
+### 4. Run the workflow
+
+`overrides` seed inputs (`"node.port"`); `n_steps` × `interval` is how far it runs:
 
 ```bash
 curl -s $BASE/workflows/$WID/run -H "Authorization: Bearer <key>" -H 'Content-Type: application/json' \
-  -d '{"n_steps": 1, "interval": 1.0, "overrides": {"inc.x": 5}}'
-# {"observables": {"scale.b": 60.0}, "provenance": {"modules": ["MathExpressionStep"], ...}}
+  -d '{"n_steps": 1, "overrides": {"inc.x": 5}}'
 
-curl -s $BASE/workflows/$WID/graph -H "Authorization: Bearer <key>"   # nodes + edges
-curl -s -X DELETE $BASE/workflows/$WID -H "Authorization: Bearer <key>"
+# → {"observables": {"scale.b": 60.0}, "provenance": {...}}
 ```
 
-## The tiered worked workflow
+Also: `GET /workflows/{id}/graph` (the diagram) and `DELETE /workflows/{id}`.
 
-`viva_simulation_core/api/workflow_examples.py` builds a workflow from four real
-viva- modules — mirroring the biogears↔SBML sepsis story and the digital-twin
-API's exact↔surrogate tiering:
+## A real example: three engines at once
+
+`viva_simulation_core/api/workflow_examples.py` builds one workflow from four real
+modules — the same comparison at the heart of the biogears↔SBML sepsis work, and
+the exact↔surrogate tiering of the twin API:
 
 ```
-BioGearsProcess  — physiology (MAP, HR, SBP) ┐
-TelluriumUTCStep — exact SBML/kinetic model  ┼─► MathExpressionStep ─► derived observable
-NeuralProcess    — neural surrogate (viva_torch) ┘   (physiology vs exact vs surrogate)
+TelluriumUTCStep  — exact SBML model         ┐
+NeuralProcess     — fast neural surrogate     ┤─► MathExpressionStep ─► compare
+BioGearsProcess   — physiology engine         ┘
 ```
 
-`train_demo_surrogate` trains + curates a tiny surrogate so the `NeuralProcess`
-node has a real checkpoint (it runs at its trained timestep — pass that as the
-run `interval`). The surrogate and exact engine always run; the BioGears node
-needs a compiled `pybiogears` engine to execute.
+`train_demo_surrogate()` trains a tiny surrogate first so the `NeuralProcess` node
+has a real checkpoint. The exact engine and the surrogate run anywhere; the
+BioGears node needs a compiled `pybiogears` to execute.
 
-## Notes
+## Good to know
 
-- **Execution:** workflows run in-process via `Composite.run()` (the same way the
-  workbench runs composites), serialized by a run lock. This is distinct from the
-  digital-twin API's per-twin worker subprocesses, which exist for warm,
-  concurrently-stepped roadrunner instances.
-- **Lifetime:** workflows live in an in-process registry (ephemeral); a restart
-  forgets them. Unknown module / bad wiring → `422`; unknown workflow → `404`.
-- **Single worker:** the registry requires `uvicorn --workers 1` (already enforced
-  by the app).
+- **It's thin on purpose.** Every endpoint just calls process-bigraph
+  (`build_core()` + `Composite`) — the API adds no simulation logic of its own.
+- **Errors:** unknown module or bad wiring → `422`; unknown workflow → `404`.
+- **Lifetime:** workflows live in memory and are forgotten on restart. Run one
+  server process (`uvicorn --workers 1`); runs are serialized internally.
