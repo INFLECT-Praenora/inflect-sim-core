@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from viva_simulation_core.serve import ServedModel, model_server
+from viva_simulation_core.serving import ServedModel, model_server
 
 # A tiny model with an assignment rule (``total``) — exercises rule-driven
 # observables without loading the 91-state sepsis model.

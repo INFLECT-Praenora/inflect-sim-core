@@ -1,7 +1,7 @@
 """ApiCallStep — a process-bigraph Process whose update is a remote model call.
 
 The "API-calling step": instead of computing locally, it POSTs the current values
-of its declared observables to a model-serving ``url`` (e.g. ``serve.model_server``
+of its declared observables to a model-serving ``url`` (e.g. ``serving.model_server``
 or a remote viva-api) and returns the stepped state. This is how a vivarium
 composite orchestrates a *remote* simulation as one interchangeable node.
 """
@@ -40,7 +40,7 @@ class ApiCallStep(Process):
             raise RuntimeError(f"ApiCallStep: POST {self.url} failed: {e}") from e
         body = resp.json()
         # The server speaks absolute state (overrides in, stepped state out, like
-        # serve.model_server). Composite float ports apply updates additively, so
+        # serving.model_server). Composite float ports apply updates additively, so
         # return the delta that lands the store on the server's absolute value.
         return {name: float(body[name]) - overrides[name]
                 for name in self.observables if name in body}
