@@ -1,4 +1,4 @@
-# Design — Vivarium-as-scaffolding sepsis investigation (INFLECT demonstration)
+# Design — Simulation-core capabilities sepsis investigation (INFLECT demonstration)
 
 **Status:** draft for approval
 **Date:** 2026-11-20
@@ -183,7 +183,9 @@ study or parity lives under 01 with divergence as 05.
 
 ## Open questions for approval
 
-- Title wording (working: *"Vivarium as simulation scaffolding — compose,
-  orchestrate, ensemble, and run the sepsis core across engines"*).
+- Title wording — set to *"Simulation core — one sepsis model, every engine:
+  composed, ensembled, orchestrated, benchmarked"* (simulation-core-forward; no
+  "vivarium" in the reader-facing title). Reader-facing study names and framings
+  likewise lead with the capability, not the framework.
 - Study-05 shape (parity+divergence together, or parity under 01).
 - Depth of surrogate-accuracy migration.
