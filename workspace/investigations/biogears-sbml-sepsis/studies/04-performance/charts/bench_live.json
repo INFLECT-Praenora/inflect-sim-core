@@ -1,0 +1,16 @@
+{
+  "exact": {
+    "engine": "Tellurium exact SBML (CVODE, per interval)",
+    "n_steps": 20,
+    "wall_s": 10.513765207957476,
+    "per_step_ms": 525.6882603978738
+  },
+  "surrogate": {
+    "engine": "PyTorch surrogate (NeuralProcess)",
+    "n_steps": 20,
+    "wall_s": 0.0008078338578343391,
+    "per_step_ms": 0.04039169289171696
+  },
+  "exact_vs_surrogate_per_step": 13014.76176814752,
+  "note": "Per-step wall-clock, measured live on this machine (warm; compile/load excluded). Exact = real 91-state sepsis SBML via roadrunner CVODE. BioGears not measured here (needs compiled pybiogears); full-48h wall-clocks are in 01_runtime_compare."
+}

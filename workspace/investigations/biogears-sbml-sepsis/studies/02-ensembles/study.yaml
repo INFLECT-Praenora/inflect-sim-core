@@ -1,0 +1,76 @@
+schema_version: 3
+name: 02-ensembles
+investigation: biogears-sbml-sepsis
+status: ran
+title: "Ensembles — a severity × engine batch in one sweep"
+confidence: Accepted
+
+parent_studies: []
+
+question: |
+  Can the simulation core run the sepsis model as an ENSEMBLE — many configurations
+  (severity × engine) executed as one orchestrated batch and gathered into a single
+  comparison?
+
+objective: |
+  Demonstrate the ensembles pillar: run the sepsis core across severities {0,1,3}
+  under multiple engines and gather one endpoint (minimum tissue integrity) into one
+  grid — the same batch harness that would run any registered engine.
+
+claim: |
+  The sepsis core runs as a severity {0,1,3} × engine {BioGears, Tellurium, surrogate}
+  ensemble, gathered into one grid. The two full-physics engines agree to within ~0.1% and
+  show the expected severity response (minimum tissue integrity 1.00 healthy -> 0.97
+  mild -> 0.24 severe); their heavy runs are cited from the committed severity studies.
+  The surrogate ran live across every cell in the same batch — the orchestration proof
+  that the harness executes many cheap configurations in one sweep — and is flagged a
+  fast approximate tier (its endpoint is out of physical range; its real contribution,
+  speed, is study 04).
+
+expected_behavior:
+  - name: severity-engine-batch-runs
+    statement: "A severity {0,1,3} × engine batch is executed and gathered into one grid; the full-physics engines show the severity response and agree."
+    status: supported
+  - name: orchestration-runs-many-cheap
+    statement: "The batch harness runs every cell; the surrogate sweeps all three severities live in seconds (the orchestration/speed tier)."
+    status: supported
+
+findings:
+  - summary: "One batch, severity × engine — the full-physics engines show the severity response and agree."
+    detail: |
+      Minimum tissue integrity (the inflammation core) across severities {0,1,3}:
+      BioGears and the exact Tellurium extraction both fall 1.00 (healthy) -> 0.968
+      (mild) -> 0.243 (severe), to within ~0.1%. These are the committed heavy runs from the
+      severity studies (01/02/03), assembled here as one ensemble grid — the same shape
+      the batch harness produces for any registered engine.
+    status: supported
+  - summary: "The surrogate ran live across every cell — the orchestration proof."
+    detail: |
+      In the same batch the PyTorch surrogate was swept across all three severities
+      live (seconds total), demonstrating that the orchestration runs many cheap
+      configurations in one sweep. The surrogate is a fast APPROXIMATE tier: its
+      tissue-integrity endpoint is out of physical range (accuracy is data-limited),
+      so it is reported for transparency but not presented as a science value. Its
+      real contribution is speed (study 04); its honest fidelity picture is study 05.
+    status: supported
+
+visualizations:
+  - name: "Severity × engine ensemble — minimum tissue integrity"
+    address: image:charts/01_ensemble_grid.svg
+    display: primary
+
+baseline:
+  - name: sepsis-core-spec
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+    config: {severity: 3}
+    note: "The sepsis spec swept across severities and engines; the exact Tellurium path is the anchor composite."
+
+variants:
+  - name: severity-1-mild
+    note: "Mild infection arm (severity 1) — committed endpoints from study 02."
+  - name: severity-3-severe
+    note: "Severe infection arm (severity 3) — committed endpoints from study 03."
+
+interventions: []
+runs: []
+

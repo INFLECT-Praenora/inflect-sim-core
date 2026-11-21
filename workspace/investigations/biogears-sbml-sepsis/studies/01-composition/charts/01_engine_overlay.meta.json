@@ -1,0 +1,6 @@
+{
+  "title": "Same sepsis spec, two full-physics engines, nine observables",
+  "interpretation": "The one BioGears sepsis core specification run under two interchangeable engines over 72 h — the BioGears 8.2.0 C++ physiology engine and the exact SBML/Antimony extraction integrated by Tellurium/roadrunner (CVODE). The inflammation observables (tissue integrity, blood pathogen) overlap to within ~0.1%; the divergence is in the hemodynamic layer (quantified in study 05). This is the composition pillar: swapping the engine is swapping one box's address, and the shared typed-port observables let the same spec render under either engine. The PyTorch surrogate is the third interchangeable engine; its speed and (approximate) behavior are study 04.",
+  "caption": "Severe arm, all 9 observables, BioGears engine vs exact SBML extraction over 72 h — the same spec under two interchangeable engines. Inflammation overlap to within ~0.1%; hemodynamics diverge (study 05).",
+  "provenance": "Committed run reused from the severe-infection comparison (both arms are real locally-built BioGears 8.2.0 + Tellurium/roadrunner 72 h runs). Figure carried over from studies/03-severe-infection/charts/03_severe_9panel_engine_vs_sbml. The third engine (surrogate) is confirmed to construct + run live here via engines_live_check.json."
+}

@@ -1,0 +1,5 @@
+{
+ "title": "03_functional_difference_matrix",
+ "interpretation": "Map of BioGears functionality to its fate in the extraction and to the run-for-run result. The inflammation core is translated faithfully (identical output); the cardiovascular control and fluid systems are simplified; and a cluster of vasomotor/fluid/metabolic subsystems (nitric oxide, fever vasodilation, renal/urine, lactate, intracellular water, respiration, nutrition) is omitted or inert \u2014 exactly the pathways that would couple into SVR, CO and volume, which is where every divergence lands.",
+ "caption": "Map of BioGears functionality to its fate in the extraction and to the run-for-run result. The inflammation core is translated faithfully (identical output); the cardiovascular control and fluid systems are simplified; and a cluster of vasomotor/fluid/metabolic subsystems (nitric oxide, fever vasodilation, renal/urine, lactate, intracellular water, respiration, nutrition) is omitted or inert \u2014 exactly the pathways that would couple into SVR, CO and volume, which is where every divergence lands."
+}

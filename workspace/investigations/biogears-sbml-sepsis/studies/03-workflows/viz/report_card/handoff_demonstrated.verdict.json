@@ -1,0 +1,60 @@
+{
+  "schema": "report_card_verdict/v2",
+  "model_ref": "03-workflows",
+  "reference_model": "",
+  "generated": "",
+  "overall": "within_tol",
+  "groups": {
+    "orchestration": {
+      "verdict": "within_tol",
+      "axes": [
+        {
+          "id": "workflow_ran",
+          "label": "Four-verb workflow builds + runs from registered modules",
+          "verdict": "within_tol",
+          "value": 1.0,
+          "meter": 0.6666666666666666,
+          "detail": null,
+          "expected": {
+            "kind": "band",
+            "value": null,
+            "low": 0.5,
+            "high": 1.5,
+            "op": "~=",
+            "tol": 0.05,
+            "statement": null,
+            "units": null
+          },
+          "margin": 0.5,
+          "severity": "hard",
+          "units": null,
+          "knob": null,
+          "citation": null
+        },
+        {
+          "id": "exact_map_physical",
+          "label": "Handed-off .ant -> exact Tellurium MAP is physical (mmHg)",
+          "verdict": "within_tol",
+          "value": 95.54,
+          "meter": 0.7014374999999999,
+          "detail": null,
+          "expected": {
+            "kind": "band",
+            "value": null,
+            "low": 30.0,
+            "high": 160.0,
+            "op": "~=",
+            "tol": 0.05,
+            "statement": null,
+            "units": null
+          },
+          "margin": 64.46,
+          "severity": "hard",
+          "units": null,
+          "knob": null,
+          "citation": null
+        }
+      ]
+    }
+  }
+}

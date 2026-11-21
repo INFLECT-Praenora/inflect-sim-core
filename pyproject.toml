@@ -1,0 +1,86 @@
+[project]
+name = "simulation-core"
+version = "0.0.0"
+description = "Process-bigraph research workspace"
+requires-python = ">=3.12"
+dependencies = [
+    # Floor: 1.8.5 ships the composite `core_extensions` mechanism (1.8.0) the
+    # dashboard relies on AND the emitter fix (#217) + `requests`/`fire` server
+    # deps. Below this, composite type-registration and agent-embedded emits
+    # break — the root cause behind the map[...] type errors seen in the field.
+    "process-bigraph>=1.8.5",
+    # Cap below 1.8.4: bigraph-schema 1.8.4 REMOVED `bigraph_schema.matching`,
+    # which process-bigraph 1.11.0 still imports (via process_bigraph.holes) but
+    # only requires as `bigraph-schema>=1.8.1` (no upper cap). Without this cap the
+    # resolver grabs 1.8.4 and collection fails with
+    # `ModuleNotFoundError: No module named 'bigraph_schema.matching'`.
+    "bigraph-schema>=1.8.1,<1.8.4",
+    "bigraph-viz>=2.0.3",
+    "pyyaml>=6.0",
+    "jsonschema[format-nongpl]>=4.21",
+    "jinja2>=3.1",
+    "pypdf>=4.0",
+    "matplotlib",
+    "plotly",
+    # Web-based workspace dashboard (server + templates + assets + lib helpers).
+    # Extracted from viva-template as of v0.4.16; provides the `vivarium-workbench
+    # serve` CLI invoked by scripts/serve.sh.
+    "vivarium-workbench",
+    # viva-core/tellurium/biogears are not on PyPI: resolved via [tool.uv.sources]
+    # (public git repos). viva-emitters is on PyPI.
+    "viva-core",
+    "viva-tellurium",
+    "viva-biogears",
+    "viva-emitters",
+    # viva-torch (neural-surrogate stack) is a BASE dep, not an opt-in extra: the
+    # surrogate tier + the NeuralProcess module are always installed and
+    # first-class (discoverable via build_core / GET /modules). Tradeoff: torch is
+    # heavy, so the base install is larger. Resolved via [tool.uv.sources] git pin.
+    "viva-torch",
+    # The viva-sim / simulation-core CLI entrypoints import these at import time.
+    "typer",
+    "rich",
+    # ApiCallStep POSTs the current state to a served or remote model.
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "httpx"]
+# Serving a model over HTTP: serve.model_server + examples/serve_demo.
+serve = ["starlette", "uvicorn[standard]"]
+
+[project.scripts]
+simulation-core = "viva_simulation_core.cli.__main__:main"
+viva-sim = "viva_simulation_core.cli.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Allow ecosystem git-direct-reference deps (viva-superpowers / vivarium-workbench
+# @ git+https://…) that workspaces commonly add — hatchling rejects them otherwise.
+[tool.hatch.metadata]
+allow-direct-references = true
+
+# Declare the workspace Python package explicitly so this workspace is
+# pip-installable (e.g. `pip install git+<repo>@<sha>`).  sms-api injects it
+# as an extra_pip_dep so the container runner can import the workspace's
+# processes from a committed + pushed git ref.
+[tool.hatch.build.targets.wheel]
+packages = ["viva_simulation_core"]
+
+[tool.uv.sources]
+# Pinned to explicit commits for reproducibility. A bare `branch = "main"` drifts:
+# the lock pins one commit while `main` moves on, so a later resolve can mix
+# incompatible versions (this is what silently broke the real BioGears engine —
+# a stale viva-biogears against a newer pybiogears). To upgrade a dep, bump its
+# `rev` here and re-run `uv lock`.
+viva-core = { git = "https://github.com/vivarium-collective/viva-core", rev = "154d94c2f30050715e87aa89af2b93b04d5f77b7" }
+viva-tellurium = { git = "https://github.com/vivarium-collective/viva-tellurium", rev = "c65f8032f76935524912c2b3d384accb805b9e24" }
+viva-biogears = { git = "https://github.com/vivarium-collective/viva-biogears", rev = "8d0201976b2b3a008bc6406fdfe3f980d9bcb77f" }
+vivarium-workbench = { git = "https://github.com/vivarium-collective/vivarium-workbench.git", rev = "f13a597110901d0df28415a23bb884b3213b4dda" }
+viva-torch = { git = "https://github.com/vivarium-collective/viva-torch", rev = "bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" }
+
+[tool.pytest.ini_options]
+markers = ["slow: real-engine / roadrunner-heavy integration tests (run with `pytest -m slow`)"]
+addopts = "-m 'not slow'"

@@ -1,0 +1,12 @@
+{
+ "sbp_below_100_h": null,
+ "map_below_65_h": null,
+ "hr_above_90_h": null,
+ "svr_ratio_min": 0.991232200026107,
+ "svr_ratio_min_h": 48.0,
+ "tissue_integrity_min": 0.9675528826275726,
+ "tissue_integrity_min_h": 8.816666666666666,
+ "peak_blood_pathogen": 6.2983166029536175,
+ "peak_blood_pathogen_h": 1.7333333333333334,
+ "resolved": false
+}
