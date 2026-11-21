@@ -37,15 +37,17 @@ dependencies = [
     # first-class (discoverable via build_core / GET /modules). Tradeoff: torch is
     # heavy, so the base install is larger. Resolved via [tool.uv.sources] git pin.
     "viva-torch",
+    # The viva-sim / simulation-core CLI entrypoints import these at import time.
+    "typer",
+    "rich",
+    # ApiCallStep POSTs the current state to a served or remote model.
+    "requests",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.4", "httpx"]
-api = ["fastapi", "uvicorn[standard]", "pydantic"]
-cli = ["typer", "rich"]
-# viva-torch is now a BASE dependency (see [project.dependencies]); this extra is
-# kept as an empty back-compat alias so `pip install .[surrogate]` still resolves.
-surrogate = []
+# Serving a model over HTTP: serve.model_server + examples/serve_demo.
+serve = ["starlette", "uvicorn[standard]"]
 
 [project.scripts]
 simulation-core = "viva_simulation_core.cli.__main__:main"
