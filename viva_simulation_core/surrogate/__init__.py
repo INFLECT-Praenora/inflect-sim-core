@@ -11,5 +11,21 @@ from viva_simulation_core.surrogate.interface import (
     Scorecard,
     SurrogateBackend,
 )
+from viva_simulation_core.surrogate.validate import validate_surrogate
+from viva_simulation_core.surrogate.fit_and_score import fit_and_score
+from viva_simulation_core.surrogate.backends.baseline import (
+    PersistenceBackend,
+    LinearBackend,
+)
+from viva_simulation_core.surrogate.backends.neural import NeuralBackend
 
-__all__ = ["FittedSurrogate", "SurrogateBackend", "Scorecard"]
+__all__ = [
+    "FittedSurrogate",
+    "SurrogateBackend",
+    "Scorecard",
+    "validate_surrogate",
+    "fit_and_score",
+    "PersistenceBackend",
+    "LinearBackend",
+    "NeuralBackend",
+]
