@@ -1,0 +1,6 @@
+{
+  "title": "Severity \u00d7 engine ensemble: minimum tissue integrity",
+  "interpretation": "The sepsis core run as a severity {0,1,3} \u00d7 engine {BioGears, Tellurium exact, surrogate} batch, endpoint = minimum tissue integrity (the inflammation core). The two full-physics engines agree bit-for-bit and show the expected severity response (1.00 healthy -> 0.97 mild -> 0.24 severe). BioGears + Tellurium cells are committed heavy runs (studies 01/02/03); the surrogate cells run live (a fast approximate tier, flagged). The point is orchestration: one batch over all severity \u00d7 engine cells, the live surrogate sweep in 5.2s.",
+  "caption": "Minimum tissue integrity across severity \u00d7 engine, gathered as one batch. Full-physics engines agree and track severity; the surrogate is the fast approximate tier (live cells flagged).",
+  "provenance": "BioGears/Tellurium: committed tissue_integrity_min from studies/0{1,2,3}-*/out/*.milestones.json (sev0 = healthy baseline, tissue integrity holds at 1.0). Surrogate: live rollout via viva_torch NeuralProcess. Script: make_ensemble_grid.py; data: ensemble_results.json."
+}

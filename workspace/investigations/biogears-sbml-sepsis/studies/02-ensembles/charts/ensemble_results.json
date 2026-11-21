@@ -1,0 +1,71 @@
+{
+  "endpoint": "tissue_integrity_min",
+  "severities": [
+    0,
+    1,
+    3
+  ],
+  "engines": [
+    "biogears",
+    "tellurium",
+    "surrogate"
+  ],
+  "cells": {
+    "biogears": {
+      "0": {
+        "tissue_integrity_min": 1.0,
+        "source": "healthy-baseline"
+      },
+      "1": {
+        "tissue_integrity_min": 0.968,
+        "source": "committed"
+      },
+      "3": {
+        "tissue_integrity_min": 0.243,
+        "source": "committed"
+      }
+    },
+    "tellurium": {
+      "0": {
+        "tissue_integrity_min": 1.0,
+        "source": "healthy-baseline"
+      },
+      "1": {
+        "tissue_integrity_min": 0.968,
+        "source": "committed"
+      },
+      "3": {
+        "tissue_integrity_min": 0.243,
+        "source": "committed"
+      }
+    },
+    "surrogate": {
+      "0": {
+        "tissue_integrity_min": null,
+        "raw_surrogate_value": -6.085,
+        "physical": false,
+        "ran": true,
+        "source": "live",
+        "note": "approximate tier \u2014 endpoint out of physical range; see study 04 (speed) / 05 (fidelity)"
+      },
+      "1": {
+        "tissue_integrity_min": null,
+        "raw_surrogate_value": -6.085,
+        "physical": false,
+        "ran": true,
+        "source": "live",
+        "note": "approximate tier \u2014 endpoint out of physical range; see study 04 (speed) / 05 (fidelity)"
+      },
+      "3": {
+        "tissue_integrity_min": null,
+        "raw_surrogate_value": -6.085,
+        "physical": false,
+        "ran": true,
+        "source": "live",
+        "note": "approximate tier \u2014 endpoint out of physical range; see study 04 (speed) / 05 (fidelity)"
+      }
+    }
+  },
+  "live_surrogate_batch_s": 5.205,
+  "note": "BioGears/Tellurium cells are committed heavy runs (sev 0/1/3 from studies 01/02/03); surrogate cells run live (approximate tier). One batch over severity \u00d7 engine."
+}
