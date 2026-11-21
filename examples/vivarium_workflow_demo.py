@@ -30,7 +30,7 @@ def step(n: int, title: str) -> None:
 def main() -> None:
     client = TestClient(create_app(ApiConfig(api_keys=KEY, rate_capacity=1e6,
                                              rate_refill_per_s=1e6, request_timeout_s=120.0)))
-    print("The Workflow API: snap simulation modules together and run them over HTTP.")
+    print("The workflow API builds and runs process-bigraph composites over HTTP, in four calls.")
 
     # 1. LIST — what modules can I use?
     step(1, "List the modules you can use   (GET /modules)")
@@ -84,8 +84,8 @@ def main() -> None:
             print(f"  • {ref:<34} = {val:.4f}")
 
     print(f"\n{'─' * 70}")
-    print("Four verbs — list, run one, connect, run — over real modules, one API.")
-    print("Reference: docs/workflow-api.md")
+    print("That is the whole surface: list, run one, connect, run. Reference: docs/workflow-api.md")
+    print("(The surrogate node is a fast approximate tier — see docs/workflow-api.md for its limits.)")
 
 
 if __name__ == "__main__":
