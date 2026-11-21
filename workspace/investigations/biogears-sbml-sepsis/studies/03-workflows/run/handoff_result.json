@@ -1,0 +1,67 @@
+{
+  "verbs": {
+    "list": {
+      "n_modules": 76,
+      "engine_boxes": [
+        "MathExpressionStep",
+        "TelluriumProcess",
+        "TelluriumUTCStep",
+        "BioGearsProcess",
+        "NeuralProcess"
+      ]
+    },
+    "call": {
+      "module": "TelluriumUTCStep",
+      "loaded_ok": true,
+      "wall_s": 2.974
+    },
+    "connect": {
+      "nodes": [
+        "exact",
+        "surrogate",
+        "compare"
+      ],
+      "edges": [
+        [
+          "surrogate.stores__rate_rules__q_Ao",
+          "compare.a"
+        ],
+        [
+          "surrogate.stores__rate_rules__q_Brain",
+          "compare.b"
+        ],
+        [
+          "surrogate.stores__rate_rules__q_Bone",
+          "compare.c"
+        ]
+      ]
+    },
+    "run": {
+      "wall_s": 0.465
+    }
+  },
+  "handoff": {
+    "artifact": "/Users/eranagmon/code/simulation-core--simcore-scaffolding/workspace/investigations/biogears-sbml-sepsis/sources/biogears_sepsis.ant",
+    "loaded_by": "TelluriumUTCStep",
+    "narrative": "biogears_sepsis.ant (extracted from the BioGears C++ engine) is handed to the Tellurium/roadrunner integrator inside the workflow; the same portable artifact can drive any engine box over the shared ports."
+  },
+  "workflow": {
+    "ran": true,
+    "emit": {
+      "compare.surrogate_total": 396.40877133607864
+    },
+    "provenance": {
+      "modules": [
+        "MathExpressionStep",
+        "NeuralProcess",
+        "TelluriumUTCStep"
+      ],
+      "wall_ms": 464.1,
+      "lib_versions": {
+        "process-bigraph": "1.11.0",
+        "bigraph-schema": "1.8.3"
+      }
+    },
+    "note": "The compare step derives from the surrogate tier (a fast APPROXIMATE engine, study 04/05). The point here is orchestration: list -> call -> connect -> run, composing registered modules with no new simulation code."
+  }
+}

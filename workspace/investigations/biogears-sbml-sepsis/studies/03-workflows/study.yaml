@@ -1,0 +1,69 @@
+schema_version: 3
+name: 03-workflows
+investigation: biogears-sbml-sepsis
+status: ran
+title: "Orchestration & workflows — compose modules, hand off an SBML file"
+confidence: Accepted
+
+parent_studies: []
+
+question: |
+  Can the simulation core compose registered modules into a workflow and hand an
+  Antimony/SBML file between engines — all through a small, uniform API, with no new
+  simulation code?
+
+objective: |
+  Demonstrate the orchestration pillar: build and run a pipeline with the four-verb
+  workflow API (list modules, call one, connect a workflow, run it), where the
+  portable biogears_sepsis.ant artifact is handed to the Tellurium engine and the
+  pipeline composes it with a surrogate tier and a derivation step.
+
+claim: |
+  The simulation core composes registered modules into a workflow and hands an
+  Antimony/SBML file between engines, using the four-verb API and no new simulation
+  code. The BioGears sepsis core — extracted to the portable file biogears_sepsis.ant —
+  is handed to the TelluriumUTCStep engine (load the file, run it), composed in one
+  workflow with a NeuralProcess surrogate tier and a MathExpressionStep derivation,
+  and run end-to-end in a few seconds. The four verbs (list -> call -> connect -> run)
+  are the entire surface; the portable artifact is the interface between engines.
+
+expected_behavior:
+  - name: modules-compose-and-hand-off-sbml
+    statement: "A workflow built from registered modules alone loads the real biogears_sepsis.ant, composes it with other engine boxes, and runs to a finite emitted observable."
+    status: supported
+  - name: four-verbs-are-the-surface
+    statement: "The pipeline is built and run entirely via list / call / connect / run — no new simulation code."
+    status: supported
+
+findings:
+  - summary: "An Antimony/SBML file handed between engines, composed as a workflow, run with four verbs."
+    detail: |
+      The BioGears sepsis core was extracted to a portable Antimony/SBML file
+      (biogears_sepsis.ant). The hand-off workflow (run/handoff_result.json):
+        1. LISTS the registered modules (the engine boxes available);
+        2. CALLS one — TelluriumUTCStep on the real biogears_sepsis.ant: the SBML/Antimony
+           file is loaded and run, the artifact handed from the BioGears C++ engine to the
+           Tellurium/roadrunner integrator;
+        3. CONNECTS a workflow — the artifact-loading Tellurium node, a NeuralProcess
+           surrogate tier over the same spec, and a MathExpressionStep derivation, wired
+           by ports;
+        4. RUNS it end-to-end in a few seconds, emitting the derived observable.
+      Every node is an existing registered module; nothing in the composition is
+      sepsis-specific plumbing. The DAG (chart 01) shows the hand-off: a portable model
+      artifact is the interface between engines.
+    status: supported
+
+visualizations:
+  - name: "Hand-off workflow DAG — an Antimony/SBML file passed into the engines"
+    address: image:charts/01_handoff_dag.svg
+    display: primary
+
+baseline:
+  - name: sepsis-core-spec
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+    config: {severity: 3}
+    note: "The sepsis spec, here handed to the Tellurium engine as the portable biogears_sepsis.ant file inside a workflow."
+
+variants: []
+interventions: []
+runs: []
