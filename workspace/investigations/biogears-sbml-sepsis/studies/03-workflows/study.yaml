@@ -4,6 +4,8 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Orchestration & workflows — compose modules, hand off an SBML file"
 confidence: Accepted
+# authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
+verdict: supported  # four-verb API composes + hands the model between engines end-to-end
 
 parent_studies: []
 

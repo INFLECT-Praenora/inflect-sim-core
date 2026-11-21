@@ -4,6 +4,8 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "The simulation core — one sepsis model, every engine"
 confidence: Accepted
+# authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
+verdict: supported  # all four capabilities demonstrated by runnable artifacts
 
 parent_studies: []
 

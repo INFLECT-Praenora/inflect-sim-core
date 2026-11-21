@@ -4,6 +4,8 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Composition — one sepsis spec, interchangeable engines"
 confidence: Accepted
+# authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
+verdict: supported  # one spec runs under three interchangeable engines (live check + overlay)
 
 parent_studies: []
 

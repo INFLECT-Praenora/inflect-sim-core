@@ -4,6 +4,8 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Performance — where the compute goes, and the surrogate speedup"
 confidence: Accepted
+# authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
+verdict: supported  # compute spans 4+ orders; bottleneck localized to the stiff ODE solve
 
 parent_studies: []
 

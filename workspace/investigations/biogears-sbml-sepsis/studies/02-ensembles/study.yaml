@@ -4,6 +4,8 @@ investigation: biogears-sbml-sepsis
 status: ran
 title: "Ensembles — a severity × engine batch in one sweep"
 confidence: Accepted
+# authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
+verdict: supported  # severity x engine batch runs; full-physics engines agree and track severity
 
 parent_studies: []
 
