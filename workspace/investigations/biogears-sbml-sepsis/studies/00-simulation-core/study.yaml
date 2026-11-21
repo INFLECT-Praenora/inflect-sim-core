@@ -64,7 +64,10 @@ findings:
         demonstration stays credible.
     status: supported
 
-visualizations: []
+visualizations:
+  - name: The simulation core at a glance
+    address: image:charts/00_overview.svg
+    display: primary
 
 baseline:
   - name: sepsis-core-spec

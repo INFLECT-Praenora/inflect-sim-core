@@ -1,0 +1,9 @@
+{
+ "title": "The simulation core at a glance",
+ "interpretation": "One BioGears sepsis specification runs under three interchangeable engines (a C++ physiology engine, an exact SBML extraction, and a learned surrogate) by swapping a single node over shared typed ports \u2014 and that one model drives four runnable capabilities: composition, ensembles, orchestration, and performance.",
+ "caption": "One BioGears sepsis specification runs under three interchangeable engines (a C++ physiology engine, an exact SBML extraction, and a learned surrogate) by swapping a single node over shared typed ports \u2014 and that one model drives four runnable capabilities: composition, ensembles, orchestration, and performance.",
+ "provenance": {
+  "generator": "charts/make_overview.py",
+  "kind": "schematic"
+ }
+}
