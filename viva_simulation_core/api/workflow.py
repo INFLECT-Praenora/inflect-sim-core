@@ -1,8 +1,8 @@
 """The four-verb workflow API over process-bigraph — pure functions.
 
-Thin by design: every function delegates to the process-bigraph ``Core`` (from
-``build_core``) and ``Composite``; no simulation logic of its own. The top-level
-facade (``viva_simulation_core``) and the ``viva-sim`` CLI wrap these.
+Every function delegates to the process-bigraph ``Core`` (from ``build_core``) and
+``Composite``; there is no simulation logic here. The top-level facade
+(``viva_simulation_core``) and the ``viva-sim`` CLI wrap these.
 
 - discover modules → ``list_modules`` / ``module_card``
 - call a module    → ``call_module``
@@ -35,7 +35,7 @@ _ENGINE_LOCK = threading.Lock()
 
 
 # ----------------------------------------------------------------------------
-# Module introspection (generic — reads the live registry, no hardcoding)
+# Module introspection — reads the live registry
 # ----------------------------------------------------------------------------
 def _short(name: str) -> str:
     return name.rsplit(".", 1)[-1]

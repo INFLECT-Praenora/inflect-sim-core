@@ -25,6 +25,14 @@ the module is enough.
 `catalog()` (CLI `viva-sim list`) lists every registered module as a card:
 `name`, `kind` (process/step), and `config_schema`.
 
+## Switching engines — one contract, many model types
+
+Every engine adapter exposes the **same typed ports** — the observable contract.
+So the engines are interchangeable: the exact Tellurium model, the BioGears C++
+engine, and a learned surrogate are each a box over the same ports, and switching
+model types is a one-node change. This is what makes `call`, `connect`, and `run`
+engine-agnostic: the verbs address ports, never a specific engine.
+
 ## The four verbs
 
 ### call — run one module

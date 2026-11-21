@@ -33,7 +33,7 @@ class SurrogateProcess(Process):
         return {name: "float" for name in self.observables}
 
     def update(self, state, interval):
-        # NOTE: the surrogate advances one of its own trained steps per update; `interval`
+        # the surrogate advances one of its own trained steps per update; `interval`
         # is not rescaled. A composite must drive this process at the surrogate's timestep
         # (as a trained surrogate requires) — a mismatched interval is a wiring error.
         x = np.array([float(state.get(n, 0.0)) for n in self.observables], float)

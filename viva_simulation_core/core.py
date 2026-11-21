@@ -34,7 +34,7 @@ def _iter_own_process_classes():
     Walks only this package's own top-level modules (resolved from ``__package__``
     so no name is hard-coded). Defensive: an import error in any single module is
     swallowed so one broken module never breaks ``build_core()``. A brand-new
-    package with no process classes simply yields nothing.
+    package with no process classes yields nothing.
     """
     package_name = __package__
     if not package_name:
