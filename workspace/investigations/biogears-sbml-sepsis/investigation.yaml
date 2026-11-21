@@ -21,7 +21,7 @@ hypothesis: |
   the thesis is that the simulation core already does all four of the above on a
   real model, with each capability shown by an artifact that runs. The one place a
   genuine hypothesis lives is the fidelity backbone (study 05): the SBML extraction
-  reproduces the inflammation core bit-for-bit but diverges from the BioGears engine
+  reproduces the inflammation core to within ~0.1% but diverges from the BioGears engine
   in the hemodynamic layer — a real, measured result that keeps the demonstration
   credible.
 
@@ -59,7 +59,7 @@ executive:
     surrogate ~0.2 s — with the exact engines' time spent almost entirely in the
     stiff 91-state ODE solve the surrogate replaces with one forward pass (04). The
     demonstration stays honest (05): the extraction reproduces the inflammation core
-    bit-for-bit but reaches septic shock by a different hemodynamic mechanism and on
+    to within ~0.1% but reaches septic shock by a different hemodynamic mechanism and on
     a flipped timeline, and the surrogate is a fast APPROXIMATE tier (bounded, not yet
     clinically accurate), not a drop-in replacement.
   verdict_status: complete
@@ -70,7 +70,7 @@ executive:
     (BioGears ~3.38 h, Tellurium ~2.81 h) are cited from committed wall-clock; the new
     cheap demonstrations (the workflow, the surrogate, the ensemble sweep, the
     micro-benchmark) run live. The fidelity backbone (05) carries the measured
-    engine-vs-extraction comparison (inflammation bit-identical; hemodynamics diverge
+    engine-vs-extraction comparison (inflammation near-identical (~0.1%); hemodynamics diverge
     in mechanism and timing) so the capabilities are shown on a model whose limits are
     stated, not hidden.
   decisions_needed: []
@@ -146,7 +146,7 @@ at_a_glance:
   - {study: 02-ensembles, role: "ENSEMBLES — a severity × engine batch run as one orchestrated sweep, gathered into a single grid."}
   - {study: 03-workflows, role: "ORCHESTRATION / WORKFLOWS — the four verbs compose registered modules into a pipeline and hand an Antimony/SBML file between engines, no new simulation code."}
   - {study: 04-performance, role: "PERFORMANCE — one run from seconds to hours across engines; where the compute goes (the stiff ODE solve) and the ~40,000× surrogate tier."}
-  - {study: 05-fidelity, role: "FIDELITY — the honest backbone: the engines agree on the inflammation core bit-for-bit, and diverge in the hemodynamic layer (mechanism and timing)."}
+  - {study: 05-fidelity, role: "FIDELITY — the honest backbone: the engines agree on the inflammation core to within ~0.1%, and diverge in the hemodynamic layer (mechanism and timing)."}
 
 how_to_read: |
   How the simulation core works, in one idea: a simulation is a COMPOSITE — a small
@@ -183,7 +183,7 @@ glossary:
   - term: "typed port interface"
     definition: "The named, typed inputs and outputs a box declares. Engines that expose the same ports are interchangeable — this is why one sepsis spec runs under three engines by swapping one box."
   - term: "module"
-    definition: "A registered process/step, addressable by name (e.g. TelluriumUTCStep, NeuralProcess). ~150 are registered; the API lists them at GET /modules."
+    definition: "A registered process/step, addressable by name (e.g. TelluriumUTCStep, NeuralProcess). Dozens are registered (this workspace lists 76 at GET /modules)."
   - term: "workflow"
     definition: "A composite built through the API: a list of nodes (modules) plus wires connecting one node's output port to another's input port."
   - term: "the four verbs"
@@ -203,7 +203,7 @@ biological_story: |
 
   This is the model the simulation core runs under every engine. The inflammation half
   of the race the SBML extraction translates faithfully: run against the real engine,
-  tissue integrity and pathogen load track it almost bit-for-bit in both mild and
+  tissue integrity and pathogen load track it to within ~0.1% in both mild and
   severe infection. The cardiovascular half is where the engines part — BioGears
   carries a whole driven body (nutrition schedule, temperature, respiration, renal
   fluid handling, nitric-oxide and fever vasodilation, continuous baroreflex control),

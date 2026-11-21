@@ -19,7 +19,7 @@ objective: |
 
 claim: |
   The sepsis core runs as a severity {0,1,3} × engine {BioGears, Tellurium, surrogate}
-  ensemble, gathered into one grid. The two full-physics engines agree bit-for-bit and
+  ensemble, gathered into one grid. The two full-physics engines agree to within ~0.1% and
   show the expected severity response (minimum tissue integrity 1.00 healthy -> 0.97
   mild -> 0.24 severe); their heavy runs are cited from the committed severity studies.
   The surrogate ran live across every cell in the same batch — the orchestration proof
@@ -40,7 +40,7 @@ findings:
     detail: |
       Minimum tissue integrity (the inflammation core) across severities {0,1,3}:
       BioGears and the exact Tellurium extraction both fall 1.00 (healthy) -> 0.968
-      (mild) -> 0.243 (severe), bit-for-bit. These are the committed heavy runs from the
+      (mild) -> 0.243 (severe), to within ~0.1%. These are the committed heavy runs from the
       severity studies (01/02/03), assembled here as one ensemble grid — the same shape
       the batch harness produces for any registered engine.
     status: supported

@@ -55,23 +55,27 @@ def main() -> None:
     call_s = time.perf_counter() - t0
     loaded_ok = one is not None
 
-    # ── Verb 3: CONNECT a workflow — artifact-loading Tellurium + surrogate + derive
+    # ── Verb 3: CONNECT a workflow — the artifact-loading EXACT engine drives the
+    # output; a surrogate tier runs the same spec; a MathExpressionStep derives a
+    # clinical margin. The exact Tellurium node runs biogears_sepsis.ant and emits a
+    # REAL observable (MAP), so the hand-off produces a real result — not a dead end.
     npc = core.link_registry.get("NeuralProcess")({"checkpoint": str(CKPT)}, core)
-    nkeys = list(npc.inputs().keys())[:3]
-    syms = ["a", "b", "c"]
+    sur_map_port = next(k for k in npc.inputs() if k.endswith("__MAP"))
     wf = WorkflowSpec(
         nodes=[
             WorkflowNode(id="exact", module="TelluriumUTCStep",
                          config={"model_file": str(ANT), "model_format": "antimony",
-                                 "end_time": 10.0, "n_points": 11}),
+                                 "end_time": 3600.0, "n_points": 13,
+                                 "selections": ["time", "MAP", "TI"]}),
             WorkflowNode(id="surrogate", module="NeuralProcess",
                          config={"checkpoint": str(CKPT)}, interval=300.0),
-            WorkflowNode(id="compare", module="MathExpressionStep",
-                         config={"expressions": [{"out": "surrogate_total", "expr": "a+b+c"}]}),
+            WorkflowNode(id="shock", module="MathExpressionStep",
+                         config={"expressions": [{"out": "shock_margin", "expr": "map - 65"}]}),
         ],
-        wires=[WorkflowWire(**{"from": f"surrogate.{nkeys[i]}", "to": f"compare.{syms[i]}"})
-               for i in range(3)],
-        emit=["compare.surrogate_total"],
+        # the surrogate's MAP feeds the derivation (a meaningful clinical margin, not a sum)
+        wires=[WorkflowWire(**{"from": f"surrogate.{sur_map_port}", "to": "shock.map"})],
+        # emit the EXACT engine's real trajectory (the hand-off product) + the derivation
+        emit=["exact.species_trajectories", f"surrogate.{sur_map_port}", "shock.shock_margin"],
     )
     reg = WorkflowRegistry(lambda: core)
     wid, graph = reg.define(wf)
@@ -80,6 +84,23 @@ def main() -> None:
     t1 = time.perf_counter()
     res = reg.run(wid, n_steps=1, overrides={}, interval=300.0)
     run_s = time.perf_counter() - t1
+
+    # Real result: the exact engine's MAP from the handed-off .ant, and a genuine
+    # exact-vs-surrogate comparison on the same observable.
+    import numpy as np
+    obs = res.observables
+    exact_map = float(np.asarray(obs["exact.species_trajectories"]["MAP"])[-1])
+    sur_map = float(obs[f"surrogate.{sur_map_port}"])
+    result = {
+        "exact_map_final": round(exact_map, 2),
+        "surrogate_map_final": round(sur_map, 2),
+        "exact_minus_surrogate_map": round(exact_map - sur_map, 2),
+        "derived_shock_margin_from_surrogate": round(float(obs["shock.shock_margin"]), 2),
+        "note": "exact_map_final is the real Tellurium run of the handed-off biogears_sepsis.ant "
+                "(physical, mmHg). The surrogate is a fast APPROXIMATE tier (study 04/05) — the large "
+                "exact-vs-surrogate gap is the honest reminder of that. The derivation is a clinical "
+                "margin (MAP - 65 shock threshold).",
+    }
 
     out = {
         "verbs": {
@@ -93,24 +114,23 @@ def main() -> None:
         "handoff": {
             "artifact": str(ANT),
             "loaded_by": "TelluriumUTCStep",
-            "narrative": "biogears_sepsis.ant (extracted from the BioGears C++ engine) "
-                         "is handed to the Tellurium/roadrunner integrator inside the workflow; "
-                         "the same portable artifact can drive any engine box over the shared ports.",
+            "narrative": "biogears_sepsis.ant (extracted from the BioGears C++ engine) is handed to the "
+                         "Tellurium/roadrunner integrator inside the workflow; it runs the real model and "
+                         "its MAP drives the workflow's result. The same portable artifact can drive any "
+                         "engine box over the shared ports.",
         },
         "workflow": {
             "ran": True,
-            "emit": res.observables,
+            "emit": list(obs.keys()),
             "provenance": {"modules": res.provenance.modules,
                            "wall_ms": round(res.provenance.wall_ms, 1),
                            "lib_versions": res.provenance.lib_versions},
-            "note": "The compare step derives from the surrogate tier (a fast APPROXIMATE "
-                    "engine, study 04/05). The point here is orchestration: list -> call -> "
-                    "connect -> run, composing registered modules with no new simulation code.",
         },
+        "result": result,
     }
     (HERE / "handoff_result.json").write_text(json.dumps(out, indent=2))
-    print(f"four verbs OK | hand-off: {ANT.name} loaded by TelluriumUTCStep | "
-          f"workflow emit {res.observables}")
+    print(f"four verbs OK | hand-off: {ANT.name} -> TelluriumUTCStep exact MAP={exact_map:.1f} mmHg | "
+          f"exact-vs-surrogate MAP delta={exact_map - sur_map:.1f}")
 
 
 if __name__ == "__main__":

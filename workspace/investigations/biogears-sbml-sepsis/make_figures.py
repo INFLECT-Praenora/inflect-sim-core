@@ -66,7 +66,7 @@ fig.suptitle("Severe sepsis (severity 3): BioGears engine vs SBML extraction —
 fig.tight_layout()
 save(fig,"03-severe-infection","03_severe_9panel_engine_vs_sbml",
      "Severe arm, all 9 observables, engine vs SBML extraction over 72 h. Inflammation "
-     "(tissue integrity, blood pathogen) overlaps bit-for-bit; every divergence is in the "
+     "(tissue integrity, blood pathogen) overlap to within ~0.1%; every divergence is in the "
      "hemodynamic layer. Dotted lines mark the SBP<100 / MAP<65 / HR>90 thresholds — both "
      "arms cross MAP<65 within 72 h, the extraction (steel blue) first.")
 

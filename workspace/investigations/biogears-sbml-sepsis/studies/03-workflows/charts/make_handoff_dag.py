@@ -31,8 +31,8 @@ def _arrow(ax, x0, y0, x1, y1, label=""):
 
 def main() -> None:
     res = json.loads(RESULT.read_text()) if RESULT.exists() else {}
-    emit = res.get("workflow", {}).get("emit", {})
-    val = next(iter(emit.values()), None)
+    result = res.get("result", {})
+    exact_map = result.get("exact_map_final")
 
     fig, ax = plt.subplots(figsize=(8.6, 3.6))
     ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
@@ -45,15 +45,17 @@ def main() -> None:
     # engine nodes
     _box(ax, 0.47, 0.60, 0.21, 0.20, "TelluriumUTCStep\n(exact SBML / CVODE)", "#d7f0dd", "#55A868")
     _box(ax, 0.47, 0.18, 0.21, 0.20, "NeuralProcess\n(surrogate — approx.)", "#f7dfe0", "#C44E52")
-    _box(ax, 0.77, 0.39, 0.21, 0.22, "MathExpressionStep\n(derive)", "#ece7f6", "#8172B3")
+    _box(ax, 0.77, 0.49, 0.21, 0.18, "MAP result\n(real, mmHg)", "#d7f0dd", "#2f6f45")
+    _box(ax, 0.77, 0.14, 0.21, 0.18, "MathExpressionStep\n(shock margin)", "#ece7f6", "#8172B3")
 
     _arrow(ax, 0.405, 0.53, 0.47, 0.68, "load file")    # .ant -> Tellurium (the hand-off)
     _arrow(ax, 0.405, 0.49, 0.47, 0.30, "same spec")    # .ant -> surrogate
-    _arrow(ax, 0.68, 0.28, 0.77, 0.45, "wire ports")    # surrogate -> compare
+    _arrow(ax, 0.68, 0.70, 0.77, 0.60, "emit MAP")      # exact -> real result (drives output)
+    _arrow(ax, 0.68, 0.26, 0.77, 0.26, "wire MAP")      # surrogate -> derive
 
     title = "Hand-off workflow: an Antimony/SBML file passed into the engines (four verbs)"
-    if val is not None:
-        title += f"\nemit  compare.surrogate_total = {val:.1f}"
+    if exact_map is not None:
+        title += f"\nexact Tellurium run of the .ant → MAP = {exact_map:.1f} mmHg (real)"
     ax.set_title(title, fontsize=10)
     fig.tight_layout()
     for ext in ("svg", "png"):

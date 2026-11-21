@@ -2,7 +2,7 @@
 into one grid.
 
 Endpoint: tissue_integrity_min (the inflammation core — a clean severity response
-where the full-physics engines agree bit-for-bit).
+where the full-physics engines agree to within ~0.1%).
 
 - BioGears + Tellurium cells: the committed severity runs (studies 01/02/03 ran
   sev 0/1/3 for both engines); endpoints read from their committed milestones.
@@ -68,20 +68,33 @@ def main() -> None:
 
     t0 = time.perf_counter()
     for sev in SEVS:
-        ti = _surrogate_ti(spec, sev)
-        physical = np.isfinite(ti) and 0.0 <= ti <= 1.05
-        cells["surrogate"][str(sev)] = {
-            # the surrogate RAN (orchestration proof); it is a fast approximate tier
-            # whose accuracy is data-limited — its raw endpoint is out of physical
-            # range here, so it is reported (transparency) but NOT presented as a
-            # science value. The surrogate's real contribution is SPEED (study 04).
-            "tissue_integrity_min": None,
-            "raw_surrogate_value": round(float(ti), 3),
-            "physical": bool(physical),
-            "ran": True,
-            "source": "live",
-            "note": "approximate tier — endpoint out of physical range; see study 04 (speed) / 05 (fidelity)",
-        }
+        # Per-cell error isolation: a dead cell (bad checkpoint, shape mismatch) renders
+        # as a visible failed marker, never silently dropping the cell or crashing the batch.
+        try:
+            ti = _surrogate_ti(spec, sev)
+            physical = bool(np.isfinite(ti) and 0.0 <= ti <= 1.05)
+            cells["surrogate"][str(sev)] = {
+                # the surrogate RAN (orchestration proof); it is a fast approximate tier
+                # whose accuracy is data-limited — its raw endpoint is out of physical
+                # range here, so it is reported (transparency) but NOT presented as a
+                # science value. The surrogate's real contribution is SPEED (study 04).
+                "tissue_integrity_min": None,
+                "raw_surrogate_value": round(float(ti), 3),
+                "physical": physical,
+                "ran": True,
+                "source": "live",
+                "note": "approximate tier — endpoint out of physical range; see study 04 (speed) / 05 (fidelity)",
+            }
+        except Exception as exc:  # noqa: BLE001 — a failed cell must still render
+            cells["surrogate"][str(sev)] = {
+                "tissue_integrity_min": None,
+                "raw_surrogate_value": None,
+                "physical": False,
+                "ran": False,
+                "source": "live",
+                "error": f"{type(exc).__name__}: {exc}"[:200],
+                "note": "live surrogate cell failed — rendered as a failed cell, not dropped",
+            }
     batch_s = time.perf_counter() - t0
 
     out = {
@@ -113,9 +126,12 @@ def main() -> None:
             if c.get("tissue_integrity_min") is not None:
                 ax.text(j, i, f"{c['tissue_integrity_min']:.2f}", ha="center", va="center",
                         fontsize=9, color="black")
-            else:
+            elif c.get("ran"):
                 ax.text(j, i, "ran ✓\n(approx.)", ha="center", va="center",
                         fontsize=7.5, color="#6c757d")
+            else:
+                ax.text(j, i, "FAILED", ha="center", va="center",
+                        fontsize=8, color="#c0392b", fontweight="bold")
     ax.set_title("Severity × engine ensemble — min tissue integrity\n"
                  "one orchestrated batch (full-physics engines colored; surrogate ran live)", fontsize=9.5)
     fig.colorbar(im, ax=ax, label="min tissue integrity (1 = intact)")
@@ -127,7 +143,7 @@ def main() -> None:
         "title": "Severity × engine ensemble: minimum tissue integrity",
         "interpretation": "The sepsis core run as a severity {0,1,3} × engine {BioGears, Tellurium exact, surrogate} "
                           "batch, endpoint = minimum tissue integrity (the inflammation core). The two full-physics "
-                          "engines agree bit-for-bit and show the expected severity response (1.00 healthy -> 0.97 mild "
+                          "engines agree to within ~0.1% and show the expected severity response (1.00 healthy -> 0.97 mild "
                           "-> 0.24 severe). BioGears + Tellurium cells are committed heavy runs (studies 01/02/03); the "
                           "surrogate cells run live (a fast approximate tier, flagged). The point is orchestration: one "
                           f"batch over all severity × engine cells, the live surrogate sweep in {batch_s:.1f}s.",

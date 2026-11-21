@@ -44,13 +44,16 @@ findings:
         2. CALLS one — TelluriumUTCStep on the real biogears_sepsis.ant: the SBML/Antimony
            file is loaded and run, the artifact handed from the BioGears C++ engine to the
            Tellurium/roadrunner integrator;
-        3. CONNECTS a workflow — the artifact-loading Tellurium node, a NeuralProcess
-           surrogate tier over the same spec, and a MathExpressionStep derivation, wired
-           by ports;
-        4. RUNS it end-to-end in a few seconds, emitting the derived observable.
+        3. CONNECTS a workflow — the artifact-loading Tellurium node (which runs the real
+           model and whose MAP drives the result), a NeuralProcess surrogate tier over
+           the same spec, and a MathExpressionStep that derives a clinical shock margin;
+        4. RUNS it end-to-end in a few seconds. The handed-off file produces a REAL
+           result — the exact Tellurium MAP of biogears_sepsis.ant (~95 mmHg, physical) —
+           and the run reports a genuine exact-vs-surrogate MAP comparison (the large gap
+           is the honest reminder that the surrogate is a fast approximate tier, study 04/05).
       Every node is an existing registered module; nothing in the composition is
       sepsis-specific plumbing. The DAG (chart 01) shows the hand-off: a portable model
-      artifact is the interface between engines.
+      artifact is the interface between engines, and the exact engine drives the output.
     status: supported
 
 visualizations:

@@ -22,7 +22,7 @@ objective: |
 claim: |
   The engines AGREE where the extraction is faithful and DIVERGE where it is not. At
   rest both hold the StandardMale baseline; under infection the inflammation core
-  (tissue integrity, blood pathogen) matches bit-for-bit (to ~0.1%) in both mild and
+  (tissue integrity, blood pathogen) matches to within ~0.1% in both mild and
   severe arms. They DIVERGE in the hemodynamic layer: the engine fluctuates
   continuously (its nutrition schedule and full homeostatic control) while the
   autonomous extraction is near-flat, and under severe sepsis both reach MAP<65 shock
@@ -36,11 +36,11 @@ claim: |
 
 expected_behavior:
   - name: engines-agree-on-inflammation-diverge-on-hemodynamics
-    statement: "Baseline and the inflammation core agree bit-for-bit; the hemodynamic layer diverges in mechanism and timing, mapped to omitted subsystems."
+    statement: "Baseline and the inflammation core agree to within ~0.1%; the hemodynamic layer diverges in mechanism and timing, mapped to omitted subsystems."
     status: supported
 
 findings:
-  - summary: "Where they agree — baseline parity and a bit-for-bit inflammation core."
+  - summary: "Where they agree — baseline parity and a near-identical (~0.1%) inflammation core."
     detail: |
       At rest both engines hold the StandardMale baseline within tolerance
       (00_baseline_parity). Under infection the inflammation observables — tissue
@@ -66,7 +66,7 @@ visualizations:
   - name: "Functional-difference matrix — divergence mapped to omitted subsystems"
     address: image:charts/03_functional_difference_matrix.svg
     display: secondary
-  - name: "Inflammation core matches bit-for-bit"
+  - name: "Inflammation core matches to within ~0.1%"
     address: image:charts/02_inflammation_match.svg
     display: secondary
 

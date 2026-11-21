@@ -19,49 +19,49 @@
       "nodes": [
         "exact",
         "surrogate",
-        "compare"
+        "shock"
       ],
       "edges": [
         [
-          "surrogate.stores__rate_rules__q_Ao",
-          "compare.a"
-        ],
-        [
-          "surrogate.stores__rate_rules__q_Brain",
-          "compare.b"
-        ],
-        [
-          "surrogate.stores__rate_rules__q_Bone",
-          "compare.c"
+          "surrogate.stores__parameters__MAP",
+          "shock.map"
         ]
       ]
     },
     "run": {
-      "wall_s": 0.465
+      "wall_s": 125.195
     }
   },
   "handoff": {
     "artifact": "/Users/eranagmon/code/simulation-core--simcore-scaffolding/workspace/investigations/biogears-sbml-sepsis/sources/biogears_sepsis.ant",
     "loaded_by": "TelluriumUTCStep",
-    "narrative": "biogears_sepsis.ant (extracted from the BioGears C++ engine) is handed to the Tellurium/roadrunner integrator inside the workflow; the same portable artifact can drive any engine box over the shared ports."
+    "narrative": "biogears_sepsis.ant (extracted from the BioGears C++ engine) is handed to the Tellurium/roadrunner integrator inside the workflow; it runs the real model and its MAP drives the workflow's result. The same portable artifact can drive any engine box over the shared ports."
   },
   "workflow": {
     "ran": true,
-    "emit": {
-      "compare.surrogate_total": 396.40877133607864
-    },
+    "emit": [
+      "exact.species_trajectories",
+      "surrogate.stores__parameters__MAP",
+      "shock.shock_margin"
+    ],
     "provenance": {
       "modules": [
         "MathExpressionStep",
         "NeuralProcess",
         "TelluriumUTCStep"
       ],
-      "wall_ms": 464.1,
+      "wall_ms": 125194.4,
       "lib_versions": {
         "process-bigraph": "1.11.0",
         "bigraph-schema": "1.8.3"
       }
-    },
-    "note": "The compare step derives from the surrogate tier (a fast APPROXIMATE engine, study 04/05). The point here is orchestration: list -> call -> connect -> run, composing registered modules with no new simulation code."
+    }
+  },
+  "result": {
+    "exact_map_final": 95.54,
+    "surrogate_map_final": 0.11,
+    "exact_minus_surrogate_map": 95.43,
+    "derived_shock_margin_from_surrogate": -64.89,
+    "note": "exact_map_final is the real Tellurium run of the handed-off biogears_sepsis.ant (physical, mmHg). The surrogate is a fast APPROXIMATE tier (study 04/05) \u2014 the large exact-vs-surrogate gap is the honest reminder of that. The derivation is a clinical margin (MAP - 65 shock threshold)."
   }
 }

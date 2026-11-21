@@ -22,7 +22,7 @@ claim: |
   Tellurium (exact SBML via roadrunner/CVODE), and a PyTorch surrogate — each a box
   over the same typed observable ports. Swapping engines is swapping one box's
   address. The nine-observable overlay shows the two full-physics engines (BioGears
-  and exact Tellurium) run the same spec and track bit-for-bit on the inflammation
+  and exact Tellurium) run the same spec and track to within ~0.1% on the inflammation
   core; the surrogate is the third interchangeable engine (its speed and approximate
   behavior are study 04). Where the full-physics engines diverge — the hemodynamic
   layer — is the fidelity backbone (study 05).
@@ -41,7 +41,7 @@ findings:
       The same BioGears sepsis core specification runs under the BioGears 8.2.0 C++
       engine and under the exact SBML/Antimony extraction (Tellurium/roadrunner,
       CVODE). Across all nine shared observables the inflammation core (tissue
-      integrity, blood pathogen) overlaps bit-for-bit; the hemodynamic observables
+      integrity, blood pathogen) overlaps to within ~0.1%; the hemodynamic observables
       diverge (studied in 05). Because each engine is a box over the same typed
       observable ports, the swap is a single node-address change — nothing else in
       the composite moves.
@@ -52,7 +52,8 @@ findings:
       learned box over the same ports. The live check (engines_live_check.json)
       confirms it: the Tellurium/roadrunner engine constructs over the real 91-state
       model, and the surrogate runs a full 48 h / 576-step rollout in a fraction of a
-      second, finite and bounded. It is a fast APPROXIMATE tier — not asserted
+      second, finite (though out of physical range — it is degenerate across severity).
+      It is a fast APPROXIMATE tier — not asserted
       clinically accurate (its speed is study 04; the honest accuracy picture is 05).
     status: supported
 
