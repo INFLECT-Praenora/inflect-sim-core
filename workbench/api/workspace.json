@@ -1,1 +1,1 @@
-{"name": "simulation-core", "description": "", "imports": {}, "investigations": [{"name": "biogears-sbml-sepsis", "title": "BioGears sepsis core: engine vs SBML extraction", "status": "running", "description": ""}]}
+{"name": "simulation-core", "description": "", "imports": {}, "investigations": [{"name": "biogears-sbml-sepsis", "title": "Simulation core \u2014 one sepsis model, every engine: composed, ensembled, orchestrated, benchmarked", "status": "running", "description": ""}]}

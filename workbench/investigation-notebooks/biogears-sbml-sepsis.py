@@ -17,21 +17,29 @@ if _os.environ.get("PYTHONUTF8") != "1":
     _os.execv(_sys.executable, [_sys.executable, *_sys.argv])
 
 
-# # BioGears sepsis core: engine vs SBML extraction
+# # Simulation core — one sepsis model, every engine: composed, ensembled, orchestrated, benchmarked
 #
 # _Investigation `biogears-sbml-sepsis` — coder reproduction notebook._
 #
-# **Question.** Does the Antimony/SBML extraction of the BioGears sepsis core reproduce the
-# real BioGears engine run-for-run — not merely against the McDaniel et al. 2019
-# paper milestones — and where does it diverge, and why?
+# **Question.** What can the simulation core do? Taking ONE real model — the BioGears sepsis
+# core — can we show, as runnable artifacts rather than claims:
+#   1. COMPOSITION — run the same spec under interchangeable engines (BioGears C++,
+#      exact SBML via Tellurium, and a PyTorch surrogate) by swapping one box;
+#   2. ENSEMBLES — run a severity × engine batch in one orchestrated sweep;
+#   3. ORCHESTRATION / WORKFLOWS — compose modules into a pipeline and hand an
+#      Antimony/SBML file between engines;
+#   4. PERFORMANCE — profile where the compute goes and how fast each engine is;
+# while staying honest about where the engines agree and where they do not?
 #
-# A side-by-side comparison of the BioGears sepsis core run two ways — the real
-# BioGears 8.2.0 engine (viva-biogears) versus its SBML/Antimony extraction
-# (viva-tellurium) — across a healthy baseline and mild and severe infection,
-# plus two runtime axes: one comparing the Python process-bigraph engine with the
-# Rust viva-core engine on the same composite (the composition engine), and one
-# asking whether a faster or compiled ODE integrator could speed up the SBML model
-# (the numerical solver).
+# A guided tour of the simulation core's capabilities on one real model. The same
+# BioGears sepsis core is run under three interchangeable engines (BioGears C++,
+# exact SBML/Tellurium, PyTorch surrogate) and used to demonstrate four things, each
+# a runnable artifact: COMPOSITION (study 01 — the same spec under three engines by
+# one node swap), ENSEMBLES (study 02 — a severity × engine batch in one sweep),
+# ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes modules into a
+# pipeline and hands an Antimony/SBML file between engines), and PERFORMANCE
+# (study 04 — where the compute goes, and a ~40,000× surrogate tier). A fidelity
+# backbone (study 05) keeps it honest: where the engines agree, and where they do not.
 #
 # ---
 #
@@ -42,10 +50,6 @@ if _os.environ.get("PYTHONUTF8") != "1":
 # 3. The **Setup** cell at the top is collapsed scaffolding (environment + render helpers); expand it only to inspect. Set `RERUN = False` there to render the committed `runs.db` without re-simulating.
 #
 # The prose states the **question and parameters**; the figures each run produces are the results.
-
-# **Competing frameworks**
-#
-# - **Extraction validated against paper milestones only (status quo)**
 
 """Setup — environment & helpers (runs automatically; open only to inspect).
 
@@ -256,26 +260,26 @@ def _render_one(address, config, runs_db, study_yaml, overrides=None):
         return _p.read_text(encoding='utf-8', errors='replace')
     return f'<p style="color:#6b7280">unsupported figure type: {address}</p>'
 
-# ## Study: `01-baseline-parity`
+# ## Study: `00-simulation-core`
 #
 # _study.yaml not found — skipped._
 
-# ## Study: `02-mild-infection`
+# ## Study: `01-composition`
 #
 # _study.yaml not found — skipped._
 
-# ## Study: `03-severe-infection`
+# ## Study: `02-ensembles`
 #
 # _study.yaml not found — skipped._
 
-# ## Study: `04-engine-runtime`
+# ## Study: `03-workflows`
 #
 # _study.yaml not found — skipped._
 
-# ## Study: `05-divergence-mechanism`
+# ## Study: `04-performance`
 #
 # _study.yaml not found — skipped._
 
-# ## Study: `06-ode-integrator-runtime`
+# ## Study: `05-fidelity`
 #
 # _study.yaml not found — skipped._
