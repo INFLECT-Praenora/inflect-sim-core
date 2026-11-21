@@ -78,7 +78,7 @@ packages = ["viva_simulation_core"]
 viva-core = { git = "https://github.com/vivarium-collective/viva-core", rev = "154d94c2f30050715e87aa89af2b93b04d5f77b7" }
 viva-tellurium = { git = "https://github.com/vivarium-collective/viva-tellurium", rev = "c65f8032f76935524912c2b3d384accb805b9e24" }
 viva-biogears = { git = "https://github.com/vivarium-collective/viva-biogears", rev = "8d0201976b2b3a008bc6406fdfe3f980d9bcb77f" }
-vivarium-workbench = { git = "https://github.com/vivarium-collective/vivarium-workbench.git", rev = "f13a597110901d0df28415a23bb884b3213b4dda" }
+vivarium-workbench = { git = "https://github.com/vivarium-collective/vivarium-workbench.git", rev = "df8fe3659016765d95893200dddf249c564c2fad" }
 viva-torch = { git = "https://github.com/vivarium-collective/viva-torch", rev = "bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" }
 
 [tool.pytest.ini_options]
