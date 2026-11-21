@@ -1,0 +1,9 @@
+{
+ "title": "Live interchangeability check",
+ "interpretation": "Live interchangeability check (engines_live_check.json): the exact-SBML engine constructs in 5.0s and the surrogate runs 576 steps in 0.198s, finite over the horizon \u2014 all three engines expose the same observables and the MAP handoff column. The engine is a box you swap.",
+ "caption": "Live interchangeability check (engines_live_check.json): the exact-SBML engine constructs in 5.0s and the surrogate runs 576 steps in 0.198s, finite over the horizon \u2014 all three engines expose the same observables and the MAP handoff column. The engine is a box you swap.",
+ "provenance": {
+  "generator": "charts/make_live_check.py",
+  "data": "engines_live_check.json"
+ }
+}

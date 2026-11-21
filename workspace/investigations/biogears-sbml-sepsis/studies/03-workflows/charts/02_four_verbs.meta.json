@@ -1,0 +1,9 @@
+{
+ "title": "Four-verb workflow",
+ "interpretation": "The four-verb workflow API on one handed-off model (handoff_result.json): list surfaces 76 modules, call loads TelluriumUTCStep in 2.97s, connect wires the surrogate's MAP into the shock node, and run executes the pipeline in 125.2s.",
+ "caption": "The four-verb workflow API on one handed-off model (handoff_result.json): list surfaces 76 modules, call loads TelluriumUTCStep in 2.97s, connect wires the surrogate's MAP into the shock node, and run executes the pipeline in 125.2s.",
+ "provenance": {
+  "generator": "run/make_four_verbs.py",
+  "data": "handoff_result.json"
+ }
+}

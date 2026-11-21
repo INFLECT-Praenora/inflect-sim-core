@@ -61,6 +61,9 @@ visualizations:
   - name: "Same sepsis spec, two full-physics engines, nine observables"
     address: image:charts/01_engine_overlay.svg
     display: primary
+  - name: "Live interchangeability check — the third engine constructs and runs here"
+    address: image:charts/02_live_check.svg
+    display: secondary
 
 baseline:
   - name: sepsis-core-spec

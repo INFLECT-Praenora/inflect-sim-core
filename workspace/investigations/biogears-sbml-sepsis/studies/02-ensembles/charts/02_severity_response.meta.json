@@ -1,0 +1,9 @@
+{
+ "title": "Severity response across engines",
+ "interpretation": "Minimum tissue integrity vs infection severity, from one orchestrated severity\u00d7engine batch (ensemble_results.json). Both full-physics engines agree and show the severity response: near-intact at severity 0\u20131, collapsing to ~0.24 at severity 3.",
+ "caption": "Minimum tissue integrity vs infection severity, from one orchestrated severity\u00d7engine batch (ensemble_results.json). Both full-physics engines agree and show the severity response: near-intact at severity 0\u20131, collapsing to ~0.24 at severity 3.",
+ "provenance": {
+  "generator": "charts/make_severity_response.py",
+  "data": "ensemble_results.json"
+ }
+}

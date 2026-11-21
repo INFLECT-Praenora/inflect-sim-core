@@ -58,6 +58,9 @@ visualizations:
   - name: "Severity × engine ensemble — minimum tissue integrity"
     address: image:charts/01_ensemble_grid.svg
     display: primary
+  - name: "Severity response — full-physics engines agree and track severity"
+    address: image:charts/02_severity_response.svg
+    display: secondary
 
 baseline:
   - name: sepsis-core-spec

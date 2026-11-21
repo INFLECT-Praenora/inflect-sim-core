@@ -1,0 +1,9 @@
+{
+ "title": "Per-step compute \u2014 exact vs surrogate",
+ "interpretation": "Wall-clock per step, measured live (bench_live.json, warm): one exact CVODE step of the real 91-state sepsis model is ~526 ms, versus ~0.040 ms for a surrogate forward pass \u2014 13,015\u00d7 faster. This is where the compute goes: the stiff ODE solve.",
+ "caption": "Wall-clock per step, measured live (bench_live.json, warm): one exact CVODE step of the real 91-state sepsis model is ~526 ms, versus ~0.040 ms for a surrogate forward pass \u2014 13,015\u00d7 faster. This is where the compute goes: the stiff ODE solve.",
+ "provenance": {
+  "generator": "charts/make_compute_bar.py",
+  "data": "bench_live.json"
+ }
+}
