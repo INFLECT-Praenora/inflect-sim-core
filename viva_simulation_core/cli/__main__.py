@@ -163,13 +163,18 @@ def call_cmd(
 
     from viva_simulation_core import call
 
-    cfg = json.loads(config)
+    try:
+        cfg = json.loads(config)
+    except json.JSONDecodeError as e:
+        raise typer.BadParameter(f"--config is not valid JSON: {e}")
     inputs = dict(_parse_override(i) for i in inp)
     try:
         out = call(module, config=cfg, inputs=inputs, steps=steps)
     except KeyError:
         console.print(f"[red]unknown module: {module}[/red]")
         raise typer.Exit(code=2)
+    except Exception as e:  # bad config / inputs / run
+        raise typer.BadParameter(str(e))
     for key, value in out.items():
         console.print(f"{key} = {value}")
 
@@ -185,9 +190,15 @@ def workflow_cmd(
 
     from viva_simulation_core import run as run_workflow
 
-    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    try:
+        spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise typer.BadParameter(f"{spec_file} is not valid JSON: {e}")
     overrides = dict(_parse_override(o) for o in override)
-    obs = run_workflow(spec, steps=steps, overrides=overrides)
+    try:
+        obs = run_workflow(spec, steps=steps, overrides=overrides)
+    except Exception as e:  # unknown module / bad wiring / bad run
+        raise typer.BadParameter(str(e))
     for key, value in obs.items():
         console.print(f"{key} = {value}")
 
@@ -201,7 +212,10 @@ def serve_cmd(
     """Serve a model as a stepping handle; print its observables (and optionally step it)."""
     from viva_simulation_core import serve
 
-    model = serve(model_file.read_text(encoding="utf-8"), model_format)
+    try:
+        model = serve(model_file.read_text(encoding="utf-8"), model_format)
+    except Exception as e:  # unparseable / unloadable model
+        raise typer.BadParameter(f"could not load model: {e}")
     console.print("observables: " + ", ".join(model.observables()))
     if steps > 0:
         final = model.predict(steps)

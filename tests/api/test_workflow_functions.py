@@ -99,6 +99,35 @@ def test_registry_delete_evicts(core):
 
 # --- the tiered worked workflow: four real modules compose ------------------
 
+def test_registry_run_fans_out_to_multiple_consumers(core):
+    # one producer output feeds two consumers (port_store reuse path)
+    spec = WorkflowSpec(
+        nodes=[
+            WorkflowNode(id="p", module="MathExpressionStep",
+                         config={"expressions": [{"out": "a", "expr": "x + 1"}]}),
+            WorkflowNode(id="c1", module="MathExpressionStep",
+                         config={"expressions": [{"out": "b", "expr": "a * 10"}]}),
+            WorkflowNode(id="c2", module="MathExpressionStep",
+                         config={"expressions": [{"out": "c", "expr": "a * 100"}]}),
+        ],
+        wires=[WorkflowWire(**{"from": "p.a", "to": "c1.a"}),
+               WorkflowWire(**{"from": "p.a", "to": "c2.a"})],
+        emit=["c1.b", "c2.c"],
+    )
+    reg = wf.WorkflowRegistry(core_provider=lambda: core)
+    wid, _ = reg.define(spec)
+    obs = reg.run(wid, n_steps=1, overrides={"p.x": 5.0}).observables
+    assert obs["c1.b"] == 60.0   # (5+1) * 10
+    assert obs["c2.c"] == 600.0  # (5+1) * 100
+
+
+def test_list_modules_introspects_every_module_without_raising(core):
+    # resilience: a single module that fails to introspect must not take down the list
+    cards = wf.list_modules(core)
+    assert len(cards) >= 4
+    assert all(c.name for c in cards)
+
+
 def test_tiered_spec_composes_four_real_modules():
     spec = tiered_workflow_spec(checkpoint="unused.pt", timestep=1.0,
                                 feature_keys=["S1", "S2", "S3"], include_biogears=True)

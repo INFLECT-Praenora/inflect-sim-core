@@ -60,3 +60,36 @@ def test_cli_serve_prints_observables(tmp_path):
     r = runner.invoke(app, ["serve", str(f), "--format", "antimony"])
     assert r.exit_code == 0, r.output
     assert "S1" in r.output
+
+
+def _assert_clean_failure(r):
+    """Non-zero exit with a readable message, never a leaked (traceback-producing)
+    exception — only typer's own SystemExit is acceptable."""
+    assert r.exit_code != 0
+    assert r.exception is None or isinstance(r.exception, SystemExit), repr(r.exception)
+
+
+def test_cli_call_bad_config_json_fails_cleanly():
+    r = runner.invoke(app, ["call", "MathExpressionStep", "--config", "{not json"])
+    _assert_clean_failure(r)
+
+
+def test_cli_workflow_unknown_module_fails_cleanly(tmp_path):
+    f = tmp_path / "wf.json"
+    f.write_text(json.dumps({"nodes": [{"id": "n", "module": "NoSuchModule"}], "wires": [], "emit": []}))
+    r = runner.invoke(app, ["workflow", str(f)])
+    _assert_clean_failure(r)
+
+
+def test_cli_workflow_malformed_json_fails_cleanly(tmp_path):
+    f = tmp_path / "bad.json"
+    f.write_text("{not valid json")
+    r = runner.invoke(app, ["workflow", str(f)])
+    _assert_clean_failure(r)
+
+
+def test_cli_serve_bad_model_fails_cleanly(tmp_path):
+    f = tmp_path / "bad.ant"
+    f.write_text("this is not antimony @@@")
+    r = runner.invoke(app, ["serve", str(f), "--format", "antimony"])
+    _assert_clean_failure(r)
