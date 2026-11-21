@@ -142,6 +142,72 @@ def run_composite(
         console.print(composite.state)
 
 
+@app.command(name="list")
+def list_modules_cmd() -> None:
+    """List every registered module (the unified registry)."""
+    from viva_simulation_core import catalog
+
+    for card in catalog():
+        console.print(f"{card.name}  [{card.kind}]")
+
+
+@app.command(name="call")
+def call_cmd(
+    module: str = typer.Argument(..., help="Module name, e.g. MathExpressionStep"),
+    config: str = typer.Option("{}", "--config", help="JSON config for the module."),
+    inp: list[str] = typer.Option([], "--input", help="Input as key=value (repeatable)."),
+    steps: int = typer.Option(1, "--steps", help="Steps to run."),
+) -> None:
+    """Run one module as a 1-node composite and print its outputs."""
+    import json
+
+    from viva_simulation_core import call
+
+    cfg = json.loads(config)
+    inputs = dict(_parse_override(i) for i in inp)
+    try:
+        out = call(module, config=cfg, inputs=inputs, steps=steps)
+    except KeyError:
+        console.print(f"[red]unknown module: {module}[/red]")
+        raise typer.Exit(code=2)
+    for key, value in out.items():
+        console.print(f"{key} = {value}")
+
+
+@app.command(name="workflow")
+def workflow_cmd(
+    spec_file: Path = typer.Argument(..., exists=True, help="Workflow spec JSON (nodes/wires/emit)."),
+    steps: int = typer.Option(10, "--steps", help="Steps to run."),
+    override: list[str] = typer.Option([], "--override", help="node.port=value (repeatable)."),
+) -> None:
+    """Connect a workflow spec and run it; print the emitted observables."""
+    import json
+
+    from viva_simulation_core import run as run_workflow
+
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    overrides = dict(_parse_override(o) for o in override)
+    obs = run_workflow(spec, steps=steps, overrides=overrides)
+    for key, value in obs.items():
+        console.print(f"{key} = {value}")
+
+
+@app.command(name="serve")
+def serve_cmd(
+    model_file: Path = typer.Argument(..., exists=True, help="SBML/Antimony model file."),
+    model_format: str = typer.Option("antimony", "--format", help="antimony | sbml."),
+    steps: int = typer.Option(0, "--steps", help="If > 0, step the model and print the final state."),
+) -> None:
+    """Serve a model as a stepping handle; print its observables (and optionally step it)."""
+    from viva_simulation_core import serve
+
+    model = serve(model_file.read_text(encoding="utf-8"), model_format)
+    console.print("observables: " + ", ".join(model.observables()))
+    if steps > 0:
+        final = model.predict(steps)
+        console.print({k: v[-1] for k, v in final.items()})
+
+
 def main() -> None:
     app()
 

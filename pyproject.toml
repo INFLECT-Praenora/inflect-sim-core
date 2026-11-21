@@ -49,6 +49,7 @@ surrogate = []
 
 [project.scripts]
 simulation-core = "viva_simulation_core.cli.__main__:main"
+viva-sim = "viva_simulation_core.cli.__main__:main"
 
 [build-system]
 requires = ["hatchling"]
