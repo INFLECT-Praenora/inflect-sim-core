@@ -48,11 +48,12 @@ def test_served_model_predict_returns_n_points(served):
     assert traj["S1"][0] > traj["S1"][-1]  # monotone decay over the window
 
 
-def test_served_model_reset_restores_initial(served):
+def test_served_model_reset_returns_to_initial_trajectory(served):
     served.reset()
-    served.predict(5)
+    first = served.step()["S1"]   # fresh model's first-step value
+    served.predict(10)            # advance far
     served.reset()
-    assert abs(served.observables_now()["S1"] - 10.0) < 1e-6
+    assert abs(served.step()["S1"] - first) < 1e-9  # reset -> same fresh trajectory
 
 
 def test_served_model_overrides_seed_initial(served):

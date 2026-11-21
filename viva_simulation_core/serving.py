@@ -1,56 +1,76 @@
 """Serve a model as a stepping API — the lean replacement for the twin service.
 
-``ServedModel`` loads an SBML/Antimony model and exposes an in-process stepping
-handle (``step`` / ``predict`` / ``reset``); ``model_server`` wraps one instance
-in a single-route ASGI app (``POST /step``) for the api-call demo. No worker
-pool, ownership, TTL, or persistence — just the capability.
+``ServedModel`` wraps the model as a ``viva_tellurium.TelluriumProcess`` (a
+process-bigraph module) and advances it through the module's own ``update()`` —
+we never drive roadrunner directly, so serving goes through the same wrapped-module
+contract as every other engine. ``model_server`` wraps one instance in a
+single-route ASGI app (``POST /step``) for the api-call demo. No worker pool,
+ownership, TTL, or persistence — just the capability.
+
+Because the Tellurium module reports state only after an interval is simulated,
+``ServedModel`` observes state *after* stepping (not at t=0).
 """
 from __future__ import annotations
 
 from typing import Any
 
-from .api.modeling import load_engine, infer_observables
+from viva_tellurium import TelluriumProcess
 
 
 class ServedModel:
-    """A loaded model you can step and read. Stateful: ``step``/``predict`` advance
-    the engine; ``reset`` returns it to initial conditions."""
+    """A model served as a stepping handle, backed by a ``TelluriumProcess``.
 
-    def __init__(self, source: str, model_format: str = "antimony") -> None:
-        self._rr = load_engine(source, model_format)
-        self._obs = infer_observables(self._rr)  # {id: id}, incl. rule targets
+    Stateful: ``step`` / ``predict`` advance the module; ``reset`` rebuilds it at
+    initial conditions.
+    """
 
-    def observables(self) -> dict[str, str]:
-        """The readable observable ids (floating species, non-constant globals, rule targets)."""
-        return dict(self._obs)
+    def __init__(self, source: str, model_format: str = "antimony", core: Any = None) -> None:
+        from .core import build_core
 
-    def observables_now(self) -> dict[str, float]:
-        """Current value of every observable."""
-        return {k: float(self._rr[k]) for k in self._obs}
+        self._core = core if core is not None else build_core()
+        self._config = {"model": source, "model_format": model_format, "bulk_species": False}
+        self._proc = TelluriumProcess(self._config, self._core)
+        self._ids: list[str] | None = None
 
-    def _apply(self, overrides: dict | None) -> None:
-        for k, v in (overrides or {}).items():
-            self._rr[k] = v
+    def _advance(self, overrides: dict | None, dt: float) -> dict[str, float]:
+        """Advance one interval through the module and return species ∪ parameters."""
+        state = {"species": dict(overrides)} if overrides else {}
+        result = self._proc.update(state, dt)
+        obs = {**(result.get("species") or {}), **(result.get("parameters") or {})}
+        obs = {k: float(v) for k, v in obs.items()}
+        self._ids = sorted(obs)
+        return obs
+
+    def observables(self) -> list[str]:
+        """The observable ids (floating species + globals, incl. rule targets).
+
+        Discovered without advancing the served model: a throwaway module instance
+        is stepped once to read the ids (the Tellurium module reports them only
+        after an interval), then discarded.
+        """
+        if self._ids is None:
+            probe = TelluriumProcess(self._config, self._core)
+            r = probe.update({}, 1.0)
+            self._ids = sorted({**(r.get("species") or {}), **(r.get("parameters") or {})})
+        return list(self._ids)
 
     def step(self, overrides: dict | None = None, dt: float = 1.0) -> dict[str, float]:
-        """Seed any overrides, advance one step of size ``dt``, return the new state."""
-        self._apply(overrides)
-        t = float(self._rr.model.getTime())
-        self._rr.oneStep(t, dt)
-        return self.observables_now()
+        """Seed any overrides, advance one interval of size ``dt``, return the new state."""
+        return self._advance(overrides, dt)
 
     def predict(self, n: int, overrides: dict | None = None, dt: float = 1.0) -> dict[str, list]:
-        """Seed any overrides, advance ``n`` steps, return a per-observable trajectory
-        of length ``n`` (the state after each step)."""
-        self._apply(overrides)
-        t0 = float(self._rr.model.getTime())
-        self._rr.selections = list(self._obs)
-        data = self._rr.simulate(t0, t0 + n * dt, n + 1)  # rows t0..tn; drop t0
-        return {obs: [float(v) for v in data[1:, j]] for j, obs in enumerate(self._obs)}
+        """Advance ``n`` intervals, return a per-observable trajectory of length ``n``
+        (the state after each step). ``overrides`` seed the first step only."""
+        traj: dict[str, list] = {}
+        for i in range(n):
+            obs = self._advance(overrides if i == 0 else None, dt)
+            for k, v in obs.items():
+                traj.setdefault(k, []).append(v)
+        return traj
 
     def reset(self) -> None:
-        """Return the engine to initial conditions."""
-        self._rr.reset()
+        """Rebuild the module at initial conditions (observable ids are unchanged)."""
+        self._proc = TelluriumProcess(self._config, self._core)
 
 
 def model_server(served: ServedModel) -> Any:

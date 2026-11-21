@@ -214,9 +214,10 @@ def serve_cmd(
 
     try:
         model = serve(model_file.read_text(encoding="utf-8"), model_format)
+        observables = model.observables()  # the module loads lazily on first use
     except Exception as e:  # unparseable / unloadable model
         raise typer.BadParameter(f"could not load model: {e}")
-    console.print("observables: " + ", ".join(model.observables()))
+    console.print("observables: " + ", ".join(observables))
     if steps > 0:
         final = model.predict(steps)
         console.print({k: v[-1] for k, v in final.items()})
