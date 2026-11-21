@@ -33,7 +33,7 @@ from viva_simulation_core.composites.sepsis_sbml_state import build_sepsis_state
 HERE = Path(__file__).parent
 INV = HERE.parents[2]
 CKPT = INV / "assets" / "surrogate_stable2.pt"
-STUDIES = INV / "studies"
+DATA = HERE.parent / "data"   # self-contained copies of the committed milestones
 SEVS = [0, 1, 3]
 INTERVAL = 300.0
 N_STEPS = 576
@@ -43,8 +43,7 @@ def _committed_ti(engine_tag: str, sev: int):
     """tissue_integrity_min from a committed milestones file, or the healthy baseline."""
     if sev == 0:
         return 1.0, "healthy-baseline"  # no infection seeded; tissue integrity holds at 1.0
-    study = {1: "02-mild-infection", 3: "03-severe-infection"}[sev]
-    m = STUDIES / study / "out" / f"{engine_tag}-sev{sev}.milestones.json"
+    m = DATA / f"{engine_tag}-sev{sev}.milestones.json"
     d = json.loads(m.read_text())
     return float(d["tissue_integrity_min"]), "committed"
 
@@ -134,8 +133,8 @@ def main() -> None:
                           f"batch over all severity × engine cells, the live surrogate sweep in {batch_s:.1f}s.",
         "caption": "Minimum tissue integrity across severity × engine, gathered as one batch. Full-physics engines agree "
                    "and track severity; the surrogate is the fast approximate tier (live cells flagged).",
-        "provenance": "BioGears/Tellurium: committed tissue_integrity_min from studies/0{1,2,3}-*/out/*.milestones.json "
-                      "(sev0 = healthy baseline, tissue integrity holds at 1.0). Surrogate: live rollout via "
+        "provenance": "BioGears/Tellurium: committed tissue_integrity_min from the severity runs' milestones "
+                      "(copied into this study's data/; sev0 = healthy baseline, tissue integrity holds at 1.0). Surrogate: live rollout via "
                       "viva_torch NeuralProcess. Script: make_ensemble_grid.py; data: ensemble_results.json.",
     }
     (HERE / "01_ensemble_grid.meta.json").write_text(json.dumps(meta, indent=2))
