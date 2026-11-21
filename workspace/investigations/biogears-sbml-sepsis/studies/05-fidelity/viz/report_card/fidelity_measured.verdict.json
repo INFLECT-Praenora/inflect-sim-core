@@ -1,0 +1,37 @@
+{
+  "schema": "report_card_verdict/v2",
+  "model_ref": "05-fidelity",
+  "reference_model": "",
+  "generated": "",
+  "overall": "within_tol",
+  "groups": {
+    "fidelity": {
+      "verdict": "within_tol",
+      "axes": [
+        {
+          "id": "inflammation_agreement",
+          "label": "Inflammation core agrees engine vs SBML (|\u0394| %)",
+          "verdict": "within_tol",
+          "value": 0.004342796891107776,
+          "meter": 0.5043427968911077,
+          "detail": null,
+          "expected": {
+            "kind": "band",
+            "value": null,
+            "low": 0.0,
+            "high": 0.5,
+            "op": "~=",
+            "tol": 0.05,
+            "statement": null,
+            "units": null
+          },
+          "margin": 0.004342796891107776,
+          "severity": "hard",
+          "units": null,
+          "knob": null,
+          "citation": null
+        }
+      ]
+    }
+  }
+}

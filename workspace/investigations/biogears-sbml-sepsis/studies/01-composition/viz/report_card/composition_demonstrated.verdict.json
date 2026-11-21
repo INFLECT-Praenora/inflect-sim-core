@@ -1,0 +1,60 @@
+{
+  "schema": "report_card_verdict/v2",
+  "model_ref": "01-composition",
+  "reference_model": "",
+  "generated": "",
+  "overall": "within_tol",
+  "groups": {
+    "composition": {
+      "verdict": "within_tol",
+      "axes": [
+        {
+          "id": "tellurium_builds",
+          "label": "Tellurium engine constructs over the real 91-state model",
+          "verdict": "within_tol",
+          "value": 1.0,
+          "meter": 0.6666666666666666,
+          "detail": null,
+          "expected": {
+            "kind": "band",
+            "value": null,
+            "low": 0.5,
+            "high": 1.5,
+            "op": "~=",
+            "tol": 0.05,
+            "statement": null,
+            "units": null
+          },
+          "margin": 0.5,
+          "severity": "hard",
+          "units": null,
+          "knob": null,
+          "citation": null
+        },
+        {
+          "id": "surrogate_runs",
+          "label": "Surrogate (third interchangeable engine) runs finite",
+          "verdict": "within_tol",
+          "value": 1.0,
+          "meter": 0.6666666666666666,
+          "detail": null,
+          "expected": {
+            "kind": "band",
+            "value": null,
+            "low": 0.5,
+            "high": 1.5,
+            "op": "~=",
+            "tol": 0.05,
+            "statement": null,
+            "units": null
+          },
+          "margin": 0.5,
+          "severity": "hard",
+          "units": null,
+          "knob": null,
+          "citation": null
+        }
+      ]
+    }
+  }
+}
