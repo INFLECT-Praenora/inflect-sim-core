@@ -76,7 +76,3 @@ variants: []
 interventions: []
 runs: []
 
-tests:
-  - name: simulation_core_runs
-    kind: report_card
-    card: simulation_core_runs

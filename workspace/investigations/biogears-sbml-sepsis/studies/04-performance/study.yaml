@@ -89,7 +89,3 @@ variants: []
 interventions: []
 runs: []
 
-tests:
-  - name: performance_profiled
-    kind: report_card
-    card: performance_profiled

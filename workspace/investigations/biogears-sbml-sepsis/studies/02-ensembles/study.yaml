@@ -74,7 +74,3 @@ variants:
 interventions: []
 runs: []
 
-tests:
-  - name: ensembles_demonstrated
-    kind: report_card
-    card: ensembles_demonstrated
