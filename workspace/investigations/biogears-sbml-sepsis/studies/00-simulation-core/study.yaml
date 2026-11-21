@@ -1,0 +1,77 @@
+schema_version: 3
+name: 00-simulation-core
+investigation: biogears-sbml-sepsis
+status: ran
+title: "The simulation core — one sepsis model, every engine"
+confidence: Accepted
+
+parent_studies: []
+
+question: |
+  What can the simulation core do? This investigation takes ONE real model — the
+  BioGears sepsis core — and shows four capabilities on it, each as something you
+  can open and run, not a claim on a slide:
+    1. COMPOSITION  — run the same spec under interchangeable engines (study 01).
+    2. ENSEMBLES    — run a severity × engine batch in one orchestrated sweep (study 02).
+    3. ORCHESTRATION / WORKFLOWS — compose modules into a pipeline and hand an
+       Antimony/SBML file between engines (study 03).
+    4. PERFORMANCE  — profile where the compute goes and how fast each engine is (study 04).
+  A fidelity backbone (study 05) keeps it honest: where the engines agree, and where
+  they do not.
+
+objective: |
+  Orient the reader. Name the one model, the engines it runs under, and the four
+  capability studies — so the rest of the investigation reads as a guided tour of
+  what the simulation core can do.
+
+claim: |
+  The simulation core runs one sepsis specification under three interchangeable
+  engines — BioGears (C++ physiology), Tellurium (exact SBML via roadrunner/CVODE),
+  and a PyTorch surrogate — composes and orchestrates them into workflows (including
+  passing an Antimony/SBML file between engines), runs them as ensembles, and does it
+  performantly (seconds to hours across engines; a ~40,000× surrogate tier). Every
+  capability below is a runnable artifact; the surrogate is a fast approximate tier
+  (bounded, not yet clinically accurate), not a drop-in replacement.
+
+expected_behavior:
+  - name: one-spec-many-engines
+    statement: "One sepsis specification runs under BioGears, Tellurium, and the PyTorch surrogate through one typed interface."
+    status: supported
+  - name: capabilities-are-runnable
+    statement: "Each of the four capabilities (composition, ensembles, orchestration/workflows, performance) is demonstrated by an artifact that runs, not by assertion."
+    status: supported
+
+findings:
+  - summary: "One model, every engine — the same sepsis spec runs under three interchangeable engines by swapping one box."
+    detail: |
+      The BioGears sepsis core is ONE specification. Each engine is a box over the
+      same typed observable ports, so swapping engines is swapping one node address —
+      the wiring, the emitters, and the analysis are unchanged:
+        - BioGearsProcess — the original BioGears 8.2.0 C++ physiology engine;
+        - TelluriumUTCStep / TelluriumProcess — the exact SBML/Antimony extraction, integrated by roadrunner (CVODE);
+        - NeuralProcess — a learned PyTorch surrogate of the same core.
+      This is the composition pillar; study 01 shows the three engines side by side.
+    status: supported
+  - summary: "The four pillars, each a runnable study."
+    detail: |
+      - COMPOSITION (study 01): the same spec under three engines, one node swapped.
+      - ENSEMBLES (study 02): a severity × engine batch run as one orchestrated sweep.
+      - ORCHESTRATION / WORKFLOWS (study 03): the four-verb API composes modules into a
+        pipeline and hands an Antimony/SBML file between engines.
+      - PERFORMANCE (study 04): where the compute goes (stiff ODE), and the surrogate's
+        ~40,000× speedup.
+      - FIDELITY (study 05): where the engines agree, and where they do not — so the
+        demonstration stays credible.
+    status: supported
+
+visualizations: []
+
+baseline:
+  - name: sepsis-core-spec
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+    config: {severity: 3}
+    note: "The one sepsis specification this investigation runs under every engine (shown here via the exact Tellurium/SBML path)."
+
+variants: []
+interventions: []
+runs: []
