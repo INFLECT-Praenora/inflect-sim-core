@@ -1466,6 +1466,78 @@
       _esc(label || 'Download') + '</a>';
   }
 
+  // The file URL for a workspace-relative path — same resolution as the download
+  // link (snapshot → GitHub raw base; live → '/' + path), but WITHOUT the download
+  // attribute, so it can be viewed inline.
+  function _inputsFileUrl(path) {
+    var cfg = window.__DASH_CONFIG__ || {};
+    var rel = String(path || '').replace(/^\/+/, '');
+    return (cfg.mode === 'snapshot' && cfg.inputsDownloadBase)
+      ? String(cfg.inputsDownloadBase).replace(/\/+$/, '') + '/' + rel
+      : '/' + rel;
+  }
+
+  // A "View" button that opens the file in an in-page modal (args URL-encoded so
+  // quotes/HTML in names never break the inline handler).
+  function _inputsViewBtn(path, name) {
+    if (!path) return '';
+    var u = encodeURIComponent(_inputsFileUrl(path));
+    var n = encodeURIComponent(String(name || path));
+    return '<button class="action-btn" style="font-size:0.8em;padding:1px 8px;' +
+      'margin-right:5px" onclick="_viewResource(\'' + u + '\',\'' + n + '\')">👁 View</button>';
+  }
+
+  // Extensions we can render inline as text; PDFs go in an <iframe>; anything else
+  // falls back to Download / open-in-new-tab.
+  var _RES_TEXT_EXT = ['xml', 'sbml', 'ant', 'txt', 'json', 'csv', 'tsv', 'bib',
+    'md', 'yaml', 'yml', 'html', 'log', 'py', 'r', 'csl'];
+
+  window._viewResource = function (encUrl, encName) {
+    _openResourceModal(decodeURIComponent(encUrl), decodeURIComponent(encName));
+  };
+
+  function _openResourceModal(url, name) {
+    var d = document;
+    var ext = (String(name || url).split('.').pop() || '').toLowerCase();
+    var overlay = d.createElement('div');
+    overlay.className = 'res-view-overlay';
+    var close = function () { if (overlay.parentNode) d.body.removeChild(overlay); d.removeEventListener('keydown', onKey); };
+    var onKey = function (e) { if (e.key === 'Escape') close(); };
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    var head = '<div class="res-view-head"><strong class="res-view-title">' + _esc(name) + '</strong>' +
+      '<span style="flex:1"></span>' +
+      '<a class="action-btn" href="' + _esc(url) + '" download style="text-decoration:none">⬇ Download</a>' +
+      '<a class="action-btn" href="' + _esc(url) + '" target="_blank" rel="noopener" style="text-decoration:none">↗ New tab</a>' +
+      '<button class="action-btn res-view-close" title="Close (Esc)">✕</button></div>';
+    var body;
+    if (ext === 'pdf') {
+      body = '<iframe class="res-view-frame" src="' + _esc(url) + '" title="' + _esc(name) + '"></iframe>';
+    } else if (_RES_TEXT_EXT.indexOf(ext) !== -1) {
+      body = '<pre class="res-view-pre">Loading…</pre>';
+    } else {
+      body = '<div class="res-view-note">No inline preview for <code>.' + _esc(ext) +
+        '</code> — use Download or open in a new tab.</div>';
+    }
+    var panel = d.createElement('div');
+    panel.className = 'res-view-panel';
+    panel.innerHTML = head + '<div class="res-view-body">' + body + '</div>';
+    overlay.appendChild(panel);
+    d.body.appendChild(overlay);
+    panel.querySelector('.res-view-close').addEventListener('click', close);
+    d.addEventListener('keydown', onKey);
+
+    if (_RES_TEXT_EXT.indexOf(ext) !== -1) {
+      var pre = panel.querySelector('.res-view-pre');
+      fetch(url).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(function (t) { pre.textContent = t; })
+        .catch(function (err) {
+          pre.textContent = 'Could not load this file in the browser (' + err.message +
+            '). Use Download or “New tab”.';
+        });
+    }
+  }
+
   // Render a datasets list (name + path + download) as a compact table, or a
   // "none" line.
   function _inputsDatasetsHtml(datasets) {
@@ -1475,11 +1547,12 @@
       var name = _esc(ds.name || ds.path || '(unnamed)');
       var path = ds.path || '';
       var src = ds.path || ds.url || '';
+      var view = path ? _inputsViewBtn(path, ds.name || ds.path) : '';
       var dl = path ? _inputsDownloadLink(path, 'Download') :
         (ds.url ? '<a href="' + _esc(ds.url) + '" target="_blank" rel="noopener" ' +
           'class="action-btn" style="font-size:0.8em;padding:1px 8px;text-decoration:none">↗ Source</a>' : '');
       return '<tr class="res-item"><td><code>' + name + '</code></td><td><small class="muted">' +
-        _esc(src) + '</small></td><td style="text-align:right">' + dl + '</td></tr>';
+        _esc(src) + '</small></td><td style="text-align:right;white-space:nowrap">' + view + dl + '</td></tr>';
     }).join('');
     return '<table><thead><tr><th>Name</th><th>Source</th><th></th></tr></thead><tbody>' +
       rows + '</tbody></table>';
@@ -1533,7 +1606,8 @@
       : '';
 
     var actions = '';
-    if (ref.pdf_path) actions += ' ' + _inputsDownloadLink(ref.pdf_path, 'PDF');
+    if (ref.pdf_path) actions += ' ' + _inputsViewBtn(ref.pdf_path, (ref.title || key || 'reference') + '.pdf') +
+      _inputsDownloadLink(ref.pdf_path, 'PDF');
 
     var bibtex = ref.bibtex || '';
     var bibBlock = '';
@@ -1628,7 +1702,8 @@
         doc = doc || {};
         var name = _esc(doc.name || doc.path || '(unnamed)');
         var path = doc.path ? ' <small class="muted">' + _esc(doc.path) + '</small>' : '';
-        var dl = doc.path ? ' ' + _inputsDownloadLink(doc.path, 'Download') : '';
+        var dl = doc.path ? ' ' + _inputsViewBtn(doc.path, doc.name || doc.path) +
+          _inputsDownloadLink(doc.path, 'Download') : '';
         var desc = doc.description
           ? '<div class="muted" style="font-size:0.85em;margin-top:2px">' +
             _esc(doc.description) + '</div>'
@@ -10807,8 +10882,49 @@
       _applyInvOverviewState();
     }
     if (typeof _openInvestigationDetail === 'function') _openInvestigationDetail(name);
+    _renderStudyCompletenessBanner(name, mountEl);
   }
   window._renderInvestigationDetailInto = _renderInvestigationDetailInto;
+
+  // Study-completeness gate banner (published read-only bundle only). publish.py
+  // bakes api/study-completeness/<inv>.json listing studies that LOOK done but are
+  // inconsistent (claims done with no runs; completed but verdict pending; declares
+  // a composite that doesn't resolve). A loud, non-blocking strip at the top of the
+  // investigation page so a reviewer doesn't read it as complete. Removed when the
+  // investigation is clean or in live mode (DataSource returns null).
+  function _renderStudyCompletenessBanner(name, mountEl) {
+    var host = mountEl || document.getElementById('ws-context') || document.body;
+    var existing = document.getElementById('inv-completeness-banner');
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+    if (!(window.DataSource && window.DataSource.loadStudyCompleteness)) return;
+    window.DataSource.loadStudyCompleteness(name).then(function (d) {
+      if (window._currentIset && window._currentIset !== name) return;  // stale
+      var items = (d && d.findings) || [];
+      if (!items.length) return;
+      // One line per flagged study (deduped), with the plain-English reason.
+      var _label = {
+        status_claims_done_no_runs_recorded: 'claims done but records no runs',
+        completed_but_verdict_pending: 'marked complete but its verdict is still pending',
+        declared_composite_unresolved: 'declares a model composite that does not resolve'
+      };
+      var rows = items.map(function (f) {
+        return '<li><strong>' + _esc(f.study || '?') + '</strong> — ' +
+          _esc(_label[f.check] || f.check || 'incomplete') + '</li>';
+      }).join('');
+      var banner = document.createElement('div');
+      banner.id = 'inv-completeness-banner';
+      banner.setAttribute('role', 'status');
+      banner.style.cssText = 'margin:0 0 10px;padding:9px 12px;border:1px solid #f59e0b;' +
+        'border-left-width:4px;border-radius:6px;background:#fffbeb;color:#92400e;' +
+        'font-size:0.9em;line-height:1.4';
+      banner.innerHTML =
+        '<div style="font-weight:700;margin-bottom:3px">⚠ ' + items.length +
+          ' stud' + (items.length === 1 ? 'y looks' : 'ies look') + ' done but need attention</div>' +
+        '<ul style="margin:2px 0 0;padding-left:18px">' + rows + '</ul>';
+      host.insertBefore(banner, host.firstChild);
+    }).catch(function () { /* best-effort; no banner on failure */ });
+  }
+  window._renderStudyCompletenessBanner = _renderStudyCompletenessBanner;
 
   // Report / Notebook actions in the workspace header (#ws-actions), moved off
   // the detail-view header (hidden by _renderInvestigationDetailInto).
@@ -10849,7 +10965,7 @@
       '<span class="inv-report-wrap" style="position:relative;display:inline-flex">' +
         '<button class="btn-mini" id="inv-report-btn" aria-haspopup="true" ' +
           'aria-label="Shortcuts" title="Shortcuts — open in the browser or download (report, notebook, figures)" onclick="_toggleInvReportMenu(event)">Shortcuts ▾</button>' +
-        '<div id="inv-report-menu" role="menu" style="display:none;position:absolute;left:0;top:100%;margin-top:4px;' +
+        '<div id="inv-report-menu" role="menu" style="display:none;position:absolute;right:0;left:auto;top:100%;margin-top:4px;' +
           'background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.14);z-index:70;min-width:190px;padding:4px">' +
           _sec('Report') +
           '<button ' + _mi + ' onclick="_closeInvReportMenu();window._vivReportOpen(event)">Open in browser</button>' +
@@ -12494,11 +12610,25 @@
     var mount = document.getElementById('inv-attention-mount');
     var tab = document.querySelector('.inv-brief-tab[onclick*="attention"]');
     if (!mount && !tab) return;
-    fetch('/api/needs-attention?investigation=' + encodeURIComponent(name),
-          {headers: {Accept: 'application/json'}})
-      .then(function (r) { return r.ok ? r.json() : null; })
+    // Clear the "Scanning…" spinner with a note — so the tab never hangs on a
+    // 404 / failed load (e.g. a snapshot whose needs-attention JSON is missing,
+    // or a transient error). Only touch the mount when it's still OUR scan.
+    var _clear = function (msg) {
+      if (window._currentIset && window._currentIset !== name) return;
+      var m = document.getElementById('inv-attention-mount');
+      if (m) m.innerHTML = '<div class="muted" style="padding:6px 2px">' + msg + '</div>';
+    };
+    // Snapshot-aware: DataSource maps this to the baked
+    // /api/needs-attention/<slug>.json offline; live hits the query endpoint.
+    // Raw fetch (the .json-less live path) 404s in a bundle and hangs the tab.
+    var _load = (window.DataSource && window.DataSource.loadNeedsAttention)
+      ? window.DataSource.loadNeedsAttention(name)
+      : fetch('/api/needs-attention?investigation=' + encodeURIComponent(name),
+              {headers: {Accept: 'application/json'}})
+          .then(function (r) { return r.ok ? r.json() : null; });
+    _load
       .then(function (d) {
-        if (!d || !d.summary) return;
+        if (!d || !d.summary) { _clear('Needs-attention scan unavailable.'); return; }
         if (window._currentIset && window._currentIset !== name) return;  // stale
         window._lastNeedsAttention = d;   // the popover/tab read this
         var total = (d.summary.total) || 0;
@@ -12526,7 +12656,7 @@
             tb.title = _q.label;   // "No studies yet" / "No runs yet" / "✓ All clear"
           }
         }
-      }).catch(function () { /* tolerant — leave the scanning note */ });
+      }).catch(function () { _clear('Needs-attention scan unavailable.'); });
   }
   window._renderInvNeedsAttention = _renderInvNeedsAttention;
 
