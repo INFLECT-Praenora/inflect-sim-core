@@ -1,0 +1,8 @@
+{
+  "nodes": [
+    {"id": "inc",   "module": "MathExpressionStep", "config": {"expressions": [{"out": "a", "expr": "x + 1"}]}},
+    {"id": "scale", "module": "MathExpressionStep", "config": {"expressions": [{"out": "b", "expr": "a * 10"}]}}
+  ],
+  "wires": [{"from": "inc.a", "to": "scale.a"}],
+  "emit": ["scale.b", "inc.a"]
+}
