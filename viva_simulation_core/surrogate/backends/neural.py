@@ -59,7 +59,7 @@ class NeuralBackend:
     def fit(self, trajectories, observable_names, dt):  # pragma: no cover - v1 path is from_checkpoint
         raise NotImplementedError(
             "NeuralBackend v1 wraps a trained checkpoint — use NeuralBackend.from_checkpoint(path). "
-            "Training lives in viva_simulation_core.api.surrogate_curate / viva_torch.train_surrogate."
+            "Training lives in viva_torch.train_surrogate."
         )
 
     @staticmethod

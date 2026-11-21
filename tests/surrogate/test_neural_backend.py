@@ -1,5 +1,4 @@
 """Task 4 — neural backend wrapping viva-torch (engine-agnostic)."""
-import tempfile
 
 import numpy as np
 import pytest
@@ -34,34 +33,3 @@ def test_neural_fitted_rollout_honors_x0_and_shape_with_stub():
     assert np.allclose(r[0], [5.0, 7.0])         # row 0 is x0 (framework convention)
     assert np.allclose(r[1:], [5.0, 7.0])        # stub echoes the seeded x0
     assert fitted.observable_names == ["a", "b"]
-
-
-@pytest.mark.skipif(
-    __import__("importlib").util.find_spec("viva_torch") is None,
-    reason="viva-torch not installed",
-)
-def test_wraps_a_trained_checkpoint_and_scores_end_to_end():
-    from viva_simulation_core.api.surrogate_curate import train_and_curate
-    from viva_simulation_core.surrogate.validate import validate_surrogate
-
-    SMALL = "S1 -> S2; k1*S1; S2 -> S3; k2*S2; k1=0.3; k2=0.12; S1=10; S2=0; S3=0;"
-    with tempfile.TemporaryDirectory() as d:
-        res = train_and_curate(source=SMALL, model_format="antimony",
-                               observables=["S1", "S2", "S3"], directory=d,
-                               timestep_s=1.0, n_trajectories=4, n_steps=12, epochs=20, seed=0)
-        fitted = NeuralBackend.from_checkpoint(str(res.checkpoint_path))
-        n_feat = len(fitted.observable_names)
-        # three distinct driver ICs; a dummy truth from one of them
-        rng = np.random.default_rng(0)
-        ics = [rng.uniform(1, 5, n_feat) for _ in range(3)]
-        truth = [fitted.rollout(ic, 6) for ic in ics]   # distinct truths per IC
-        bounds = {k: (-100.0, 100.0) for k in fitted.observable_names}
-        sc = validate_surrogate(fitted, truth, ics, bounds, dt=1.0)
-        assert set(sc.gates) == {"responsive", "physical"}
-        # the neural rollout genuinely honors x0: different ICs -> different rollouts
-        # -> nonzero responsiveness. (If x0 weren't seeded, every rollout would be
-        # identical and responsiveness would be 0 — this would catch that.)
-        assert sc.responsiveness > 0.0
-        r0 = fitted.rollout(ics[0], 4)
-        r1 = fitted.rollout(ics[1], 4)
-        assert not np.allclose(r0, r1)

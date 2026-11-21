@@ -6,14 +6,11 @@ Composes, through the unified workflow API, the exact SBML engine
 (``BioGearsProcess``), and a derivation step (``MathExpressionStep``). Mirrors the
 digital-twin API's exact<->surrogate tiering and the biogears<->SBML sepsis story.
 
-``train_demo_surrogate`` trains + curates a tiny surrogate of the small kinetic
-model so the surrogate node has a real checkpoint; it is fast enough for a slow
-test / the narrated demo, not a scientific result.
+``tiered_workflow_spec`` builds the spec; a surrogate checkpoint is supplied by the
+caller (train one with ``viva_torch.train_surrogate``). The spec composes four real
+viva- modules into one comparison graph.
 """
 from __future__ import annotations
-
-from pathlib import Path
-from typing import Any
 
 from .workflow_models import WorkflowNode, WorkflowSpec, WorkflowWire
 
@@ -21,23 +18,6 @@ from .workflow_models import WorkflowNode, WorkflowSpec, WorkflowWire
 SMALL_MODEL = "S1 -> S2; k1*S1; S2 -> S3; k2*S2; k1=0.3; k2=0.12; S1=10; S2=0; S3=0;"
 SPECIES = ["S1", "S2", "S3"]
 TIMESTEP_S = 1.0
-
-
-def train_demo_surrogate(directory: str | Path) -> dict[str, Any]:
-    """Train + curate a tiny surrogate of SMALL_MODEL into ``directory``; return the
-    checkpoint path, trained timestep, and the surrogate's feature-port keys."""
-    from .surrogate_curate import train_and_curate
-    from ..core import build_core
-
-    res = train_and_curate(source=SMALL_MODEL, model_format="antimony",
-                           observables=SPECIES, directory=str(directory),
-                           timestep_s=TIMESTEP_S, n_trajectories=4, n_steps=12,
-                           epochs=40, seed=0)
-    core = build_core()
-    inst = core.link_registry.get("NeuralProcess")({"checkpoint": str(res.checkpoint_path)}, core)
-    return {"checkpoint": str(res.checkpoint_path),
-            "timestep": inst.spec.timestep,
-            "feature_keys": list(inst.inputs().keys())}
 
 
 def tiered_workflow_spec(*, checkpoint: str, timestep: float,

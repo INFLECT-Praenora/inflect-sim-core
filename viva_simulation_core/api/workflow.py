@@ -1,15 +1,13 @@
-"""Unified vivarium-workflow API router — the four verbs over process-bigraph.
+"""The four-verb workflow API over process-bigraph — pure functions.
 
-Thin by design: every endpoint delegates to the process-bigraph ``Core`` (from
-``build_core``) and ``Composite``. The router adds no simulation logic. It is
-mounted on the existing digital-twin FastAPI app so ``/twins``, ``/modules`` and
-``/workflows`` are one service under one auth scheme.
+Thin by design: every function delegates to the process-bigraph ``Core`` (from
+``build_core``) and ``Composite``; no simulation logic of its own. The top-level
+facade (``viva_simulation_core``) and the ``viva-sim`` CLI wrap these.
 
-- define / discover a module → ``GET /modules`` + ``GET /modules/{name}``
-- call a module              → ``POST /modules/{name}/call``   (Task 4)
-- connect a workflow         → ``POST /workflows``             (Task 5)
-- call a workflow            → ``POST /workflows/{id}/run``     (Task 5)
-- the graph                  → ``GET /workflows/{id}/graph``    (Task 5)
+- discover modules → ``list_modules`` / ``module_card``
+- call a module    → ``call_module``
+- connect + run    → ``WorkflowRegistry.define`` / ``.run`` (+ ``spec_to_composite_state``)
+- the graph        → ``workflow_graph``
 """
 from __future__ import annotations
 
@@ -19,15 +17,10 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
-from fastapi import APIRouter, Depends, HTTPException
-
 from process_bigraph import Composite, Process, Step
 
-from .auth import require_key
-from .workflow_models import (GraphEdge, GraphNode, GraphResponse, ModuleCallRequest,
-                              ModuleCallResponse, ModuleCard, WorkflowCreateResponse,
-                              WorkflowProvenance, WorkflowRunRequest, WorkflowRunResponse,
-                              WorkflowSpec)
+from .workflow_models import (GraphEdge, GraphNode, GraphResponse, ModuleCard,
+                              WorkflowProvenance, WorkflowRunResponse, WorkflowSpec)
 
 # Fixed node key for a single-module call. Must not start with "_" (process-bigraph
 # treats leading-underscore top-level keys as reserved schema and never runs them)
@@ -344,74 +337,3 @@ class WorkflowRegistry:
                                   wall_ms=(time.perf_counter() - t0) * 1000.0,
                                   lib_versions=_lib_versions())
         return WorkflowRunResponse(observables=observables, provenance=prov)
-
-
-# ----------------------------------------------------------------------------
-# Router
-# ----------------------------------------------------------------------------
-def make_workflow_router(core_provider: Callable[[], Any]) -> APIRouter:
-    router = APIRouter(dependencies=[Depends(require_key)])
-
-    @router.get("/modules")
-    def get_modules() -> list[ModuleCard]:
-        return list_modules(core_provider())
-
-    @router.get("/modules/{name}")
-    def get_module(name: str) -> ModuleCard:
-        core = core_provider()
-        try:
-            resolved = _resolve_name(core, name)
-        except KeyError:
-            raise HTTPException(status_code=404, detail=f"unknown module: {name}")
-        return module_card(core, resolved, with_ports=True)
-
-    @router.post("/modules/{name}/call")
-    def post_module_call(name: str, req: ModuleCallRequest) -> ModuleCallResponse:
-        core = core_provider()
-        t0 = time.perf_counter()
-        try:
-            outputs = call_module(core, name, req.config, req.inputs, req.n_steps, req.interval)
-        except KeyError:
-            raise HTTPException(status_code=422, detail=f"unknown module: {name}")
-        except Exception as e:  # noqa: BLE001 — bad config/inputs/run → 422
-            raise HTTPException(status_code=422, detail=str(e))
-        prov = WorkflowProvenance(modules=[_short(name)], n_steps=req.n_steps,
-                                  wall_ms=(time.perf_counter() - t0) * 1000.0,
-                                  lib_versions=_lib_versions())
-        return ModuleCallResponse(outputs=outputs, provenance=prov)
-
-    registry = WorkflowRegistry(core_provider)
-
-    @router.post("/workflows")
-    def post_workflow(spec: WorkflowSpec) -> WorkflowCreateResponse:
-        try:
-            wid, graph = registry.define(spec)
-        except Exception as e:  # noqa: BLE001 — unknown module / bad wiring / config → 422
-            raise HTTPException(status_code=422, detail=str(e))
-        return WorkflowCreateResponse(workflow_id=wid, graph=graph)
-
-    @router.post("/workflows/{wid}/run")
-    def post_workflow_run(wid: str, req: WorkflowRunRequest) -> WorkflowRunResponse:
-        try:
-            return registry.run(wid, req.n_steps, req.overrides, req.interval)
-        except KeyError:
-            raise HTTPException(status_code=404, detail=f"unknown workflow: {wid}")
-        except Exception as e:  # noqa: BLE001 — a bad run → 422
-            raise HTTPException(status_code=422, detail=str(e))
-
-    @router.get("/workflows/{wid}/graph")
-    def get_workflow_graph(wid: str) -> GraphResponse:
-        try:
-            return registry.graph(wid)
-        except KeyError:
-            raise HTTPException(status_code=404, detail=f"unknown workflow: {wid}")
-
-    @router.delete("/workflows/{wid}")
-    def delete_workflow(wid: str) -> dict:
-        try:
-            registry.delete(wid)
-        except KeyError:
-            raise HTTPException(status_code=404, detail=f"unknown workflow: {wid}")
-        return {"deleted": wid}
-
-    return router
