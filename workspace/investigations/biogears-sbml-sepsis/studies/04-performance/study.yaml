@@ -1,0 +1,90 @@
+schema_version: 3
+name: 04-performance
+investigation: biogears-sbml-sepsis
+status: ran
+title: "Performance — where the compute goes, and the surrogate speedup"
+confidence: Accepted
+
+parent_studies: []
+
+question: |
+  How fast is the simulation core, and where does the compute go? For one matched
+  48 h sepsis run, what does each engine cost, what dominates that cost, and how much
+  does the learned surrogate save?
+
+objective: |
+  Profile the compute across engines on one matched run: the full-run wall-clock
+  (BioGears, Tellurium), the dominant cost (stiff ODE integration), whether a faster
+  integrator can help, and the surrogate's per-step speedup — with a live, reproducible
+  micro-benchmark behind the full-run numbers.
+
+claim: |
+  For one matched 48 h severe-sepsis run the same spec spans 4+ orders of magnitude of
+  compute: BioGears (C++ physiology) ~3.38 h, Tellurium (exact SBML via roadrunner/
+  CVODE) ~2.81 h, and the PyTorch surrogate ~0.2 s (~40,000x faster than the exact
+  SBML path). The exact engines spend essentially all of that time integrating the
+  stiff 91-state ODE — a stiff implicit solver (CVODE) is required, so a faster or
+  Rust explicit integrator cannot speed it up; the real levers are a better stiff
+  solver, GPU-parallel patients, or a surrogate. The surrogate replaces the ODE solve
+  with one forward pass: a live per-step micro-benchmark on this machine measures
+  ~526 ms for one exact CVODE step of the real model vs ~0.04 ms for one surrogate
+  forward pass — the exact per-step cost is ~13,000x the surrogate's. The surrogate is
+  a fast APPROXIMATE tier (bounded, not yet clinically accurate), not a drop-in
+  replacement.
+
+expected_behavior:
+  - name: compute-profile-and-surrogate-speedup
+    statement: "Per-engine wall-clock for a matched 48 h run is recorded; the stiff ODE solve is the dominant cost; the surrogate is ~4 orders of magnitude faster."
+    status: supported
+  - name: stiff-ode-is-the-bottleneck
+    statement: "The sepsis ODE is stiff (CVODE required); a faster/Rust explicit integrator cannot speed up the exact engines."
+    status: supported
+
+findings:
+  - summary: "One 48 h run, three engines, 4+ orders of magnitude of compute."
+    detail: |
+      Matched 48 h severe-sepsis run of the same spec (BioGears + Tellurium from the
+      committed engine-runtime study; surrogate from the folded-in surrogate work):
+        - BioGears 8.2.0 (C++ physiology): ~3.38 h
+        - Tellurium exact SBML (roadrunner CVODE): ~2.81 h
+        - PyTorch surrogate (576-step rollout): ~0.2 s (~40,000x faster than exact)
+      The two exact engines are the same order of magnitude and both dominated by the
+      stiff 91-state ODE solve. The surrogate skips the solve entirely (one forward
+      pass per step), at the cost of accuracy.
+    status: supported
+  - summary: "The bottleneck is the stiff ODE solve — a faster integrator is not a lever."
+    detail: |
+      The sepsis ODE is stiff, so the one solver class that works is an implicit stiff
+      method (CVODE/BDF), already compiled C inside libroadrunner. An explicit
+      fixed-step integrator (the kind a from-scratch Rust engine uses) is unstable on
+      the real model and wrong on the fast cardiovascular states even at ~173 M steps
+      per 48 h. Reimplementing the integrator in another language is not the speed
+      lever; a better/warm-started stiff solver, GPU-parallel patients, or a surrogate
+      are. (The composition engine is separately interchangeable: the SBML composite is
+      bit-identical under process-bigraph Python and the viva-core Rust engine — the
+      engine swap moves only framework overhead.)
+    status: supported
+  - summary: "Live per-step micro-benchmark: the stiff solve is ~13,000x the surrogate forward pass."
+    detail: |
+      Reproducible on this machine (bench_live.py, warm): one exact CVODE step of the
+      real 91-state sepsis model costs ~526 ms, versus ~0.04 ms for one surrogate
+      forward pass — the exact per-step stiff solve is ~13,000x the surrogate's. This
+      is the per-step view behind the full-run wall-clocks and shows directly where the
+      compute goes: the stiff ODE solve. The surrogate is a fast approximate tier
+      (study 05 for the honest fidelity picture).
+    status: supported
+
+visualizations:
+  - name: "Same sepsis spec, three engines: where compute time goes (committed full-run + live per-step)"
+    address: image:charts/01_runtime_compare.svg
+    display: primary
+
+baseline:
+  - name: sepsis-sbml-exact
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+    config: {severity: 3}
+    note: "The exact Tellurium/SBML engine benchmarked per-step live; full-run wall-clock cited from the committed engine-runtime study."
+
+variants: []
+interventions: []
+runs: []
