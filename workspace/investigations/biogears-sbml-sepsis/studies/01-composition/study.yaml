@@ -1,0 +1,73 @@
+schema_version: 3
+name: 01-composition
+investigation: biogears-sbml-sepsis
+status: ran
+title: "Composition — one sepsis spec, interchangeable engines"
+confidence: Accepted
+
+parent_studies: []
+
+question: |
+  Does the same sepsis specification run under interchangeable engines by swapping
+  one box — BioGears (C++ physiology), the exact SBML extraction (Tellurium/CVODE),
+  and a PyTorch surrogate — all through one typed-port interface?
+
+objective: |
+  Demonstrate the composition pillar: the BioGears sepsis core is ONE spec; each
+  engine is a box over the same observable ports, so swapping engines is swapping one
+  node address while the wiring, emitters, and analysis stay unchanged.
+
+claim: |
+  The same sepsis core runs under three interchangeable engines — BioGears (C++),
+  Tellurium (exact SBML via roadrunner/CVODE), and a PyTorch surrogate — each a box
+  over the same typed observable ports. Swapping engines is swapping one box's
+  address. The nine-observable overlay shows the two full-physics engines (BioGears
+  and exact Tellurium) run the same spec and track to within ~0.1% on the inflammation
+  core; the surrogate is the third interchangeable engine (its speed and approximate
+  behavior are study 04). Where the full-physics engines diverge — the hemodynamic
+  layer — is the fidelity backbone (study 05).
+
+expected_behavior:
+  - name: same-spec-three-engines
+    statement: "The one sepsis spec produces a trajectory under each of BioGears, exact Tellurium, and the PyTorch surrogate, through one typed interface."
+    status: supported
+  - name: swap-is-one-node
+    statement: "Switching engine changes only one node's address; the composite wiring, emitters, and analysis are unchanged."
+    status: supported
+
+findings:
+  - summary: "One sepsis spec, two full-physics engines overlaid on nine observables — same spec, one box swapped."
+    detail: |
+      The same BioGears sepsis core specification runs under the BioGears 8.2.0 C++
+      engine and under the exact SBML/Antimony extraction (Tellurium/roadrunner,
+      CVODE). Across all nine shared observables the inflammation core (tissue
+      integrity, blood pathogen) overlaps to within ~0.1%; the hemodynamic observables
+      diverge (studied in 05). Because each engine is a box over the same typed
+      observable ports, the swap is a single node-address change — nothing else in
+      the composite moves.
+    status: supported
+  - summary: "The surrogate is the third interchangeable engine — it constructs and runs live here."
+    detail: |
+      The PyTorch surrogate (viva-torch NeuralProcess) is the same sepsis core as a
+      learned box over the same ports. The live check (engines_live_check.json)
+      confirms it: the Tellurium/roadrunner engine constructs over the real 91-state
+      model, and the surrogate runs a full 48 h / 576-step rollout in a fraction of a
+      second, finite (though out of physical range — it is degenerate across severity).
+      It is a fast APPROXIMATE tier — not asserted
+      clinically accurate (its speed is study 04; the honest accuracy picture is 05).
+    status: supported
+
+visualizations:
+  - name: "Same sepsis spec, two full-physics engines, nine observables"
+    address: image:charts/01_engine_overlay.svg
+    display: primary
+
+baseline:
+  - name: sepsis-core-spec
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+    config: {severity: 3}
+    note: "The one sepsis spec, shown here via the exact Tellurium/SBML engine; the same spec runs under BioGears (overlay) and the surrogate (live check) by swapping one box."
+
+variants: []
+interventions: []
+runs: []

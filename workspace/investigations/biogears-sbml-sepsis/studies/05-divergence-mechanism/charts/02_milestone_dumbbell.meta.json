@@ -1,5 +1,0 @@
-{
- "title": "02_milestone_dumbbell",
- "interpretation": "Severe-arm crossing times, engine vs extraction, over 72 h. On SBP<100 (26.6 h vs 37.5 h) and HR>90 (26.8 h vs 37.6 h) the extraction lags ~11 h \u2014 but on the MAP<65 shock threshold the order FLIPS: the extraction crosses at 54.1 h vs the engine's 69.3 h, ~15 h EARLIER, because its deeper SVR vasodilation pulls MAP = CO\u00b7SVR down first. Measured run-for-run against the real engine, not against the McDaniel 2019 paper milestones.",
- "caption": "Severe-arm crossing times, engine vs extraction, over 72 h. On SBP<100 (26.6 h vs 37.5 h) and HR>90 (26.8 h vs 37.6 h) the extraction lags ~11 h \u2014 but on the MAP<65 shock threshold the order FLIPS: the extraction crosses at 54.1 h vs the engine's 69.3 h, ~15 h EARLIER, because its deeper SVR vasodilation pulls MAP = CO\u00b7SVR down first. Measured run-for-run against the real engine, not against the McDaniel 2019 paper milestones."
-}

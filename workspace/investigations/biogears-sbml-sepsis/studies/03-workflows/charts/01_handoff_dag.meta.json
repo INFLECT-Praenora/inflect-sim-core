@@ -1,0 +1,6 @@
+{
+  "title": "Hand-off workflow DAG",
+  "interpretation": "The BioGears sepsis core was extracted to a portable Antimony/SBML file (biogears_sepsis.ant). The workflow hands that file to the Tellurium engine (load file), composes it with a learned surrogate tier over the same spec, and wires the surrogate's ports into a MathExpressionStep derivation. All nodes are registered modules; the pipeline is built and run with the four verbs (list, call, connect, run) \u2014 no new simulation code. The yellow box is the hand-off: a portable model artifact is the interface between engines.",
+  "caption": "The hand-off workflow \u2014 biogears_sepsis.ant handed into TelluriumUTCStep and a surrogate tier, derived by MathExpressionStep, composed and run via the four-verb API.",
+  "provenance": "Node/edge set and emitted observable from run/handoff_result.json (a live workflow run). Script: make_handoff_dag.py."
+}

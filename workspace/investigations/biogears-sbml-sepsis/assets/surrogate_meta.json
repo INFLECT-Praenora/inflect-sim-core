@@ -1,0 +1,74 @@
+{
+ "dataset": {
+  "n_transitions": 5760,
+  "n_features": 98,
+  "n_targets": 98,
+  "timestep_s": 300.0,
+  "horizon_h": 48.0,
+  "train_ics": [
+   [
+    0,
+    0.0
+   ],
+   [
+    1,
+    0.0
+   ],
+   [
+    1,
+    21600.0
+   ],
+   [
+    2,
+    0.0
+   ],
+   [
+    2,
+    21600.0
+   ],
+   [
+    3,
+    0.0
+   ],
+   [
+    3,
+    21600.0
+   ]
+  ],
+  "eval_ics": [
+   [
+    1,
+    10800.0
+   ],
+   [
+    2,
+    10800.0
+   ],
+   [
+    3,
+    10800.0
+   ]
+  ]
+ },
+ "heldout_rollout_nrmse": {
+  "sev1_start3h": 1.287180515180195e+32,
+  "sev2_start3h": 5.81883895710006e+31,
+  "sev3_start3h": 3.667831192591288e+31
+ },
+ "surrogate_nonfinite_frac": {
+  "sev1_start3h": 0.0278,
+  "sev2_start3h": 0.0278,
+  "sev3_start3h": 0.0278
+ },
+ "mean_heldout_nrmse": 7.452825100497766e+31,
+ "speed": {
+  "real_sbml_s": 8064.4,
+  "surrogate_s": 0.2,
+  "speedup": 40462.7,
+  "n_steps": 576,
+  "benchmark_ic": [
+   3,
+   3.0
+  ]
+ }
+}
