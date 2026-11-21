@@ -79,3 +79,8 @@ baseline:
 variants: []
 interventions: []
 runs: []
+
+tests:
+  - name: fidelity_measured
+    kind: report_card
+    card: fidelity_measured

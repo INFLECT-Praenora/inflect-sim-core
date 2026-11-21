@@ -71,3 +71,8 @@ baseline:
 variants: []
 interventions: []
 runs: []
+
+tests:
+  - name: composition_demonstrated
+    kind: report_card
+    card: composition_demonstrated

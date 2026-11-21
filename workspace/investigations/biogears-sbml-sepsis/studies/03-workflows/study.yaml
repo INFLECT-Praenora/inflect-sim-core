@@ -70,3 +70,8 @@ baseline:
 variants: []
 interventions: []
 runs: []
+
+tests:
+  - name: handoff_demonstrated
+    kind: report_card
+    card: handoff_demonstrated

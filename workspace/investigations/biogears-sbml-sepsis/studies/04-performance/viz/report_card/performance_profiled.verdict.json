@@ -1,0 +1,37 @@
+{
+  "schema": "report_card_verdict/v2",
+  "model_ref": "04-performance",
+  "reference_model": "",
+  "generated": "",
+  "overall": "within_tol",
+  "groups": {
+    "performance": {
+      "verdict": "within_tol",
+      "axes": [
+        {
+          "id": "surrogate_speedup",
+          "label": "Exact per-step stiff solve >> surrogate forward pass (x)",
+          "verdict": "within_tol",
+          "value": 13014.76176814752,
+          "meter": 0.5000064573808841,
+          "detail": null,
+          "expected": {
+            "kind": "band",
+            "value": null,
+            "low": 100.0,
+            "high": 1000000000.0,
+            "op": "~=",
+            "tol": 0.05,
+            "statement": null,
+            "units": null
+          },
+          "margin": 12914.76176814752,
+          "severity": "hard",
+          "units": null,
+          "knob": null,
+          "citation": null
+        }
+      ]
+    }
+  }
+}
