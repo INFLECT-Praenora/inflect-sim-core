@@ -1,0 +1,12 @@
+{
+  "tellurium_builds": true,
+  "tellurium_build_s": 4.997,
+  "surrogate": {
+    "ran": true,
+    "finite": true,
+    "n_steps": 576,
+    "wall_s": 0.198,
+    "note": "approximate tier \u2014 bounded/finite over the horizon, not asserted clinically accurate (study 04/05)"
+  },
+  "map_col_present": true
+}
