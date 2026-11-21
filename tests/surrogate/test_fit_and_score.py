@@ -44,5 +44,6 @@ def test_linear_beats_persistence_on_dynamics():
 def test_public_api_exports():
     import viva_simulation_core.surrogate as S
     for sym in ("fit_and_score", "validate_surrogate", "Scorecard",
-                "PersistenceBackend", "LinearBackend", "NeuralBackend"):
+                "PersistenceBackend", "LinearBackend", "NeuralBackend",
+                "SurrogateProcess", "register"):
         assert hasattr(S, sym), sym

@@ -18,6 +18,7 @@ from viva_simulation_core.surrogate.backends.baseline import (
     LinearBackend,
 )
 from viva_simulation_core.surrogate.backends.neural import NeuralBackend
+from viva_simulation_core.surrogate.process import SurrogateProcess, register
 
 __all__ = [
     "FittedSurrogate",
@@ -28,4 +29,6 @@ __all__ = [
     "PersistenceBackend",
     "LinearBackend",
     "NeuralBackend",
+    "SurrogateProcess",
+    "register",
 ]

@@ -66,7 +66,8 @@ class Scorecard:
         sp = "n/a" if self.speedup is None else f"{self.speedup:,.0f}x"
         gates = "  ".join(f"{k}={'ok' if v else 'FAIL'}" for k, v in self.gates.items())
         return (
-            f"Surrogate scorecard — {self.backend}: {self.verdict}\n"
+            f"Surrogate scorecard — {self.backend}: {self.verdict}  "
+            f"(PASS = responsive + physical; rollout_nrmse is reported, not gated)\n"
             f"  rollout_nrmse  {self.rollout_nrmse:.4f}\n"
             f"  physicality    {self.physicality:.3f}\n"
             f"  responsiveness {self.responsiveness:.4f}\n"

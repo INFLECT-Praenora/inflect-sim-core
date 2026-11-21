@@ -54,8 +54,14 @@ def test_wraps_a_trained_checkpoint_and_scores_end_to_end():
         # three distinct driver ICs; a dummy truth from one of them
         rng = np.random.default_rng(0)
         ics = [rng.uniform(1, 5, n_feat) for _ in range(3)]
-        truth = [fitted.rollout(ics[0], 6)]
+        truth = [fitted.rollout(ic, 6) for ic in ics]   # distinct truths per IC
         bounds = {k: (-100.0, 100.0) for k in fitted.observable_names}
         sc = validate_surrogate(fitted, truth, ics, bounds, dt=1.0)
-        assert sc.verdict in ("PASS", "FAIL")        # the wrapping + harness integrate
         assert set(sc.gates) == {"responsive", "physical"}
+        # the neural rollout genuinely honors x0: different ICs -> different rollouts
+        # -> nonzero responsiveness. (If x0 weren't seeded, every rollout would be
+        # identical and responsiveness would be 0 — this would catch that.)
+        assert sc.responsiveness > 0.0
+        r0 = fitted.rollout(ics[0], 4)
+        r1 = fitted.rollout(ics[1], 4)
+        assert not np.allclose(r0, r1)

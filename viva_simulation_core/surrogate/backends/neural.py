@@ -11,8 +11,17 @@ import numpy as np
 
 
 def _overrides_from_x0(feature_paths, x0) -> dict:
-    """Nest the x0 vector at the surrogate's feature paths (the seed state)."""
+    """Nest the x0 vector at the surrogate's feature paths (the seed state).
+
+    Raises if x0 does not cover every feature path — silently truncating (zip's
+    default) would leave driver features unseeded and make the harness measure
+    responsiveness to the wrong thing."""
     x0 = np.asarray(x0, float)
+    if len(feature_paths) != len(x0):
+        raise ValueError(
+            f"x0 has {len(x0)} values but the surrogate has {len(feature_paths)} feature "
+            f"paths — every feature must be seeded (no silent truncation)."
+        )
     ov: dict = {}
     for p, v in zip(feature_paths, x0):
         d = ov
@@ -63,6 +72,17 @@ class NeuralBackend:
         if rollout_fn is None:
             from viva_torch.evaluate import _rollout_surrogate as rollout_fn  # type: ignore
         spec = SurrogateSpec(**torch.load(path, map_location="cpu", weights_only=False)["spec"])
+        # v1 supports AUTOREGRESSIVE surrogates (feature == target). A driver-conditioned
+        # surrogate (feature = target + exogenous drivers) needs the harness to vary the
+        # drivers, not just x0 — a documented follow-up — so we refuse it loudly rather
+        # than silently measure the wrong responsiveness.
+        if len(spec.feature_paths) != len(spec.target_paths_t):
+            raise NotImplementedError(
+                "NeuralBackend v1 supports autoregressive surrogates (feature==target). "
+                f"This checkpoint has {len(spec.feature_paths)} features vs "
+                f"{len(spec.target_paths_t)} targets (driver-conditioned); varying exogenous "
+                "drivers through the harness is a follow-up."
+            )
         obs = [p[-1] for p in spec.target_paths_t]
         return _NeuralFitted(spec=spec, feature_paths=spec.feature_paths,
                              observable_names=obs, timestep=spec.timestep,

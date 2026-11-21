@@ -20,17 +20,20 @@ _EPS = 1e-9
 
 
 def _rollout_nrmse(fitted: FittedSurrogate, truths: list[np.ndarray]) -> float:
-    errs, scales = [], []
+    """Per-observable normalized RMSE, averaged — so a large-scale observable does
+    not swamp a small one (the multi-scale hemodynamic case)."""
+    errs, refs = [], []
     for t in truths:
-        pred = np.asarray(fitted.rollout(t[0], len(t)), float)
         t = np.asarray(t, float)
+        pred = np.asarray(fitted.rollout(t[0], len(t)), float)
         n = min(len(pred), len(t))
         errs.append(pred[:n] - t[:n])
-        scales.append(t[:n])
-    e = np.concatenate([x.ravel() for x in errs])
-    s = np.concatenate([x.ravel() for x in scales])
-    rmse = float(np.sqrt(np.mean(e ** 2)))
-    return rmse / (float(np.std(s)) + _EPS)
+        refs.append(t[:n])
+    E = np.concatenate(errs, axis=0)          # (N, n_obs)
+    R = np.concatenate(refs, axis=0)          # (N, n_obs)
+    rmse_per = np.sqrt(np.mean(E ** 2, axis=0))
+    scale_per = np.std(R, axis=0) + _EPS
+    return float(np.mean(rmse_per / scale_per))
 
 
 def _physicality(fitted: FittedSurrogate, driver_ics: list[np.ndarray],
@@ -48,11 +51,16 @@ def _physicality(fitted: FittedSurrogate, driver_ics: list[np.ndarray],
 
 
 def _responsiveness(fitted: FittedSurrogate, driver_ics: list[np.ndarray],
-                    n_steps: int) -> float:
+                    n_steps: int, truth_end_spread: np.ndarray) -> float:
+    """How much do the surrogate's rollout endpoints vary across drivers, RELATIVE to
+    how much the truth's endpoints vary (``truth_end_spread``). A good surrogate ≈ 1;
+    a converging system ≈ 1 (both spreads shrink together); a degenerate surrogate that
+    ignores its input ≈ 0 — regardless of magnitude. Normalizing by the truth spread
+    (never |mean|) avoids both a mean≈0 collapse false-passing and a converging system
+    false-failing."""
     ends = np.array([np.asarray(fitted.rollout(ic, n_steps), float)[-1] for ic in driver_ics])
-    # per-observable coefficient of variation across drivers; min over observables
-    cv = np.std(ends, axis=0) / (np.abs(np.mean(ends, axis=0)) + _EPS)
-    return float(np.min(cv))
+    rel = np.std(ends, axis=0) / (np.asarray(truth_end_spread, float) + _EPS)
+    return float(np.min(rel))
 
 
 def validate_surrogate(fitted: FittedSurrogate, truth_trajs: list[np.ndarray],
@@ -65,11 +73,20 @@ def validate_surrogate(fitted: FittedSurrogate, truth_trajs: list[np.ndarray],
         raise ValueError("driver_ics is empty — need ≥2 driver initial conditions to test responsiveness")
     if len(driver_ics) < 2:
         raise ValueError("responsiveness needs ≥2 driver initial conditions")
+    if len({len(np.asarray(t)) for t in truth_trajs}) > 1:
+        raise ValueError("truth_trajs have mismatched lengths — all must share one horizon")
 
     n_steps = len(np.asarray(truth_trajs[0]))
+    # responsiveness scale = how much the TRUTH's endpoints vary across trajectories
+    # (per observable). This is the natural "how much should endpoints differ?" scale;
+    # it shrinks with a converging system and stays non-zero whenever the truth responds.
+    truth_ends = np.array([np.asarray(t, float)[-1] for t in truth_trajs])
+    truth_end_spread = (np.std(truth_ends, axis=0) if len(truth_ends) >= 2
+                        else np.zeros(truth_ends.shape[1]))
+
     nrmse = _rollout_nrmse(fitted, truth_trajs)
     phys = _physicality(fitted, driver_ics, bounds, n_steps)
-    resp = _responsiveness(fitted, driver_ics, n_steps)
+    resp = _responsiveness(fitted, driver_ics, n_steps, truth_end_spread)
     gates = {"responsive": resp >= resp_gate, "physical": phys >= phys_gate}
     name = getattr(fitted, "name", type(fitted).__name__)
     return Scorecard(backend=name, rollout_nrmse=nrmse, physicality=phys,

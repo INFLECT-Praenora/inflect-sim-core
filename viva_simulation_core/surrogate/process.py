@@ -15,7 +15,16 @@ class SurrogateProcess(Process):
     def __init__(self, config=None, core=None):
         super().__init__(config, core)
         self.fitted = self.config["fitted"]                 # a FittedSurrogate
-        self.observables = list(self.config["observables"])
+        # Ports are tied to the fitted surrogate: default to its observable_names, and
+        # refuse a config list that disagrees (silent reorder -> wrong-port mapping).
+        fitted_obs = list(getattr(self.fitted, "observable_names", []))
+        cfg_obs = list(self.config.get("observables") or [])
+        if cfg_obs and fitted_obs and cfg_obs != fitted_obs:
+            raise ValueError(
+                f"SurrogateProcess observables {cfg_obs} disagree with the fitted "
+                f"surrogate's {fitted_obs} — ports would map to the wrong columns."
+            )
+        self.observables = cfg_obs or fitted_obs
 
     def inputs(self):
         return {name: "float" for name in self.observables}
@@ -24,6 +33,9 @@ class SurrogateProcess(Process):
         return {name: "float" for name in self.observables}
 
     def update(self, state, interval):
+        # NOTE: the surrogate advances one of its own trained steps per update; `interval`
+        # is not rescaled. A composite must drive this process at the surrogate's timestep
+        # (as a trained surrogate requires) — a mismatched interval is a wiring error.
         x = np.array([float(state.get(n, 0.0)) for n in self.observables], float)
         nxt = np.asarray(self.fitted.rollout(x, 2), float)[-1]
         return {n: float(nxt[i]) for i, n in enumerate(self.observables)}

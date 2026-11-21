@@ -36,6 +36,15 @@ class OutOfRangeFitted:
         return out
 
 
+class NearDeadFitted:
+    """Collapsed near zero with tiny driver-dependent jitter — the mean≈0 case that
+    inflates a CV normalized by |mean|. Must still FAIL (it carries no real dynamics)."""
+    observable_names = NAMES
+    def rollout(self, x0, n_steps):
+        base = 1e-6 * (1.0 + 0.1 * float(np.sum(x0)))  # varies ~10% across drivers, ~0 magnitude
+        return np.full((n_steps, 2), base)
+
+
 class TruthEchoFitted:
     """Good: reproduces the matched truth trajectory for each IC."""
     observable_names = NAMES
@@ -50,6 +59,13 @@ def test_degenerate_surrogate_fails_responsiveness():
     sc = validate_surrogate(ConstantFitted(), TRUTHS, DRIVER_ICS, BOUNDS, DT)
     assert sc.responsiveness < 0.02
     assert sc.gates["responsive"] is False
+    assert sc.verdict == "FAIL"
+
+
+def test_near_dead_collapse_fails_responsiveness():
+    # mean≈0 must not inflate responsiveness; a collapsed surrogate carries no dynamics
+    sc = validate_surrogate(NearDeadFitted(), TRUTHS, DRIVER_ICS, BOUNDS, DT)
+    assert sc.responsiveness < 0.02
     assert sc.verdict == "FAIL"
 
 
@@ -74,3 +90,6 @@ def test_empty_or_mismatched_inputs_raise():
         validate_surrogate(ConstantFitted(), [], DRIVER_ICS, BOUNDS, DT)
     with pytest.raises(ValueError):
         validate_surrogate(ConstantFitted(), TRUTHS, [], BOUNDS, DT)
+    with pytest.raises(ValueError):  # ragged truth horizons
+        validate_surrogate(ConstantFitted(), [_truth([8.0, 2.0], T=6), _truth([4.0, 6.0], T=4)],
+                           DRIVER_ICS, BOUNDS, DT)
