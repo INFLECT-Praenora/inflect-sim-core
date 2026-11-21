@@ -1,0 +1,81 @@
+schema_version: 3
+name: 05-fidelity
+investigation: biogears-sbml-sepsis
+status: ran
+title: "Fidelity — do the engines agree, and where not"
+confidence: Accepted
+
+parent_studies: []
+
+question: |
+  The capability studies show the same spec running under interchangeable engines.
+  But do the engines actually AGREE — and where do they diverge? This is the honest
+  backbone: the demonstration is credible only if the engines' limits are measured,
+  not hidden.
+
+objective: |
+  Establish where the BioGears C++ engine and the exact SBML extraction agree
+  (baseline, inflammation core) and where they diverge (the hemodynamic layer),
+  mapping each divergence to the BioGears subsystem the extraction omits — so the
+  "same spec, many engines" claim is shown with its edges stated.
+
+claim: |
+  The engines AGREE where the extraction is faithful and DIVERGE where it is not. At
+  rest both hold the StandardMale baseline; under infection the inflammation core
+  (tissue integrity, blood pathogen) matches bit-for-bit (to ~0.1%) in both mild and
+  severe arms. They DIVERGE in the hemodynamic layer: the engine fluctuates
+  continuously (its nutrition schedule and full homeostatic control) while the
+  autonomous extraction is near-flat, and under severe sepsis both reach MAP<65 shock
+  by OPPOSITE mechanisms and in FLIPPED order (the engine by a hypodynamic low-output
+  route, MAP<65 at 69.3 h; the extraction by a hyperdynamic vasodilatory route, MAP<65
+  at 54.1 h — ~15 h earlier despite lagging ~11 h on systolic pressure). Every
+  divergence maps to a vasomotor/fluid/metabolic subsystem the extraction omits
+  (nitric oxide, fever vasodilation, renal fluid handling, lactate, intracellular
+  water). The surrogate is a further, coarser approximation (study 04): fast, bounded,
+  not clinically accurate.
+
+expected_behavior:
+  - name: engines-agree-on-inflammation-diverge-on-hemodynamics
+    statement: "Baseline and the inflammation core agree bit-for-bit; the hemodynamic layer diverges in mechanism and timing, mapped to omitted subsystems."
+    status: supported
+
+findings:
+  - summary: "Where they agree — baseline parity and a bit-for-bit inflammation core."
+    detail: |
+      At rest both engines hold the StandardMale baseline within tolerance
+      (00_baseline_parity). Under infection the inflammation observables — tissue
+      integrity (min 0.243/0.243 severe) and blood pathogen (peak 330.2/330.6) — match
+      to ~0.1% in both mild and severe arms (02_inflammation_match). The extracted
+      Acute Inflammatory Response is a faithful translation of the engine's.
+    status: supported
+  - summary: "Where they diverge — the hemodynamic layer, in mechanism and timing."
+    detail: |
+      The divergence lives entirely in the hemodynamics (01_divergence_heatmap). The
+      engine fluctuates continuously while the autonomous extraction is near-flat; and
+      under severe sepsis the two reach MAP<65 shock by opposite routes and in flipped
+      order (engine hypodynamic, MAP<65 at 69.3 h; extraction hyperdynamic, MAP<65 at
+      54.1 h). The functional-difference matrix (03_functional_difference_matrix) maps
+      every divergence to the BioGears subsystem the extraction omits or leaves inert
+      (nitric oxide, fever vasodilation, renal/urine, lactate, intracellular water).
+    status: supported
+
+visualizations:
+  - name: "Divergence heatmap — where the engines differ"
+    address: image:charts/01_divergence_heatmap.svg
+    display: primary
+  - name: "Functional-difference matrix — divergence mapped to omitted subsystems"
+    address: image:charts/03_functional_difference_matrix.svg
+    display: secondary
+  - name: "Inflammation core matches bit-for-bit"
+    address: image:charts/02_inflammation_match.svg
+    display: secondary
+
+baseline:
+  - name: sepsis-engine-vs-sbml
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+    config: {severity: 3}
+    note: "The exact SBML extraction compared against the BioGears engine (both committed severe runs); the comparison that keeps the capabilities demonstration honest."
+
+variants: []
+interventions: []
+runs: []

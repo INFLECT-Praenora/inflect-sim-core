@@ -1,0 +1,5 @@
+{
+ "title": "01_divergence_heatmap",
+ "interpretation": "Peak relative divergence between engine and extraction, per observable and condition, over the mild (48 h) and severe (72 h) arms. The inflammation states (tissue integrity, blood pathogen) agree to well under 0.1% in both arms; the hemodynamic states carry all the divergence \u2014 small but nonzero at mild (the engine's fluctuation) and large at severe (up to 38% on cardiac output and 36% on SVR, from the different decompensation mechanism).",
+ "caption": "Peak relative divergence between engine and extraction, per observable and condition, over the mild (48 h) and severe (72 h) arms. The inflammation states (tissue integrity, blood pathogen) agree to well under 0.1% in both arms; the hemodynamic states carry all the divergence \u2014 small but nonzero at mild (the engine's fluctuation) and large at severe (up to 38% on cardiac output and 36% on SVR, from the different decompensation mechanism)."
+}
