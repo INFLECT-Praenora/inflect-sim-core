@@ -655,7 +655,7 @@ pipeline composes it with a surrogate tier and a derivation step.
       
       
       
-      <div class="finding-card finding-kind-other finding-status-supported">
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-an-antimony-sbml-file-handed">
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
@@ -664,13 +664,13 @@ pipeline composes it with a surrogate tier and a derivation step.
           </summary>
           <div class="finding-drawer">
             <div class="finding-header">
-              <span class="finding-id"></span>
+              <span class="finding-id">an-antimony-sbml-file-handed</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
             
             
-            
+            <div class="finding-explanation"><em>Why:</em> The four-verb path executed against real artifacts, not a mock: list enumerated 76 registered modules (engine boxes including TelluriumUTCStep, NeuralProcess, MathExpressionStep), call loaded the extracted biogears_sepsis.ant into TelluriumUTCStep (loaded_ok, ~3.0 s), connect wired a three-node DAG (exact Tellurium / neural surrogate / math derivation), and run advanced the composite to finite emitted observables. The handed-off file produced a physical result — a final MAP of 95.54 mmHg under the exact roadrunner integrator — so the portable Antimony/SBML artifact is a working interface between the BioGears-derived core and an SBML solver, with no sepsis-specific plumbing in the composition; this is what makes the orchestration claim an infrastructure result rather than a one-off script. The measurement also diverges from the claim&#39;s wording in one scoped way: the end-to-end workflow wall was 125.2 s, not &#39;a few seconds&#39; — only the single Tellurium call was ~3.0 s. The &#39;few seconds&#39; framing conflates per-engine load time with full-pipeline wall and should be read as per-call, not per-workflow; the competing prediction (few-seconds vs ~125 s end-to-end) is settled by the recorded wall_ms, and a timing behaviour test that separately asserts call wall and run wall is the open validator that would pin this down. The exact-minus-surrogate MAP gap of 95.43 mmHg (surrogate 0.11 vs exact 95.54) and the derived shock margin of -64.89 are not a fidelity failure of the workflow: the surrogate is a deliberately fast, approximate tier whose calibration is the subject of studies 04/05, so the orchestration claim stands independently of the surrogate&#39;s accuracy.</div>
             
             
           </div>
@@ -1325,7 +1325,7 @@ pipeline composes it with a surrogate tier and a derivation step.
     <ul class="synthesis-list" style="margin:0 0 12px">
       
       <li style="display:flex;align-items:flex-start;gap:8px">
-        
+        <button type="button" class="action-btn study-finding-del" data-id="an-antimony-sbml-file-handed" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
         <span>An Antimony/SBML file handed between engines, composed as a workflow, run with four verbs. <span class="muted small">(supported)</span></span>
       </li>
       
@@ -1383,7 +1383,7 @@ pipeline composes it with a surrogate tier and a derivation step.
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "7dc5c4e93021e3701c64cedb507da30ec1d16d3a", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/7dc5c4e93021e3701c64cedb507da30ec1d16d3a", "branch": "main", "lockfile": "uv.lock@c83bda201a44", "generated_at": "2026-11-22 17:39 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "377f248796f000ea9beb28dbe0eb38b3db8fc54d", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/377f248796f000ea9beb28dbe0eb38b3db8fc54d", "branch": "main", "lockfile": "uv.lock@625950c11691", "generated_at": "2026-11-22 21:12 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>

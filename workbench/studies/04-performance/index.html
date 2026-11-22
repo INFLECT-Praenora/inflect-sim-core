@@ -647,7 +647,7 @@ micro-benchmark behind the full-run numbers.
     <div class="ctr-block">
       <h2 class="overview-label ctr-h">Result</h2>
       
-      <p class="ctr-text" data-edit-kind="study" data-edit-field="result" data-edit-value="" data-edit-multiline data-edit-label="Result"></p>
+      <p class="ctr-text" data-edit-kind="study" data-edit-field="result" data-edit-value="" data-edit-multiline data-edit-label="Result">The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here.</p>
       
       
       
@@ -665,22 +665,26 @@ micro-benchmark behind the full-run numbers.
       
       
       
-      <div class="finding-card finding-kind-other finding-status-supported">
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-one-48-h-run-three">
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
-            <span class="finding-claim finding-statement">One 48 h run, three engines, 4+ orders of magnitude of compute.</span>
+            <span class="finding-claim finding-statement" data-edit-kind="study" data-edit-field="findings[one-48-h-run-three].statement" data-edit-value="The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here." data-edit-multiline data-edit-label="Finding one-48-h-run-three">The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here.</span>
             
           </summary>
           <div class="finding-drawer">
             <div class="finding-header">
-              <span class="finding-id"></span>
+              <span class="finding-id">one-48-h-run-three</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
             
             
-            
+            <div class="finding-explanation"><em>Why:</em> What the measurement means: three engines running the same 48 h severe-sepsis spec separate into two regimes. The two exact engines (BioGears ~3.38 h, Tellurium ~2.81 h) sit within the same order of magnitude because both are dominated by the same stiff 91-state ODE solve; the PyTorch surrogate (~0.2 s) sits four orders below them because it replaces that solve with a single forward pass. The live per-step micro-benchmark (~526 ms for one exact CVODE step vs ~0.04 ms for one surrogate pass, ~13,000x) localizes the cost to exactly that solve, so the spread is explained by mechanism rather than measurement noise, and the companion finding rules out a faster integrator as the lever — the ODE is stiff, so an explicit method is unstable and wrong on the fast cardiovascular states.
+
+Where it sits in the investigation: performance is downstream of composition -&gt; ensembles -&gt; workflows (the spec, the matched run, and the engine wrappers are inherited here, not re-derived) and it feeds fidelity (study 05). That ordering is what makes an honest reading possible — this study measures cost under a fixed spec and deliberately does not measure correctness.
+
+Honest limitation and open question: the speedups are compute-only. They adjudicate which engine is cheaper, not the competing prediction that actually matters — whether the surrogate is a drop-in replacement for the exact SBML path. That prediction is settled by a different quantity, held-out trajectory error against the exact engine, which is the province of study 05&#39;s fidelity validator, not this one. Until that validator passes, the surrogate is a fast approximate tier, and the bounded claim this study supports is: the bottleneck is the stiff solve and the surrogate removes it, at a cost in accuracy this study does not quantify.</div>
             
             
           </div>
@@ -695,7 +699,7 @@ micro-benchmark behind the full-run numbers.
       
       
       
-      <div class="finding-card finding-kind-other finding-status-supported">
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-the-bottleneck-is-the-stiff">
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
@@ -704,7 +708,7 @@ micro-benchmark behind the full-run numbers.
           </summary>
           <div class="finding-drawer">
             <div class="finding-header">
-              <span class="finding-id"></span>
+              <span class="finding-id">the-bottleneck-is-the-stiff</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
@@ -725,7 +729,7 @@ micro-benchmark behind the full-run numbers.
       
       
       
-      <div class="finding-card finding-kind-other finding-status-supported">
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-live-per-step-micro-benchmark">
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
@@ -734,7 +738,7 @@ micro-benchmark behind the full-run numbers.
           </summary>
           <div class="finding-drawer">
             <div class="finding-header">
-              <span class="finding-id"></span>
+              <span class="finding-id">live-per-step-micro-benchmark</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
@@ -1373,7 +1377,7 @@ micro-benchmark behind the full-run numbers.
         
         <ul class="synthesis-list">
           
-          <li>One 48 h run, three engines, 4+ orders of magnitude of compute.</li>
+          <li>The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here.</li>
           
           <li>The bottleneck is the stiff ODE solve — a faster integrator is not a lever.</li>
           
@@ -1399,17 +1403,17 @@ micro-benchmark behind the full-run numbers.
     <ul class="synthesis-list" style="margin:0 0 12px">
       
       <li style="display:flex;align-items:flex-start;gap:8px">
-        
-        <span>One 48 h run, three engines, 4+ orders of magnitude of compute. <span class="muted small">(supported)</span></span>
+        <button type="button" class="action-btn study-finding-del" data-id="one-48-h-run-three" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
+        <span>The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here. <span class="muted small">(supported)</span></span>
       </li>
       
       <li style="display:flex;align-items:flex-start;gap:8px">
-        
+        <button type="button" class="action-btn study-finding-del" data-id="the-bottleneck-is-the-stiff" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
         <span>The bottleneck is the stiff ODE solve — a faster integrator is not a lever. <span class="muted small">(supported)</span></span>
       </li>
       
       <li style="display:flex;align-items:flex-start;gap:8px">
-        
+        <button type="button" class="action-btn study-finding-del" data-id="live-per-step-micro-benchmark" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
         <span>Live per-step micro-benchmark: the stiff solve is ~13,000x the surrogate forward pass. <span class="muted small">(supported)</span></span>
       </li>
       
@@ -1467,7 +1471,7 @@ micro-benchmark behind the full-run numbers.
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "7dc5c4e93021e3701c64cedb507da30ec1d16d3a", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/7dc5c4e93021e3701c64cedb507da30ec1d16d3a", "branch": "main", "lockfile": "uv.lock@c83bda201a44", "generated_at": "2026-11-22 17:39 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "377f248796f000ea9beb28dbe0eb38b3db8fc54d", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/377f248796f000ea9beb28dbe0eb38b3db8fc54d", "branch": "main", "lockfile": "uv.lock@625950c11691", "generated_at": "2026-11-22 21:12 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>

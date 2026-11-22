@@ -670,7 +670,7 @@ what the simulation core can do.
     <div class="ctr-block">
       <h2 class="overview-label ctr-h">Result</h2>
       
-      <p class="ctr-text" data-edit-kind="study" data-edit-field="result" data-edit-value="" data-edit-multiline data-edit-label="Result"></p>
+      <p class="ctr-text" data-edit-kind="study" data-edit-field="result" data-edit-value="" data-edit-multiline data-edit-label="Result">Swapping engines is swapping one typed node address — a demonstrated engineering interchangeability at the port boundary, not a claim that the three engines produce equivalent physiology.</p>
       
       
       
@@ -688,22 +688,26 @@ what the simulation core can do.
       
       
       
-      <div class="finding-card finding-kind-other finding-status-supported">
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-one-model-every-engine-the">
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
-            <span class="finding-claim finding-statement">One model, every engine — the same sepsis spec runs under three interchangeable engines by swapping one box.</span>
+            <span class="finding-claim finding-statement" data-edit-kind="study" data-edit-field="findings[one-model-every-engine-the].statement" data-edit-value="Swapping engines is swapping one typed node address — a demonstrated engineering interchangeability at the port boundary, not a claim that the three engines produce equivalent physiology." data-edit-multiline data-edit-label="Finding one-model-every-engine-the">Swapping engines is swapping one typed node address — a demonstrated engineering interchangeability at the port boundary, not a claim that the three engines produce equivalent physiology.</span>
             
           </summary>
           <div class="finding-drawer">
             <div class="finding-header">
-              <span class="finding-id"></span>
+              <span class="finding-id">one-model-every-engine-the</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
             
             
-            
+            <div class="finding-explanation"><em>Why:</em> This finding establishes the composition pillar the rest of the investigation stands on, and its evidence is structural rather than a single measured quantity. One sepsis specification exposes a fixed set of typed observable ports, and each engine — the BioGears 8.2.0 C++ physiology engine, the exact SBML/Antimony extraction integrated by roadrunner/CVODE (Tellurium), and the learned PyTorch surrogate — sits as a single node behind those ports, so moving between engines changes one node address while the wiring, the emitters, and the downstream analysis stay fixed. That the swap is genuine and not asserted is what the downstream artifacts show: study 01 records the inflammation core (tissue integrity, blood pathogen) overlapping to within ~0.1% between the two full-physics engines on the committed 72 h severe-arm run, and the surrogate completing a full 576-step rollout in a fraction of a second — three independently implemented engines driving the same spec through the same ports. The severity x engine ensemble (study 02), the Antimony/SBML hand-off (study 03), and the per-engine profile (study 04) are all variations over this one interchange.
+
+The interchangeability shown here is at the interface, not at the level of physiological output, and the two must not be conflated. Study 05&#39;s verdict is &#39;qualified&#39; precisely on this line: the engines reach baseline parity and a near-identical inflammation core but their hemodynamic layers diverge in mechanism and timing. So &#39;interchangeable&#39; means &#39;drop-in at the typed port boundary&#39; — demonstrated by runnable artifacts — and not &#39;numerically equivalent&#39;, which study 05 shows is false on the hemodynamic layer. The surrogate makes the distinction sharpest: study 04 records a ~40,000x full-run (~13,000x per-step) speedup over the stiff ODE solve, but that is a statement about cost alone, usable as a drop-in only once the fidelity gate is met — the deciding number lives in study 05, not here.
+
+Honest limitation specific to this finding: it carries no numeric observed value, and by construction it should not. Its evidence is the existence and successful execution of the downstream studies, not a measured scalar, so it is demonstration-level — an existence-and-composition claim about the artifacts, not a validation of their physiology. Two unknowns remain explicitly open. The competing predictions the map does not adjudicate are the hemodynamic MAP/HR/SVR trajectories, where the two full-physics engines disagree in mechanism and timing. The proposed validator that would close them is a pre-registered discriminating test against an external hemodynamic reference — study 05 currently bounds the divergence descriptively but cannot yet say which engine is right. Until such a validator is added, this finding should be read as a faithful inventory of runnable, port-compatible capability over one spec, not as evidence that any single engine reproduces ground-truth sepsis hemodynamics.</div>
             
             
           </div>
@@ -718,22 +722,26 @@ what the simulation core can do.
       
       
       
-      <div class="finding-card finding-kind-other finding-status-supported">
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-the-four-pillars-each-a">
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
-            <span class="finding-claim finding-statement">The four pillars, each a runnable study.</span>
+            <span class="finding-claim finding-statement" data-edit-kind="study" data-edit-field="findings[the-four-pillars-each-a].statement" data-edit-value="The four capability pillars plus the fidelity backbone are each an openable, runnable study rather than a slide assertion — a demonstrated map of what the core can do, ordered as an epistemic chain, not a validation that any one pillar&#39;s physiology is correct." data-edit-multiline data-edit-label="Finding the-four-pillars-each-a">The four capability pillars plus the fidelity backbone are each an openable, runnable study rather than a slide assertion — a demonstrated map of what the core can do, ordered as an epistemic chain, not a validation that any one pillar&#39;s physiology is correct.</span>
             
           </summary>
           <div class="finding-drawer">
             <div class="finding-header">
-              <span class="finding-id"></span>
+              <span class="finding-id">the-four-pillars-each-a</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
             
             
-            
+            <div class="finding-explanation"><em>Why:</em> This finding is the investigation&#39;s map: it asserts that each capability the core claims is realised as a study you can open and run, and it fixes the order those studies depend on one another. Composition (study 01) comes first because it establishes the one precondition everything else reuses — the same sepsis spec behind one typed port boundary, with the engine as a single swappable node (the sibling finding on one-model-every-engine states exactly this). Ensembles (study 02) is then a severity x engine batch over that interchange; workflows (study 03) hands an Antimony/SBML file between those same engines through the four-verb API; and performance (study 04) profiles where the compute goes on the identical spec, including the fast approximate surrogate tier. Read top to bottom the pillars are not four independent demonstrations but one interchange elaborated four ways, which is why the ordering composition -&gt; ensembles -&gt; workflows -&gt; performance is the claim, not just a list.
+
+The fidelity backbone (study 05) is deliberately outside the capability chain: it is the honesty check that bounds all four. Its role here is to stop &#39;each pillar runs&#39; from being misread as &#39;each pillar is physiologically correct&#39;. The engines reach baseline parity and a near-identical inflammation core but diverge on the hemodynamic layer in mechanism and timing, which is why study 05&#39;s own verdict is qualified rather than supported. That qualification propagates upward: the surrogate speedup profiled in study 04 is a per-step compute result bounded by study 05&#39;s agreement envelope, and the ensemble and workflow pillars inherit the same ceiling. So the strength of this map is set by its weakest link, not by the count of runnable studies.
+
+Honest limitation specific to this finding: it carries no numeric observed value, and it should not be expected to. Its evidence is structural — the existence and successful execution of the five downstream studies — not a measured quantity, so it is demonstration-level by construction. There is no single aggregate metric that grades &#39;the core does all four&#39;; the claim is verified study by study, and &#39;each a runnable study&#39; is an existence-and-composition claim about the artifacts, not a validation of their physiology. Open question: the investigation has no pre-registered discriminating test that would convert this map from &#39;four capabilities demonstrated over one spec&#39; into &#39;four capabilities validated against an external reference&#39; — most sharply on the hemodynamic layer where study 05 records divergence but cannot yet say which engine is right. Until such a validator is added, this finding should be read as a faithful inventory of runnable capability, not as evidence that any pillar reproduces ground-truth sepsis physiology.</div>
             
             
           </div>
@@ -1366,9 +1374,9 @@ what the simulation core can do.
         
         <ul class="synthesis-list">
           
-          <li>One model, every engine — the same sepsis spec runs under three interchangeable engines by swapping one box.</li>
+          <li>Swapping engines is swapping one typed node address — a demonstrated engineering interchangeability at the port boundary, not a claim that the three engines produce equivalent physiology.</li>
           
-          <li>The four pillars, each a runnable study.</li>
+          <li>The four capability pillars plus the fidelity backbone are each an openable, runnable study rather than a slide assertion — a demonstrated map of what the core can do, ordered as an epistemic chain, not a validation that any one pillar&#39;s physiology is correct.</li>
           
         </ul>
         
@@ -1390,13 +1398,13 @@ what the simulation core can do.
     <ul class="synthesis-list" style="margin:0 0 12px">
       
       <li style="display:flex;align-items:flex-start;gap:8px">
-        
-        <span>One model, every engine — the same sepsis spec runs under three interchangeable engines by swapping one box. <span class="muted small">(supported)</span></span>
+        <button type="button" class="action-btn study-finding-del" data-id="one-model-every-engine-the" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
+        <span>Swapping engines is swapping one typed node address — a demonstrated engineering interchangeability at the port boundary, not a claim that the three engines produce equivalent physiology. <span class="muted small">(supported)</span></span>
       </li>
       
       <li style="display:flex;align-items:flex-start;gap:8px">
-        
-        <span>The four pillars, each a runnable study. <span class="muted small">(supported)</span></span>
+        <button type="button" class="action-btn study-finding-del" data-id="the-four-pillars-each-a" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
+        <span>The four capability pillars plus the fidelity backbone are each an openable, runnable study rather than a slide assertion — a demonstrated map of what the core can do, ordered as an epistemic chain, not a validation that any one pillar&#39;s physiology is correct. <span class="muted small">(supported)</span></span>
       </li>
       
     </ul>
@@ -1453,7 +1461,7 @@ what the simulation core can do.
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "7dc5c4e93021e3701c64cedb507da30ec1d16d3a", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/7dc5c4e93021e3701c64cedb507da30ec1d16d3a", "branch": "main", "lockfile": "uv.lock@c83bda201a44", "generated_at": "2026-11-22 17:39 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "377f248796f000ea9beb28dbe0eb38b3db8fc54d", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/377f248796f000ea9beb28dbe0eb38b3db8fc54d", "branch": "main", "lockfile": "uv.lock@625950c11691", "generated_at": "2026-11-22 21:12 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>

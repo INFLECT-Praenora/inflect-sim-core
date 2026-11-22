@@ -672,7 +672,7 @@ mapping each divergence to the BioGears subsystem the extraction omits — so th
       
       
       
-      <div class="finding-card finding-kind-other finding-status-supported">
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-where-they-agree-baseline-parity">
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
@@ -681,7 +681,7 @@ mapping each divergence to the BioGears subsystem the extraction omits — so th
           </summary>
           <div class="finding-drawer">
             <div class="finding-header">
-              <span class="finding-id"></span>
+              <span class="finding-id">where-they-agree-baseline-parity</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
@@ -702,22 +702,22 @@ mapping each divergence to the BioGears subsystem the extraction omits — so th
       
       
       
-      <div class="finding-card finding-kind-other finding-status-supported">
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-where-they-diverge-the-hemodynamic">
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
-            <span class="finding-claim finding-statement">Where they diverge — the hemodynamic layer, in mechanism and timing.</span>
+            <span class="finding-claim finding-statement" data-edit-kind="study" data-edit-field="findings[where-they-diverge-the-hemodynamic].statement" data-edit-value="The hemodynamic divergence is not transcription noise but two internally-consistent, opposite shock trajectories: the engine reaches MAP&lt;65 by a hypodynamic low-output route (69.3 h) and the extraction by a hyperdynamic vasodilatory route (54.1 h). The ~15 h timing gap — earlier despite the extraction lagging ~11 h on systolic pressure — together with the engine&#39;s continuous fluctuation versus the extraction&#39;s near-flat profile, is the signature of the vasomotor, fluid, and metabolic subsystems the extraction omits, not of a faithfulness failure in the shared spec." data-edit-multiline data-edit-label="Finding where-they-diverge-the-hemodynamic">The hemodynamic divergence is not transcription noise but two internally-consistent, opposite shock trajectories: the engine reaches MAP&lt;65 by a hypodynamic low-output route (69.3 h) and the extraction by a hyperdynamic vasodilatory route (54.1 h). The ~15 h timing gap — earlier despite the extraction lagging ~11 h on systolic pressure — together with the engine&#39;s continuous fluctuation versus the extraction&#39;s near-flat profile, is the signature of the vasomotor, fluid, and metabolic subsystems the extraction omits, not of a faithfulness failure in the shared spec.</span>
             
           </summary>
           <div class="finding-drawer">
             <div class="finding-header">
-              <span class="finding-id"></span>
+              <span class="finding-id">where-they-diverge-the-hemodynamic</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
             
             
-            
+            <div class="finding-explanation"><em>Why:</em> Agreement on the inflammation core to within ~0.1% (tissue integrity, blood pathogen) bounds the extraction&#39;s error to the hemodynamic layer: the acute inflammatory response is a faithful translation of the engine&#39;s, while the closed-loop cardiovascular control is not. That localisation turns the divergence into a testable disagreement. The two engines make competing predictions about the same severe patient — the C++ engine predicts low-output shock (output falls, MAP&lt;65 arrives later, at 69.3 h) and the autonomous extraction predicts vasodilatory shock (peripheral resistance falls, MAP&lt;65 arrives earlier, at 54.1 h, even though its systolic pressure trails by ~11 h). Both cannot describe the real trajectory; at least one route is an artifact of what each model carries, and every mapped divergence traces to a subsystem the extraction leaves out or inert (nitric oxide, fever vasodilation, renal/urine fluid handling, lactate, intracellular water). The discriminating validator this leaves open: trace the cardiac-output-versus-systemic-vascular-resistance split through the shock crossing across the severity sweep and compare it against the BioGears C++ reference — the engine whose output-vs-resistance partition matches the reference at MAP&lt;65 is the faithful one, and the other&#39;s shock route is the modelling artifact. The honest limitation is that, on the committed severe runs alone, this study measures that the engines diverge and maps each divergence to an omitted subsystem, but does not yet adjudicate which shock trajectory is correct; the study-04 surrogate is a further, coarser approximation on top of the extraction. Confidence that the divergence is real and subsystem-localised is high; the adjudication between the two routes remains unresolved.</div>
             
             
           </div>
@@ -1322,7 +1322,7 @@ mapping each divergence to the BioGears subsystem the extraction omits — so th
           
           <li>Where they agree — baseline parity and a near-identical (~0.1%) inflammation core.</li>
           
-          <li>Where they diverge — the hemodynamic layer, in mechanism and timing.</li>
+          <li>The hemodynamic divergence is not transcription noise but two internally-consistent, opposite shock trajectories: the engine reaches MAP&lt;65 by a hypodynamic low-output route (69.3 h) and the extraction by a hyperdynamic vasodilatory route (54.1 h). The ~15 h timing gap — earlier despite the extraction lagging ~11 h on systolic pressure — together with the engine&#39;s continuous fluctuation versus the extraction&#39;s near-flat profile, is the signature of the vasomotor, fluid, and metabolic subsystems the extraction omits, not of a faithfulness failure in the shared spec.</li>
           
         </ul>
         
@@ -1344,13 +1344,13 @@ mapping each divergence to the BioGears subsystem the extraction omits — so th
     <ul class="synthesis-list" style="margin:0 0 12px">
       
       <li style="display:flex;align-items:flex-start;gap:8px">
-        
+        <button type="button" class="action-btn study-finding-del" data-id="where-they-agree-baseline-parity" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
         <span>Where they agree — baseline parity and a near-identical (~0.1%) inflammation core. <span class="muted small">(supported)</span></span>
       </li>
       
       <li style="display:flex;align-items:flex-start;gap:8px">
-        
-        <span>Where they diverge — the hemodynamic layer, in mechanism and timing. <span class="muted small">(supported)</span></span>
+        <button type="button" class="action-btn study-finding-del" data-id="where-they-diverge-the-hemodynamic" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
+        <span>The hemodynamic divergence is not transcription noise but two internally-consistent, opposite shock trajectories: the engine reaches MAP&lt;65 by a hypodynamic low-output route (69.3 h) and the extraction by a hyperdynamic vasodilatory route (54.1 h). The ~15 h timing gap — earlier despite the extraction lagging ~11 h on systolic pressure — together with the engine&#39;s continuous fluctuation versus the extraction&#39;s near-flat profile, is the signature of the vasomotor, fluid, and metabolic subsystems the extraction omits, not of a faithfulness failure in the shared spec. <span class="muted small">(supported)</span></span>
       </li>
       
     </ul>
@@ -1407,7 +1407,7 @@ mapping each divergence to the BioGears subsystem the extraction omits — so th
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "7dc5c4e93021e3701c64cedb507da30ec1d16d3a", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/7dc5c4e93021e3701c64cedb507da30ec1d16d3a", "branch": "main", "lockfile": "uv.lock@c83bda201a44", "generated_at": "2026-11-22 17:39 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "377f248796f000ea9beb28dbe0eb38b3db8fc54d", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/377f248796f000ea9beb28dbe0eb38b3db8fc54d", "branch": "main", "lockfile": "uv.lock@625950c11691", "generated_at": "2026-11-22 21:12 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>
