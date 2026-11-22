@@ -3225,7 +3225,7 @@ requires-dist = [
     { name = "viva-emitters" },
     { name = "viva-tellurium", git = "https://github.com/vivarium-collective/viva-tellurium?rev=c65f8032f76935524912c2b3d384accb805b9e24" },
     { name = "viva-torch", git = "https://github.com/vivarium-collective/viva-torch?rev=bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" },
-    { name = "vivarium-workbench", git = "https://github.com/vivarium-collective/vivarium-workbench.git?rev=df8fe3659016765d95893200dddf249c564c2fad" },
+    { name = "vivarium-workbench", git = "https://github.com/vivarium-collective/vivarium-workbench.git?rev=cd6258699f61674021b24a15e7d93cea4c5c5d0a" },
 ]
 provides-extras = ["dev", "serve"]
 
@@ -3578,8 +3578,8 @@ wheels = [
 
 [[package]]
 name = "viva-basic-processes"
-version = "0.3.0"
-source = { git = "https://github.com/vivarium-collective/viva-basic-processes.git?rev=9a1a624dc925cf700c3f89a8cc008a8fa4b4e5d4#9a1a624dc925cf700c3f89a8cc008a8fa4b4e5d4" }
+version = "0.4.0"
+source = { git = "https://github.com/vivarium-collective/viva-basic-processes.git?rev=f9ea4bd35f1ab94e4a8e9e715eaf78da0d04fcc4#f9ea4bd35f1ab94e4a8e9e715eaf78da0d04fcc4" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "numpy" },
@@ -3677,8 +3677,8 @@ xarray = [
 
 [[package]]
 name = "viva-superpowers"
-version = "0.29.0"
-source = { git = "https://github.com/vivarium-collective/viva-superpowers.git?rev=6f96ee1de406ab0262a52c6f234495673d78f775#6f96ee1de406ab0262a52c6f234495673d78f775" }
+version = "0.30.0"
+source = { git = "https://github.com/vivarium-collective/viva-superpowers.git?rev=fe4064a65d1da63452af73de49e57cc975f47bb4#fe4064a65d1da63452af73de49e57cc975f47bb4" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "click" },
@@ -3739,7 +3739,7 @@ dependencies = [
 [[package]]
 name = "vivarium-workbench"
 version = "0.5.5"
-source = { git = "https://github.com/vivarium-collective/vivarium-workbench.git?rev=df8fe3659016765d95893200dddf249c564c2fad#df8fe3659016765d95893200dddf249c564c2fad" }
+source = { git = "https://github.com/vivarium-collective/vivarium-workbench.git?rev=cd6258699f61674021b24a15e7d93cea4c5c5d0a#cd6258699f61674021b24a15e7d93cea4c5c5d0a" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "boto3" },
