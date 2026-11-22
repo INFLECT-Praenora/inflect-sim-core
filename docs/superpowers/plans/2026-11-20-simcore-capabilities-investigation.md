@@ -199,7 +199,7 @@ def test_surrogate_asset_present():
 
 - [ ] **Step 1: Write failing test** `tests/investigation/test_renders_end_to_end.py` — build the read-only bundle for this investigation (`vivarium-workbench-publish --workspace . --out <tmp>`), assert exit 0 and that each of the 6 studies produced a shell + the baked `composite-resolve/<id>.json` for study 01's baseline (snapshot parity).
 - [ ] **Step 2: Run it, verify it fails** (if any study is unrenderable).
-- [ ] **Step 3: Finalize `investigation.yaml`** (at_a_glance order, executive verdict framed as the capabilities demonstration); add the `neural-surrogate-sepsis` supersede pointer; run `/viva-report` (or `vivarium-workbench` render) to regenerate reports.
+- [ ] **Step 3: Finalize `investigation.yaml`** (at_a_glance order, executive verdict framed as the capabilities demonstration); add the `neural-surrogate-sepsis` supersede pointer; run `/viva:report` (or `vivarium-workbench` render) to regenerate reports.
 - [ ] **Step 4: Full verification** — `pytest tests/investigation -q` all green; `python scripts/lint-workspace.py` OK; publish-render test green.
 - [ ] **Step 5: Commit** — `investigation(simcore): finalize capabilities tour + supersede neural-surrogate-sepsis`
 

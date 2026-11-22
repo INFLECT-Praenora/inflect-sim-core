@@ -34,7 +34,7 @@
 ### Task 1: Create repo + scaffold workspace
 
 **Files:**
-- Create: `~/code/simulation-core/` (via `/viva-workspace` standalone)
+- Create: `~/code/simulation-core/` (via `/viva:workspace` standalone)
 - Create: `~/code/simulation-core/docs/superpowers/specs/2026-11-15-simulation-core-sepsis-sbml-design.md` (copy of approved spec)
 - Create: `~/code/simulation-core/docs/superpowers/plans/2026-11-15-simulation-core-sepsis-sbml-plan.md` (this plan)
 
@@ -42,7 +42,7 @@
 - Produces: a viva workspace at `~/code/simulation-core` with `workspace.yaml`, package `viva_simulation_core/`, git initialized, remote `origin` → `git@github.com:INFLECT-Praenora/simulation-core.git`.
 
 - [ ] **Step 1:** Create the public repo: `gh repo create INFLECT-Praenora/simulation-core --public --license apache-2.0 -d "API + runtime for INFLECT (ARPA-H CIRCLE): process-bigraph / viva-core, with the BioGears↔SBML sepsis investigation"`.
-- [ ] **Step 2:** Scaffold the workspace with `/viva-workspace` (standalone mode), package name `viva_simulation_core`, into `~/code/simulation-core`. Point `origin` at the repo from Step 1.
+- [ ] **Step 2:** Scaffold the workspace with `/viva:workspace` (standalone mode), package name `viva_simulation_core`, into `~/code/simulation-core`. Point `origin` at the repo from Step 1.
 - [ ] **Step 3:** Copy the approved spec + this plan into `docs/superpowers/{specs,plans}/`.
 - [ ] **Step 4: Verify** — run `/viva-status` in `~/code/simulation-core`; expect it to detect `workspace.yaml`, report the package and a clean/initialized git state.
 - [ ] **Step 5: Commit** — `git add -A && git commit -m "chore: scaffold simulation-core workspace + design/plan"`; push `main`.
@@ -64,7 +64,7 @@
 - [ ] **Step 3:** Run it; expect FAIL (modules not yet installed).
 - [ ] **Step 4:** Install the deps into the venv.
 - [ ] **Step 5:** Run the test; expect PASS. (`viva_biogears` imports without a native build; engine calls are what need it.)
-- [ ] **Step 6: Verify** — `/viva-catalog list` shows the installed modules.
+- [ ] **Step 6: Verify** — `/viva:catalog list` shows the installed modules.
 - [ ] **Step 7: Commit** — `deps: add process-bigraph, viva-core, viva-tellurium, viva-biogears, viva-emitters`.
 
 ---
@@ -143,7 +143,7 @@
 ### Task 7: Investigation + S1 baseline-parity study (workbench)
 
 **Files:**
-- Workbench state (investigation + study), written via `/viva-investigation` and `/viva-study`.
+- Workbench state (investigation + study), written via `/viva:investigate` and `/viva:study`.
 - Create: `viva_simulation_core/analysis/align.py` — `align_observables(engine_df, sbml_df, observables) -> AlignedComparison` (common-clock resample + per-observable tolerance check).
 - Test: `tests/test_align.py`
 
@@ -151,12 +151,12 @@
 - Consumes: Tasks 5 & 6 composites.
 - Produces: `/api` investigation `biogears-sbml-sepsis`; `align_observables(...)` returning aligned series + a per-observable pass/fail against tolerance; the **scenario-equality assertion** both arms must satisfy.
 
-- [ ] **Step 1:** `/viva-investigation new` → "BioGears sepsis core: engine vs SBML extraction", overview from the spec intent.
+- [ ] **Step 1:** `/viva:investigate new` → "BioGears sepsis core: engine vs SBML extraction", overview from the spec intent.
 - [ ] **Step 2: Write the failing test** `test_align_resamples_and_gates` — feed two short baseline runs; assert `align_observables` returns a common time grid and flags the baseline within tolerance (the S1 gate). Also `test_scenario_equality` — mismatched severity/patient/horizon must be rejected.
 - [ ] **Step 3:** Run; expect FAIL.
 - [ ] **Step 4:** Implement `align.py` (resample to a shared grid; per-observable relative tolerance; scenario-equality guard that raises on mismatch).
 - [ ] **Step 5:** Run; expect PASS.
-- [ ] **Step 6:** `/viva-study` — create **S1** with the two baseline composites as baseline+variant, record the parity conclusion (gate must pass before S2/S3 are trusted). If the engine is absent, S1 records the SBML baseline and marks the engine arm pending.
+- [ ] **Step 6:** `/viva:study` — create **S1** with the two baseline composites as baseline+variant, record the parity conclusion (gate must pass before S2/S3 are trusted). If the engine is absent, S1 records the SBML baseline and marks the engine arm pending.
 - [ ] **Step 7: Commit** — `feat: investigation + S1 baseline parity (alignment + scenario gate)`.
 
 ---
@@ -176,7 +176,7 @@
 - [ ] **Step 2: Write the failing test** `test_milestone_extraction` — against a **short recorded fixture** (not a full 48 h run), assert the milestone extractor computes SBP<100 crossing time, MAP<65, SVR ratio from an aligned result. (Full arms are run as an operation, not a CI test.)
 - [ ] **Step 3:** Run; expect FAIL; implement the milestone extractor in `analysis/`; run; expect PASS.
 - [ ] **Step 4:** Launch the full arms on the run host (SBML side always; engine side when built). Verify progress via commits/`out/` artifacts, not just "running".
-- [ ] **Step 5:** `/viva-study` — record **S2** and **S3**, including the severe-arm ~8–10 h delay and the untranslated-process caveats from the spec.
+- [ ] **Step 5:** `/viva:study` — record **S2** and **S3**, including the severe-arm ~8–10 h delay and the untranslated-process caveats from the spec.
 - [ ] **Step 6: Commit** — `feat: S2/S3 infection arms + milestone extraction`.
 
 ---
@@ -196,7 +196,7 @@
 - [ ] **Step 3 (if gate passes): Write the failing test** `test_cross_engine_determinism` — run the same short composite under both engines, assert the observable series match within tolerance.
 - [ ] **Step 4:** Implement `run_s4_engines.py` (same document, two engines via the interchangeable runtime; time each horizon; return results + timings).
 - [ ] **Step 5:** Run; expect determinism PASS; capture wall-clock for a representative horizon.
-- [ ] **Step 6:** `/viva-study` — record **S4**: wall-clock Python vs Rust + the determinism verdict, with the spec's honest scope note (single heavy process → overhead, modest delta; fine-grained decomposition is where viva-core's speedup appears).
+- [ ] **Step 6:** `/viva:study` — record **S4**: wall-clock Python vs Rust + the determinism verdict, with the spec's honest scope note (single heavy process → overhead, modest delta; fine-grained decomposition is where viva-core's speedup appears).
 - [ ] **Step 7: Commit** — `feat: S4 cross-engine runtime + determinism`.
 
 ---
@@ -204,16 +204,16 @@
 ### Task 10: Comparison visualization, report, publish, PR
 
 **Files:**
-- Create: `viva_simulation_core/viz/sepsis_comparison.py` (via `/viva-viz`) — overlaid time-series (engine vs SBML, mild vs severe) + the milestone-divergence table.
+- Create: `viva_simulation_core/viz/sepsis_comparison.py` (via `/viva:viz`) — overlaid time-series (engine vs SBML, mild vs severe) + the milestone-divergence table.
 - Modify: README (badges, read-only workbench link) via `gen-readme`.
 
 **Interfaces:**
 - Consumes: S1–S4 results.
 - Produces: the investigation report + published read-only workbench.
 
-- [ ] **Step 1:** `/viva-viz` — build the overlay figure(s) and the milestone-divergence table (report's measures + engine numbers + the ~8–10 h delay called out).
-- [ ] **Step 2:** `/viva-report` — run Pass A (reviewer-readiness) + Pass B (lint), fix findings, render the investigation report. Any pending engine/S4 arm is shown as pending, not green.
-- [ ] **Step 3: Verify** — report renders; `/viva-navigate decisions biogears-sbml-sepsis` shows no unresolved blockers (or only expected pending items).
+- [ ] **Step 1:** `/viva:viz` — build the overlay figure(s) and the milestone-divergence table (report's measures + engine numbers + the ~8–10 h delay called out).
+- [ ] **Step 2:** `/viva:report` — run Pass A (reviewer-readiness) + Pass B (lint), fix findings, render the investigation report. Any pending engine/S4 arm is shown as pending, not green.
+- [ ] **Step 3: Verify** — report renders; `/viva:explore decisions biogears-sbml-sepsis` shows no unresolved blockers (or only expected pending items).
 - [ ] **Step 4:** Publish the read-only workbench; regenerate README badges.
 - [ ] **Step 5: Commit + PR** — push; `gh pr create` into `main` with a body summarizing the investigation and its current state. **Do not merge** (user approves).
 
