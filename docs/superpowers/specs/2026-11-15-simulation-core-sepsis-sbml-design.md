@@ -108,12 +108,12 @@ lands in a follow-up once the build exists.
 
 - **Repo:** `INFLECT-Praenora/simulation-core`, public, MIT or Apache-2.0
   (builder to match program norm; Apache-2.0 aligns with BioGears provenance).
-  Scaffolded via `/viva-workspace` (standalone mode), package `pbg_simulation_core`.
+  Scaffolded via `/viva:workspace` (standalone mode), package `pbg_simulation_core`.
 - **Dependencies:** `process-bigraph`, `viva-core`, `viva-tellurium`,
   `viva-biogears`, `viva-emitters` (as needed). Editable installs from `~/code`
   checkouts where present (`viva-tellurium` already cloned), GitHub otherwise.
   BioGears native runtime installed via `pybiogears` installer on the run host.
-- **Investigation (`/viva-investigation`):** "BioGears sepsis core: engine vs SBML
+- **Investigation (`/viva:investigate`):** "BioGears sepsis core: engine vs SBML
   extraction." Member studies:
   - **S1 — healthy baseline parity:** both sides at rest, confirm matched
     baseline (≈114/73.5, HR 72, CO 5.9 L/min) before any infection. Gate: within
@@ -155,7 +155,7 @@ lands in a follow-up once the build exists.
   report (pdf/docx, Herbert Sauro), with a provenance note crediting Sauro,
   Apache-2.0 BioGears, and McDaniel 2019. These are untrusted downloads → copied
   in, not executed from their download dir.
-- **Comparison viz (`/viva-viz`):** overlaid time-series per observable (engine vs
+- **Comparison viz (`/viva:viz`):** overlaid time-series per observable (engine vs
   SBML, mild vs severe) + a milestone-divergence table mirroring the report's
   validation table, extended with the engine's own numbers.
 - **Runtime API:** thin — a documented entry point to construct and run either
