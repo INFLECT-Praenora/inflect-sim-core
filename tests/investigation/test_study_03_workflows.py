@@ -38,5 +38,5 @@ def test_exact_engine_drives_the_output_not_just_the_surrogate():
     assert any(k.startswith("exact.") for k in j["workflow"]["emit"])
 
 
-def test_dag_chart_present():
-    assert (S / "charts/01_handoff_dag.svg").exists()
+def test_handoff_chart_present():
+    assert (S / "charts/01_handoff_output.svg").exists()

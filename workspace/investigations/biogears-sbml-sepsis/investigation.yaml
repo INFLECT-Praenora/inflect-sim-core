@@ -94,7 +94,7 @@ scientific_argument:
   key_figures:
     - "studies/01-composition/charts/01_engine_overlay.svg"
     - "studies/02-ensembles/charts/01_ensemble_grid.svg"
-    - "studies/03-workflows/charts/01_handoff_dag.svg"
+    - "studies/03-workflows/charts/01_handoff_output.svg"
     - "studies/04-performance/charts/01_runtime_compare.svg"
     - "studies/05-fidelity/charts/01_divergence_heatmap.svg"
   caveats:
@@ -211,3 +211,92 @@ biological_story: |
   autonomous extraction holds those inputs at baseline and traces smooth. Same clinical
   outcome, different hemodynamic path to shock — the measured fidelity limit in study 05,
   which is why the capabilities here are shown on a model whose edges are stated, not hidden.
+decision_log:
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-c7d36f8f4d
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-5deb7f4cc4
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-9ce82d8491
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-854ffe34da
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-0c9091ba79
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-c6ad7ef744
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-34ce7e9824
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-2fedaa9840
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-6524974bc9
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-c59180dd3d
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> applied
+    result: applied
+    at: '2026-11-22T20:55:27+00:00'
+  - policy_version: '1'
+    actor: orchestrator
+    input_hashes: []
+    target: gr-11087d0964
+    consequence: generation:interpret_finding
+    rationale: interpret_finding -> stop
+    result: stop
+    at: '2026-11-22T20:55:27+00:00'
