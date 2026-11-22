@@ -94,7 +94,7 @@ scientific_argument:
   key_figures:
     - "studies/01-composition/charts/01_engine_overlay.svg"
     - "studies/02-ensembles/charts/01_ensemble_grid.svg"
-    - "studies/03-workflows/charts/01_handoff_dag.svg"
+    - "studies/03-workflows/charts/01_handoff_output.svg"
     - "studies/04-performance/charts/01_runtime_compare.svg"
     - "studies/05-fidelity/charts/01_divergence_heatmap.svg"
   caveats:
