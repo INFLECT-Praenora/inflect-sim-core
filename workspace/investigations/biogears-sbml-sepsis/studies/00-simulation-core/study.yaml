@@ -67,8 +67,8 @@ findings:
     status: supported
 
 visualizations:
-  - name: The simulation core at a glance
-    address: image:charts/00_overview.svg
+  - name: "The sepsis core — one spec, real output under the exact SBML engine"
+    address: image:charts/00_core_output.svg
     display: primary
 
 baseline:

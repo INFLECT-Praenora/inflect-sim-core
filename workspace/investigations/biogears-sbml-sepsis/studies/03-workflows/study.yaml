@@ -59,12 +59,9 @@ findings:
     status: supported
 
 visualizations:
-  - name: "Hand-off workflow DAG — an Antimony/SBML file passed into the engines"
-    address: image:charts/01_handoff_dag.svg
+  - name: "Hand-off pipeline — real output: the handed-off .ant run under the exact engine → MAP + derived shock margin"
+    address: image:charts/01_handoff_output.svg
     display: primary
-  - name: "The four-verb workflow API — list, call, connect, run"
-    address: image:charts/02_four_verbs.svg
-    display: secondary
 
 baseline:
   - name: sepsis-core-spec

@@ -1,0 +1,9 @@
+{
+ "title": "The sepsis core \u2014 real output",
+ "interpretation": "Real output of the one sepsis spec under the exact Tellurium/roadrunner engine (real_trajectories.json): four observables over 48 h at healthy baseline vs severe sepsis. The severe run drops MAP to 69 mmHg (below the 65 shock line) and tissue integrity to 0.32 as blood pathogen climbs \u2014 the physiology the whole investigation studies.",
+ "caption": "Real output of the one sepsis spec under the exact Tellurium/roadrunner engine (real_trajectories.json): four observables over 48 h at healthy baseline vs severe sepsis. The severe run drops MAP to 69 mmHg (below the 65 shock line) and tissue integrity to 0.32 as blood pathogen climbs \u2014 the physiology the whole investigation studies.",
+ "provenance": {
+  "generator": "charts/make_core_output.py",
+  "data": "data/real_trajectories.json"
+ }
+}

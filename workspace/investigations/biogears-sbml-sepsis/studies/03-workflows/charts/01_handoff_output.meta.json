@@ -1,0 +1,9 @@
+{
+ "title": "Hand-off pipeline \u2014 real output",
+ "interpretation": "Real output of the composed four-verb pipeline (real_trajectories.json): the portable biogears_sepsis.ant, loaded into the exact Tellurium engine and run, produces a real MAP trajectory (baseline 95.5 mmHg, reaching 69.5 mmHg); the composed derivation step emits the shock margin below. The orchestration produced these numbers from the handed-off model \u2014 nothing here is drawn by hand. (The surrogate tier the pipeline also wires is profiled in studies 04\u201305.)",
+ "caption": "Real output of the composed four-verb pipeline (real_trajectories.json): the portable biogears_sepsis.ant, loaded into the exact Tellurium engine and run, produces a real MAP trajectory (baseline 95.5 mmHg, reaching 69.5 mmHg); the composed derivation step emits the shock margin below. The orchestration produced these numbers from the handed-off model \u2014 nothing here is drawn by hand. (The surrogate tier the pipeline also wires is profiled in studies 04\u201305.)",
+ "provenance": {
+  "generator": "charts/make_handoff_output.py",
+  "data": "data/real_trajectories.json"
+ }
+}
