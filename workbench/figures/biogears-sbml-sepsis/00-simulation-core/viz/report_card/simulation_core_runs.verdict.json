@@ -1,0 +1,37 @@
+{
+  "schema": "report_card_verdict/v2",
+  "model_ref": "00-simulation-core",
+  "reference_model": "",
+  "generated": "",
+  "overall": "within_tol",
+  "groups": {
+    "simulation_core": {
+      "verdict": "within_tol",
+      "axes": [
+        {
+          "id": "spec_runs",
+          "label": "The one sepsis spec runs under the core (recorded run)",
+          "verdict": "within_tol",
+          "value": 2.0,
+          "meter": 0.5000000005,
+          "detail": null,
+          "expected": {
+            "kind": "band",
+            "value": null,
+            "low": 1.0,
+            "high": 1000000000.0,
+            "op": "~=",
+            "tol": 0.05,
+            "statement": null,
+            "units": null
+          },
+          "margin": 1.0,
+          "severity": "hard",
+          "units": null,
+          "knob": null,
+          "citation": null
+        }
+      ]
+    }
+  }
+}
