@@ -3579,7 +3579,7 @@ wheels = [
 [[package]]
 name = "viva-basic-processes"
 version = "0.3.0"
-source = { git = "https://github.com/vivarium-collective/viva-basic-processes.git?branch=main#9a1a624dc925cf700c3f89a8cc008a8fa4b4e5d4" }
+source = { git = "https://github.com/vivarium-collective/viva-basic-processes.git?rev=9a1a624dc925cf700c3f89a8cc008a8fa4b4e5d4#9a1a624dc925cf700c3f89a8cc008a8fa4b4e5d4" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "numpy" },
@@ -3678,7 +3678,7 @@ xarray = [
 [[package]]
 name = "viva-superpowers"
 version = "0.29.0"
-source = { git = "https://github.com/vivarium-collective/viva-superpowers.git?branch=main#6f96ee1de406ab0262a52c6f234495673d78f775" }
+source = { git = "https://github.com/vivarium-collective/viva-superpowers.git?rev=6f96ee1de406ab0262a52c6f234495673d78f775#6f96ee1de406ab0262a52c6f234495673d78f775" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "click" },
@@ -3730,7 +3730,7 @@ dependencies = [
 [[package]]
 name = "viva-workspace"
 version = "0.1.0"
-source = { git = "https://github.com/vivarium-collective/viva:workspace.git?branch=main#7ad2eb1a43bbb502158a69982c608f5aa66a1de6" }
+source = { git = "https://github.com/vivarium-collective/viva-workspace.git?rev=7ad2eb1a43bbb502158a69982c608f5aa66a1de6#7ad2eb1a43bbb502158a69982c608f5aa66a1de6" }
 dependencies = [
     { name = "jsonschema" },
     { name = "pyyaml" },

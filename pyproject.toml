@@ -80,6 +80,10 @@ viva-tellurium = { git = "https://github.com/vivarium-collective/viva-tellurium"
 viva-biogears = { git = "https://github.com/vivarium-collective/viva-biogears", rev = "8d0201976b2b3a008bc6406fdfe3f980d9bcb77f" }
 vivarium-workbench = { git = "https://github.com/vivarium-collective/vivarium-workbench.git", rev = "df8fe3659016765d95893200dddf249c564c2fad" }
 viva-torch = { git = "https://github.com/vivarium-collective/viva-torch", rev = "bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" }
+# Transitive (via viva-discovery-engine); pin a rev so it is not a drifting branch=main
+# pin — a branch pin makes uv inject a credential at resolve time and crash the
+# publish runner's `uv sync` with AmbiguousAuthority.
+viva-workspace = { git = "https://github.com/vivarium-collective/viva-workspace.git", rev = "7ad2eb1a43bbb502158a69982c608f5aa66a1de6" }
 
 [tool.pytest.ini_options]
 markers = ["slow: real-engine / roadrunner-heavy integration tests (run with `pytest -m slow`)"]
