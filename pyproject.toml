@@ -24,30 +24,47 @@ dependencies = [
     "plotly",
     # Web-based workspace dashboard (server + templates + assets + lib helpers).
     # Extracted from viva-template as of v0.4.16; provides the `vivarium-workbench
-    # serve` CLI invoked by scripts/serve.sh.
-    "vivarium-workbench",
-    # viva-core/tellurium/biogears are not on PyPI: resolved via [tool.uv.sources]
-    # (public git repos). viva-emitters is on PyPI.
-    "viva-core",
-    "viva-tellurium",
-    "viva-biogears",
+    # serve` CLI invoked by scripts/serve.sh. Direct git ref (not on PyPI) so a
+    # plain `pip install` resolves it; an @<sha> pin, never a branch (a branch pin
+    # makes uv inject a credential and crash the publish runner — AmbiguousAuthority).
+    "vivarium-workbench @ git+https://github.com/vivarium-collective/vivarium-workbench.git@cd6258699f61674021b24a15e7d93cea4c5c5d0a",
+    # viva-emitters is on PyPI; the emitter infra is framework-level (base).
     "viva-emitters",
-    # viva-torch (neural-surrogate stack) is a BASE dep, not an opt-in extra: the
-    # surrogate tier + the NeuralProcess module are always installed and
-    # first-class (discoverable via build_core / GET /modules). Tradeoff: torch is
-    # heavy, so the base install is larger. Resolved via [tool.uv.sources] git pin.
-    "viva-torch",
     # The viva-sim / simulation-core CLI entrypoints import these at import time.
     "typer",
     "rich",
     # ApiCallStep POSTs the current state to a served or remote model.
     "requests",
+    # NOTE: the simulation ENGINES (tellurium, copasi, biogears, surrogate/torch,
+    # rust/viva-core) are OPTIONAL — see [project.optional-dependencies] below.
+    # A bare install is framework + workbench + CLI only; pick the engine(s) you
+    # want. Engine imports are lazy + guarded, so importing this package and
+    # rendering studies/reports works with zero engines installed.
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.4", "httpx"]
 # Serving a model over HTTP: serve.model_server + examples/serve_demo.
 serve = ["starlette", "uvicorn[standard]"]
+
+# --- Simulation engines (optional; install only the ones you want) ---
+# Each is a process-bigraph-compatible engine wrapper. Direct git refs (these are
+# not on PyPI) so `pip install "simulation-core[<engine>]"` resolves them without
+# uv. Every pin is an @<sha> (never a branch) for reproducible, publish-safe
+# resolves. Engine imports in this package are lazy + guarded (see
+# viva_simulation_core.engines): a missing engine raises EngineNotInstalled with
+# the exact extra to install, never an ImportError at `import` time.
+tellurium = ["viva-tellurium @ git+https://github.com/vivarium-collective/viva-tellurium@2d07d068bb4dd713c9ed61f59747d21b49498cc2"]
+copasi    = ["viva-copasi @ git+https://github.com/vivarium-collective/viva-copasi.git@937ff132f2e8c755248a38a7440067f8d1871001"]
+biogears  = ["viva-biogears @ git+https://github.com/vivarium-collective/viva-biogears@8d0201976b2b3a008bc6406fdfe3f980d9bcb77f"]
+surrogate = ["viva-torch @ git+https://github.com/vivarium-collective/viva-torch@bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5"]
+rust      = ["viva-core @ git+https://github.com/vivarium-collective/viva-core@154d94c2f30050715e87aa89af2b93b04d5f77b7"]
+# julia — added when vivarium-collective/viva-julia-diffeqs lands (DifferentialEquations.jl):
+# julia  = ["viva-julia-diffeqs @ git+https://github.com/vivarium-collective/viva-julia-diffeqs@<sha>"]
+
+# Bundles (self-referential; resolve to the per-engine extras above).
+sbml = ["simulation-core[tellurium,copasi]"]                            # the exact-SBML engines (+ julia later)
+all  = ["simulation-core[tellurium,copasi,biogears,surrogate,rust]"]    # every engine (+ julia later)
 
 [project.scripts]
 simulation-core = "viva_simulation_core.cli.__main__:main"
@@ -70,20 +87,18 @@ allow-direct-references = true
 packages = ["viva_simulation_core"]
 
 [tool.uv.sources]
-# Pinned to explicit commits for reproducibility. A bare `branch = "main"` drifts:
-# the lock pins one commit while `main` moves on, so a later resolve can mix
-# incompatible versions (this is what silently broke the real BioGears engine —
-# a stale viva-biogears against a newer pybiogears). To upgrade a dep, bump its
-# `rev` here and re-run `uv lock`.
-viva-core = { git = "https://github.com/vivarium-collective/viva-core", rev = "154d94c2f30050715e87aa89af2b93b04d5f77b7" }
-viva-tellurium = { git = "https://github.com/vivarium-collective/viva-tellurium", rev = "c65f8032f76935524912c2b3d384accb805b9e24" }
-viva-biogears = { git = "https://github.com/vivarium-collective/viva-biogears", rev = "8d0201976b2b3a008bc6406fdfe3f980d9bcb77f" }
-vivarium-workbench = { git = "https://github.com/vivarium-collective/vivarium-workbench.git", rev = "cd6258699f61674021b24a15e7d93cea4c5c5d0a" }
-viva-torch = { git = "https://github.com/vivarium-collective/viva-torch", rev = "bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" }
+# First-party engine + workbench deps are pinned as @<sha> direct git references
+# inline (base dependencies + the engine extras above) so a plain `pip install`
+# resolves them too. Only the TRANSITIVE pin lives here:
 # Transitive (via viva-discovery-engine); pin a rev so it is not a drifting branch=main
 # pin — a branch pin makes uv inject a credential at resolve time and crash the
 # publish runner's `uv sync` with AmbiguousAuthority.
 viva-workspace = { git = "https://github.com/vivarium-collective/viva-workspace.git", rev = "7ad2eb1a43bbb502158a69982c608f5aa66a1de6" }
+# Transitive via the engine extras' closure (viva-superpowers -> viva-basic-processes).
+# Pin to rev for the same reason as viva-workspace: a branch=main source in the
+# lock crashes the publish runner's uv sync with AmbiguousAuthority.
+viva-superpowers = { git = "https://github.com/vivarium-collective/viva-superpowers.git", rev = "fe4064a65d1da63452af73de49e57cc975f47bb4" }
+viva-basic-processes = { git = "https://github.com/vivarium-collective/viva-basic-processes.git", rev = "f9ea4bd35f1ab94e4a8e9e715eaf78da0d04fcc4" }
 
 [tool.pytest.ini_options]
 markers = ["slow: real-engine / roadrunner-heavy integration tests (run with `pytest -m slow`)"]

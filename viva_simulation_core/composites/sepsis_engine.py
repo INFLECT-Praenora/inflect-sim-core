@@ -13,10 +13,8 @@ once from the setpoint), so ``infection_start_s`` must be None or 0.
 """
 from __future__ import annotations
 
-from viva_biogears.composites.sepsis import biogears_sepsis
-from viva_biogears.core import build_core
-
 from viva_simulation_core.composites.sepsis_sbml import SEPSIS_OBSERVABLES
+from viva_simulation_core.engines import require as require_engine
 
 SEVERITY_NAMES = {0: 'none', 1: 'mild', 2: 'moderate', 3: 'severe'}
 
@@ -51,6 +49,11 @@ def make_sepsis_engine_composite(severity: int = 0,
     if infection_start_s not in (None, 0, 0.0):
         raise ValueError('the BioGears engine starts the infection at t=0; '
                          'infection_start_s must be None or 0')
+    # Lazy, guarded engine import (raises EngineNotInstalled with the
+    # `pip install simulation-core[biogears]` hint if viva-biogears is absent).
+    require_engine('biogears')
+    from viva_biogears.composites.sepsis import biogears_sepsis
+    from viva_biogears.core import build_core
     return biogears_sepsis(core or build_core(), severity=SEVERITY_NAMES[int(severity)],
                            interval=float(interval_s))
 
