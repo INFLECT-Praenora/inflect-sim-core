@@ -23,7 +23,7 @@ BANNED = ("vivarium", "process-bigraph", "process bigraph")
 
 
 def _inv():
-    return yaml.safe_load(INV.read_text())
+    return yaml.safe_load(INV.read_text(encoding="utf-8"))
 
 
 def test_title_and_members():

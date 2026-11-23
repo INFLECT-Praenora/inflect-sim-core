@@ -17,7 +17,7 @@ from viva_superpowers import TestStep, TestBuilder, check, band
 
 
 def _json(study, rel: str) -> dict:
-    return json.loads((study.study_dir / rel).read_text())
+    return json.loads((study.study_dir / rel).read_text(encoding="utf-8"))
 
 
 def _run_count(study) -> int:
@@ -130,8 +130,8 @@ class FidelityCard(_StudyCard):
     def build(self, study):
         # committed severe-arm milestones (copied into the ensembles study's data/)
         data = study.study_dir.parent / "02-ensembles" / "data"
-        e = json.loads((data / "engine-sev3.milestones.json").read_text())["tissue_integrity_min"]
-        s = json.loads((data / "sbml-sev3.milestones.json").read_text())["tissue_integrity_min"]
+        e = json.loads((data / "engine-sev3.milestones.json").read_text(encoding="utf-8"))["tissue_integrity_min"]
+        s = json.loads((data / "sbml-sev3.milestones.json").read_text(encoding="utf-8"))["tissue_integrity_min"]
         disagree_pct = abs(e - s) / abs(e) * 100.0
         v = (TestBuilder(model_ref=study.study_name)
              .add("Fidelity",

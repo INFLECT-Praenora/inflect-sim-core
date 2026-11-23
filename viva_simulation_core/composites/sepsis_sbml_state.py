@@ -1,61 +1,39 @@
-"""Sepsis SBML composite variant that also exposes the rate-rule state.
+"""Sepsis SBML composite + the rate-rule state vector (config-driven).
 
 The sepsis model has 0 floating species; its Markov state is the 91 variables
-defined by rate rules (``x' = f(x)``), which TelluriumProcess does not expose
-(its ``species`` port is empty here). ``SepsisStateTelluriumProcess`` adds a
-``rate_rules`` ``map[float]`` output keyed by rate-rule id, so each variable is
-an individually addressable scalar path ``["rate_rules", "<id>"]``.
-
-Ids come from ``rr.model.getRateRuleSymbols()`` (this roadrunner build has no
-``getRateRuleValues`` / ``getStateVector``), snapshotted once at import so the
-order is fixed. Values are read with ``rr[id]``.
+defined by rate rules (``x' = f(x)``). The **base** ``TelluriumProcess`` exposes
+these as a ``rate_rules`` vector output (ordered by ``getRateRuleIds``) when
+configured with ``rate_rules_port: True`` — no subclass needed (this replaced the
+old ``SepsisStateTelluriumProcess``). This helper builds the sepsis_sbml doc with
+that port wired to a store + emitter and returns ``(document, core)`` ready to run.
 """
 from __future__ import annotations
 
 from process_bigraph import allocate_core
 from process_bigraph.emitter import RAMEmitter
-from viva_tellurium.processes import TelluriumProcess
 
-from viva_simulation_core.composites.sepsis_sbml import SBML_PATH, make_sepsis_sbml_composite
-
-
-def _snapshot_rate_rule_ids() -> list[str]:
-    import roadrunner
-    rr = roadrunner.RoadRunner(str(SBML_PATH))
-    return [str(s) for s in rr.model.getRateRuleSymbols()]
-
-
-RATE_RULE_IDS: list[str] = _snapshot_rate_rule_ids()
-
-
-class SepsisStateTelluriumProcess(TelluriumProcess):
-    """TelluriumProcess + a ``rate_rules`` map[float] output (91 scalars)."""
-
-    def outputs(self):
-        ports = super().outputs()
-        ports['rate_rules'] = 'overwrite[map[float]]'
-        return ports
-
-    def _read_state(self):
-        out = super()._read_state()
-        out['rate_rules'] = {i: float(self._rr[i]) for i in RATE_RULE_IDS}
-        return out
+from viva_simulation_core.composites.sepsis_sbml import make_sepsis_sbml_composite
+from viva_simulation_core.engines import require as require_engine
 
 
 def build_sepsis_state_composite(severity: int = 0, infection_start_s: float | None = None,
                                  interval_s: float = 10.0):
-    """Return ``(document, core)``: the sepsis_sbml doc plus a ``rate_rules`` store."""
+    """Return ``(document, core)``: the sepsis_sbml doc with the base engine's
+    ``rate_rules`` vector port enabled and wired to a store + emitter (no
+    subclass — config-driven), plus a core with the engine + emitter registered.
+    """
+    TelluriumProcess = require_engine('tellurium').TelluriumProcess
     doc = make_sepsis_sbml_composite(severity=severity, infection_start_s=infection_start_s,
                                      interval_s=interval_s)
-    doc['tellurium']['address'] = 'local:SepsisStateTelluriumProcess'
+    cfg = doc['tellurium']['config']
+    cfg['rate_rules_port'] = True
     doc['tellurium']['outputs']['rate_rules'] = ['stores', 'rate_rules']
-    doc['emitter']['config']['emit']['rate_rules'] = 'map[float]'
+    doc['emitter']['config']['emit']['rate_rules'] = 'array'
     doc['emitter']['inputs']['rate_rules'] = ['stores', 'rate_rules']
-    # seed t=0 so the first emitter row carries the initial rate-rule values
-    seed = SepsisStateTelluriumProcess(config=doc['tellurium']['config'], core=allocate_core())
+    # Seed t=0 so the first emitter row carries the initial rate-rule vector.
+    seed = TelluriumProcess(config=cfg, core=allocate_core())
     doc.setdefault('stores', {})['rate_rules'] = seed.initial_state()['rate_rules']
     core = allocate_core()
-    core.register_link('SepsisStateTelluriumProcess', SepsisStateTelluriumProcess)
     core.register_link('TelluriumProcess', TelluriumProcess)
     core.register_link('ram-emitter', RAMEmitter)
     return doc, core

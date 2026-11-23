@@ -61,7 +61,7 @@ def test_analyze_mismatched_horizon_refuses(tmp_path):
     for e, off in (('engine', 0), ('sbml', 1)):
         _arm(ra.arm_paths(tmp_path, e, 1)[0], off)
     p = ra.arm_paths(tmp_path, 'sbml', 1)[0]
-    d = json.loads(p.read_text()); d['meta'].update(horizon_s=3600.0); d['samples'] = d['samples'][:60]
+    d = json.loads(p.read_text(encoding="utf-8")); d['meta'].update(horizon_s=3600.0); d['samples'] = d['samples'][:60]
     p.write_text(json.dumps(d))
     with pytest.raises(SystemExit):
         ra.analyze(1, tmp_path)
@@ -72,7 +72,7 @@ def test_analyze_incomplete_refuses(tmp_path):
     for e, off in (('engine', 0), ('sbml', 1)):
         _arm(ra.arm_paths(tmp_path, e, 1)[0], off)
     p = ra.arm_paths(tmp_path, 'engine', 1)[0]
-    d = json.loads(p.read_text()); d['meta']['complete'] = False; p.write_text(json.dumps(d))
+    d = json.loads(p.read_text(encoding="utf-8")); d['meta']['complete'] = False; p.write_text(json.dumps(d))
     with pytest.raises(SystemExit):
         ra.analyze(1, tmp_path)
 

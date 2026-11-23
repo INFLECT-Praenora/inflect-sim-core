@@ -9,7 +9,7 @@ S = ROOT / "workspace/investigations/biogears-sbml-sepsis/studies/01-composition
 
 
 def test_study_yaml_shape():
-    d = yaml.safe_load((S / "study.yaml").read_text())
+    d = yaml.safe_load((S / "study.yaml").read_text(encoding="utf-8"))
     assert d["name"] == "01-composition"
     assert d["baseline"][0]["composite"].endswith("sepsis_sbml")
     # the composition claim names all three engines
@@ -19,14 +19,14 @@ def test_study_yaml_shape():
 
 def test_overlay_chart_present():
     assert (S / "charts/01_engine_overlay.svg").exists()
-    meta = json.loads((S / "charts/01_engine_overlay.meta.json").read_text())
+    meta = json.loads((S / "charts/01_engine_overlay.meta.json").read_text(encoding="utf-8"))
     assert meta.get("provenance")
 
 
 def test_live_engine_check_finite():
     """The cheap live check proves the engines construct + run here (the surrogate
     full rollout is finite/bounded — an approximate tier, not asserted accurate)."""
-    j = json.loads((S / "charts/engines_live_check.json").read_text())
+    j = json.loads((S / "charts/engines_live_check.json").read_text(encoding="utf-8"))
     assert j["surrogate"]["finite"] is True
     assert j["surrogate"]["n_steps"] >= 500
     assert j["tellurium_builds"] is True

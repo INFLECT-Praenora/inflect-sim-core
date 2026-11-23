@@ -16,9 +16,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from process_bigraph.composite_generator import composite_generator
-from viva_tellurium import make_tellurium_document
 
 from viva_simulation_core.core import build_core
+from viva_simulation_core.engines import require as require_engine
 
 SBML_PATH = (Path(__file__).resolve().parents[2] / 'workspace' / 'investigations'
              / 'biogears-sbml-sepsis' / 'sources' / 'biogears_sepsis.xml')
@@ -66,6 +66,10 @@ def make_sepsis_sbml_composite(core=None, *, severity: int = 0,
     ``horizon_s`` is advisory (run the Composite for that long); the document
     itself only fixes the process interval.
     """
+    # Lazy, guarded engine import: importing this module (and registering the
+    # generator) needs no engine; *building* the composite needs Tellurium.
+    # Raises EngineNotInstalled("pip install simulation-core[tellurium]") if absent.
+    make_tellurium_document = require_engine('tellurium').make_tellurium_document
     overrides = {'severity': float(severity)}
     # NB: the model's piecewise seed maps severity 0 to the *mild* dose, so a
     # healthy run must never fire E_infect: keep the default infectionStart=1e12.

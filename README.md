@@ -88,25 +88,65 @@ Reference: [`docs/simulation-core.md`](docs/simulation-core.md).
 ## Getting started
 
 You need [`uv`](https://docs.astral.sh/uv/) (and a C/C++ toolchain only for the
-optional native engine, below). Everything except the **real BioGears engine**
-works with no native build.
+optional native BioGears engine, below).
 
     git clone https://github.com/INFLECT-Praenora/inflect-sim-core
     cd inflect-sim-core
-    uv sync                       # installs the exact pinned dependency set
+    uv sync                       # framework + workbench + CLI (NO engines)
+    uv sync --extra all           # ...plus every simulation engine
 
-That gives you the SBML/Antimony sepsis model, the digital-twin API, the
-workbench, the visualizations, and all committed comparison data — everything
-that does **not** require the real BioGears C++ engine.
+A bare install gives you the SBML/Antimony sepsis model definition, the
+digital-twin API, the workbench, the visualizations, and all committed comparison
+data. **Running** a simulation needs at least one engine — pick them below.
+
+### Simulation engines — install only what you need
+
+The engines are **optional extras**: a bare install pulls in none of them, so you
+install just the ones you want. Each is a process-bigraph-compatible wrapper
+around a real solver, interchangeable behind the same API.
+
+| Extra | Engine | Kind |
+|---|---|---|
+| `tellurium` | Tellurium / roadrunner | exact SBML (CVODE) |
+| `copasi` | COPASI (`basico`) | exact SBML |
+| `biogears` | BioGears 8.2.0 | C++ whole-body physiology (native build — see below) |
+| `surrogate` | viva-torch | learned PyTorch surrogate |
+| `rust` | viva-core | Rust execution backend |
+| `sbml` | tellurium + copasi | **bundle:** all exact-SBML engines |
+| `all` | everything above | **bundle** |
+
+```bash
+# uv (uses the pinned revs in uv.lock)
+uv sync --extra tellurium                   # one engine
+uv sync --extra tellurium --extra copasi    # several
+uv sync --extra sbml                        # all exact-SBML engines
+uv sync --extra all                         # everything
+
+# plain pip — engines resolve via direct git refs, no uv required
+pip install "simulation-core[tellurium] @ git+https://github.com/INFLECT-Praenora/inflect-sim-core@main"
+pip install "simulation-core[all] @ git+https://github.com/INFLECT-Praenora/inflect-sim-core@main"
+```
+
+Importing the package and rendering studies/reports works with **zero** engines
+installed. Ask to *run* an engine you don't have and you get an actionable error,
+never a bare `ImportError`:
+
+```
+EngineNotInstalled: the 'copasi' simulation engine is not installed. Install it with:
+    pip install 'simulation-core[copasi]'
+```
+
+`viva_simulation_core.engines.available_engines()` lists what's installed;
+`known_engines()` lists every engine the package can wrap.
 
 | Task | Command |
 |---|---|
-| Fast test suite | `uv run pytest` |
-| Slow / engine tests | `uv run pytest -m slow` (real-engine tests skip cleanly if BioGears isn't built) |
+| Fast test suite | `uv run pytest` (framework-level tests need no engine) |
+| Slow / engine tests | `uv run pytest -m slow` with the relevant `--extra` (real-engine tests skip cleanly when an engine is absent) |
 | Workbench (browser UI) | `bash scripts/serve.sh` |
 | Unified API tour | `uv run python -m examples.workflow_tour` |
 | CLI | `uv run viva-sim list` (then `call` / `workflow` / `serve` / `run`) |
-| Neural surrogate (torch) | installed by default (`viva-torch` is a base dep) |
+| Neural surrogate (torch) | `uv sync --extra surrogate` |
 
 ### The API
 
@@ -126,13 +166,17 @@ processes and composites.
 
 ## Reproducible dependencies — read before you upgrade
 
-The ecosystem git dependencies (`viva-core`, `viva-tellurium`, `viva-biogears`,
-`viva-torch`, `vivarium-workbench`) are pinned to **explicit commits** in
-`pyproject.toml` (`rev = "…"`), not `branch = "main"`. This is deliberate: a bare
-`branch = "main"` drifts — the lockfile pins one commit while `main` moves on, so
-a later `uv lock --upgrade` silently mixes incompatible versions. That is exactly
-what once broke the real engine (a stale `viva-biogears` against a newer
-`pybiogears`, producing silent all-NaN physiology).
+The ecosystem git dependencies are pinned to **explicit commits**, not
+`branch = "main"`: the base dep (`vivarium-workbench`) and the optional engine
+extras (`viva-tellurium`, `viva-copasi`, `viva-biogears`, `viva-torch`,
+`viva-core`) use `@<sha>` direct git references in `pyproject.toml` (so plain
+`pip install "...[engine]"` resolves them), and the transitive-only pins live in
+`[tool.uv.sources]`. This is deliberate: a bare `branch = "main"` drifts — the
+lockfile pins one commit while `main` moves on, so a later `uv lock --upgrade`
+silently mixes incompatible versions. That is exactly what once broke the real
+engine (a stale `viva-biogears` against a newer `pybiogears`, producing silent
+all-NaN physiology). A `?branch=main#<sha>` form in `uv.lock` also crashes the
+publish runner (AmbiguousAuthority); the lock is kept to `?rev=` form.
 
 **So:** `uv sync` always reproduces the known-good set. To upgrade a dependency,
 bump its `rev` in `pyproject.toml` **and** `pybiogears` together where they are

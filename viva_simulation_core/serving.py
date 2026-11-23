@@ -14,7 +14,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from viva_tellurium import TelluriumProcess
+from viva_simulation_core.engines import require as require_engine
+
+
+def _TelluriumProcess(*args, **kwargs):
+    """Lazy TelluriumProcess constructor — raises EngineNotInstalled with the
+    `pip install simulation-core[tellurium]` hint if the engine is absent."""
+    return require_engine('tellurium').TelluriumProcess(*args, **kwargs)
 
 
 class ServedModel:
@@ -29,7 +35,7 @@ class ServedModel:
 
         self._core = core if core is not None else build_core()
         self._config = {"model": source, "model_format": model_format, "bulk_species": False}
-        self._proc = TelluriumProcess(self._config, self._core)
+        self._proc = _TelluriumProcess(self._config, self._core)
         self._ids: list[str] | None = None
 
     def _advance(self, overrides: dict | None, dt: float) -> dict[str, float]:
@@ -49,7 +55,7 @@ class ServedModel:
         after an interval), then discarded.
         """
         if self._ids is None:
-            probe = TelluriumProcess(self._config, self._core)
+            probe = _TelluriumProcess(self._config, self._core)
             r = probe.update({}, 1.0)
             self._ids = sorted({**(r.get("species") or {}), **(r.get("parameters") or {})})
         return list(self._ids)
@@ -70,7 +76,7 @@ class ServedModel:
 
     def reset(self) -> None:
         """Rebuild the module at initial conditions (observable ids are unchanged)."""
-        self._proc = TelluriumProcess(self._config, self._core)
+        self._proc = _TelluriumProcess(self._config, self._core)
 
 
 def model_server(served: ServedModel) -> Any:
