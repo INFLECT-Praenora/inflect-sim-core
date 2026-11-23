@@ -7,7 +7,10 @@ confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: supported  # one spec runs under three interchangeable engines (live check + overlay)
 
-parent_studies: []
+parent_studies:
+  - study: 00-simulation-core
+    relation: builds-on
+    rationale: "Interchangeability needs the shared core and the one sepsis model."
 
 question: |
   Does the same sepsis specification run under interchangeable engines by swapping

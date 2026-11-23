@@ -7,7 +7,10 @@ confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: qualified  # inflammation core matches ~0.1%; honestly diverges on the hemodynamic layer
 
-parent_studies: []
+parent_studies:
+  - study: 01-composition
+    relation: tests
+    rationale: "Fidelity tests whether the interchangeable engines actually agree; it finds the hemodynamic divergence."
 
 question: |
   The capability studies show the same spec running under interchangeable engines.

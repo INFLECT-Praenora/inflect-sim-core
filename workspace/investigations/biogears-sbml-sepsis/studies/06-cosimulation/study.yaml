@@ -7,7 +7,10 @@ confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + a runnable artifact
 verdict: supported  # physiology engine + controller co-step; the closed loop clears the pathogen
 
-parent_studies: []
+parent_studies:
+  - study: 05-fidelity
+    relation: builds-on
+    rationale: "Intervention acts on the sepsis mechanism fidelity establishes (detect discrepancy -> test treatment)."
 
 question: |
   Can the simulation core run a genuine co-simulation — two processes that exchange

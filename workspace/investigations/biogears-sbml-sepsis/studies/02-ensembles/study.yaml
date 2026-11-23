@@ -7,7 +7,10 @@ confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: supported  # severity x engine batch runs; full-physics engines agree and track severity
 
-parent_studies: []
+parent_studies:
+  - study: 01-composition
+    relation: builds-on
+    rationale: "Ensembles sweep the interchangeable spec across severity and engine."
 
 question: |
   Can the simulation core run the sepsis model as an ENSEMBLE — many configurations
