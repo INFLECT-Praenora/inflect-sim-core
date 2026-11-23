@@ -2,7 +2,7 @@ schema_version: 3
 name: 03-workflows
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Orchestration & workflows — compose modules, hand off an SBML file"
+title: "Model Orchestration — composable workflows across models, tools, and execution systems"
 confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: supported  # four-verb API composes + hands the model between engines end-to-end

@@ -2,7 +2,7 @@ schema_version: 3
 name: 02-ensembles
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Ensembles — a severity × engine batch in one sweep"
+title: "Simulation Ensembles — systematic perturbation and comparative physiology"
 confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: supported  # severity x engine batch runs; full-physics engines agree and track severity

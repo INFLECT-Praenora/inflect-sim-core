@@ -2,7 +2,7 @@ schema_version: 3
 name: 05-fidelity
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Fidelity — do the engines agree, and where not"
+title: "Mechanistic Fidelity — agreement, discrepancy, and missing physiology"
 confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: qualified  # inflammation core matches ~0.1%; honestly diverges on the hemodynamic layer

@@ -1,0 +1,64 @@
+{
+ "meta": {
+  "source_study": "05-fidelity",
+  "severity": 3
+ },
+ "criteria": [
+  {
+   "id": "INFLAM-01",
+   "observable": "tissue_integrity_min",
+   "tolerance_rel": 0.01,
+   "engine": 0.2430521051075611,
+   "sbml": 0.2430415498482967,
+   "rel_error": 4.3427968911077756e-05,
+   "verdict": "pass",
+   "evidence": {
+    "engine": "studies/02-ensembles/data/engine-sev3.milestones.json",
+    "sbml": "studies/02-ensembles/data/sbml-sev3.milestones.json"
+   },
+   "statement": "The two full-physics engines agree on minimum tissue integrity to within 1%."
+  },
+  {
+   "id": "INFLAM-02",
+   "observable": "peak_blood_pathogen",
+   "tolerance_rel": 0.01,
+   "engine": 330.2021486045367,
+   "sbml": 330.5956780085353,
+   "rel_error": 0.0011903646362503581,
+   "verdict": "pass",
+   "evidence": {
+    "engine": "studies/02-ensembles/data/engine-sev3.milestones.json",
+    "sbml": "studies/02-ensembles/data/sbml-sev3.milestones.json"
+   },
+   "statement": "The engines agree on peak blood pathogen to within 1%."
+  },
+  {
+   "id": "HEMO-01",
+   "observable": "map_below_65_h",
+   "tolerance_hours": 6.0,
+   "engine_h": 69.33333333333333,
+   "sbml_h": 54.06666666666667,
+   "abs_diff_h": 15.266666666666659,
+   "verdict": "fail",
+   "evidence": {
+    "engine": "studies/02-ensembles/data/engine-sev3.milestones.json",
+    "sbml": "studies/02-ensembles/data/sbml-sev3.milestones.json"
+   },
+   "statement": "Time to septic shock (MAP < 65 mmHg) agrees within 6 h."
+  },
+  {
+   "id": "SURR-01",
+   "observable": "surrogate_hemodynamic_trajectory_error",
+   "tolerance_rel": 0.1,
+   "verdict": "pending",
+   "evidence": null,
+   "required_test": "held-out multi-seed surrogate-vs-exact trajectory comparison",
+   "statement": "Surrogate hemodynamic error within 10% of the exact engine (validator not yet run)."
+  }
+ ],
+ "counts": {
+  "pass": 2,
+  "fail": 1,
+  "pending": 1
+ }
+}

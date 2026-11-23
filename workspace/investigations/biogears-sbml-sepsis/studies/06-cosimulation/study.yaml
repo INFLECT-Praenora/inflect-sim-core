@@ -2,7 +2,7 @@ schema_version: 3
 name: 06-cosimulation
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Co-simulation — two processes exchanging state every tick (closed-loop treatment)"
+title: "Dynamic Coupling — bidirectional co-simulation and physiological intervention"
 confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + a runnable artifact
 verdict: supported  # physiology engine + controller co-step; the closed loop clears the pathogen
@@ -40,6 +40,12 @@ expected_behavior:
     status: supported
   - name: closed-loop-treatment-clears-the-pathogen
     statement: "With the controller enabled, the sensed-and-dosed antibiotic drives bacteremia down relative to the matched untreated control run from the identical composite."
+    status: supported
+  - name: treatment-timing-counterfactuals
+    statement: "Untreated, early-treatment, and delayed-treatment arms from the identical composite give ordered, consistent intervention responses (early clears bacteremia, delayed lets it accumulate first then clears it, untreated climbs)."
+    status: supported
+  - name: coupling-step-convergence
+    statement: "Running the coupled composite at shrinking step sizes (240/120/60 s per tick) changes the endpoint negligibly, so the co-simulation is numerically consistent — execution success is separate from pharmacological credibility."
     status: supported
 
 findings:
@@ -86,10 +92,43 @@ findings:
 
     statement: "This co-simulation demonstrates the mechanism (per-tick state exchange with feedback) and the controlled variable (pathogen clearance), not the multi-day clinical endpoint."
     explanation: "The main claim is a capability claim, and it is fully supported: two process-bigraph processes run in one composite and exchange state every tick through shared stores, with a genuine feedback edge (the controller's writeback at tick n is the engine's input at tick n+1). That is what sets co-simulation apart from the parallel engine comparison of studies 01/02 (same spec under different engines, compared after the fact) and from the parallel surrogate tier of study 03. The clinical instance — a closed-loop antibiotic that senses bacteremia and doses against it — is chosen so the coupling does something legible: the controller clears the pathogen that the matched untreated control (the identical composite with the controller disabled) lets climb. This study does not claim a validated clinical outcome. The pathogen is the upstream driver of the sepsis cascade (inflammation -> vasodilation -> hypotension), so clearing it removes the cause of collapse, but the collapse itself unfolds over 37-72 h (studies 03/05), and the exact engine is too slow to integrate matched treated/untreated arms to that endpoint in this pass. So the honest reading is: the co-simulation capability is demonstrated end to end on the real model, and the treatment's effect on its direct target (bacteremia) is shown; the downstream multi-day endpoint is referenced from the committed severity studies, not re-derived here. The controller's PK is an illustrative Emax/one-compartment model, not a calibrated pharmacology. Swapping it for a COPASI/Tellurium PK engine (true heterogeneous engine-to-engine co-simulation) is a noted follow-up."
+  - id: treatment-timing-counterfactuals
+    summary: "Untreated vs early vs delayed treatment give an ordered, consistent response — earlier is better (see chart 02)."
+    detail: |
+      Three arms from the identical sepsis_cosim composite (severity 3, 2 h; delay 1 h),
+      differing only in when the controller starts (run_counterfactuals.py ->
+      out/cosim_counterfactuals.json):
+        * untreated — bacteremia climbs to 10.6; tissue integrity ends 0.9828.
+        * delayed treatment (onset 1 h) — bacteremia tracks the untreated arm for the
+          first hour, then drops sharply once treatment starts, ending 0.162; tissue
+          integrity ends 0.9874.
+        * early treatment (onset at detection) — bacteremia is cleared (ends 0.006);
+          tissue integrity holds at 1.0000.
+      The ordering is consistent: earlier treatment clears the pathogen sooner and
+      leaves more tissue intact (early 1.0000 > delayed 0.9874 > untreated 0.9828 at 2 h).
+      The tissue-integrity gaps are small at this horizon because the clinical collapse
+      is a multi-day process; the pathogen trajectories separate the three arms cleanly.
+      This is a treatment counterfactual, not a dosing recommendation: the PK is
+      illustrative, not calibrated.
+    status: supported
+  - id: coupling-step-convergence
+    summary: "The co-simulation is numerically consistent: the endpoint converges as the coupling step shrinks."
+    detail: |
+      Running the early-treatment arm at shrinking coupling steps (240 / 120 / 60 s per
+      tick, 1 h; out/cosim_convergence.json) gives final bacteremia 0.4115 / 0.3747 /
+      0.3566 — monotone and converging, a total spread of 0.0548 across a 4× change in
+      step size (small against the untreated arm's ~10.6). The one-tick coupling lag
+      shrinks with the step, as expected for operator-split co-simulation. This separates
+      execution success (the coupling runs and converges) from pharmacological credibility
+      (the controller's PK is illustrative, not calibrated).
+    status: supported
 visualizations:
   - name: "Closed-loop co-simulation — pathogen clearance and the controller's live PK"
     address: image:charts/01_cosim_closed_loop.svg
     display: primary
+  - name: "Treatment counterfactuals (untreated / early / delayed) + coupling-step convergence"
+    address: image:charts/02_cosim_counterfactuals.svg
+    display: secondary
 
 baseline:
   - name: sepsis-cosim-untreated

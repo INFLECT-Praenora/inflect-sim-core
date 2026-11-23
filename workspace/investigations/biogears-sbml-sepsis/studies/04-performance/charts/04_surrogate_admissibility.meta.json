@@ -1,0 +1,3 @@
+{
+ "caption": "Surrogate predictions on the severe arm (severity 3, 48 h, at the surrogate's trained 300 s timestep) checked against physical bounds. 8 of 9 observables leave admissible ranges: SBP, DBP, MAP, HR, CO, blood_volume, tissue_integrity, blood_pathogen \u2014 the surrogate reaches MAP \u2248 -158 mmHg, tissue integrity \u2248 -6.1, and negative blood pathogen, all physically impossible. So on severe sepsis the surrogate is not admissible, let alone mechanistically accurate: speed does not help here, and the exact engine is required. A fair held-out-severity admissibility protocol at the trained timestep is the pending validator (study 07, SURR-01)."
+}

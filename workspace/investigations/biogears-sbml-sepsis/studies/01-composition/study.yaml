@@ -2,7 +2,7 @@ schema_version: 3
 name: 01-composition
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Composition — one sepsis spec, interchangeable engines"
+title: "Model Interchangeability — one physiological specification, multiple implementations"
 confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: supported  # one spec runs under three interchangeable engines (live check + overlay)

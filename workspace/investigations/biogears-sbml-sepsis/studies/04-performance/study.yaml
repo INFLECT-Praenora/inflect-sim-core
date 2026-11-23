@@ -2,7 +2,7 @@ schema_version: 3
 name: 04-performance
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Performance — where the compute goes, and the surrogate speedup"
+title: "Scalable Simulation — performance, acceleration, and fidelity-aware execution"
 confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: supported  # compute spans 4+ orders; bottleneck localized to the stiff ODE solve
@@ -43,6 +43,9 @@ expected_behavior:
     status: supported
   - name: rust-backend-runs-the-same-composite
     statement: "The same sepsis composite runs under the Rust viva-core execution backend and reproduces the process-bigraph Python result (determinism); the engine swap moves framework overhead, not the stiff solve."
+    status: supported
+  - name: surrogate-admissibility-on-severe
+    statement: "Acceleration is only useful where predictions stay admissible: on the severe arm the surrogate leaves physical bounds for 8 of 9 observables, so it is screening-grade at best and the exact engine is required."
     status: supported
 
 findings:
@@ -102,6 +105,22 @@ findings:
       compute goes: the stiff ODE solve. The surrogate is a fast approximate tier (see
       study 05 for the fidelity picture).
     status: supported
+  - id: surrogate-inadmissible-on-severe
+    summary: "Speed without admissibility: on severe sepsis the surrogate leaves physical bounds for 8 of 9 observables."
+    detail: |
+      Acceleration is only useful where the predictions are admissible. Checking the
+      committed surrogate severe-arm trajectory (data/real_trajectories.json, at the
+      surrogate's trained 300 s timestep) against simple physical bounds
+      (surrogate_admissibility.py -> surrogate_admissibility.json, chart 04): 8 of 9
+      observables leave admissible ranges. The surrogate reaches MAP ~ -158 mmHg, tissue
+      integrity ~ -6.1, and negative blood pathogen — all physically impossible. Only SVR
+      stays in bounds. So on severe sepsis the surrogate is not admissible, let alone
+      mechanistically accurate: its ~40,000x speed does not help here, and the exact
+      engine is required. This draws the honest line the performance story needs —
+      screening-grade speed is only a benefit inside the regime where the surrogate stays
+      physical. A fair held-out-severity admissibility protocol at the trained timestep is
+      the pending validator (study 07, criterion SURR-01).
+    status: supported
 
 visualizations:
   - name: "Same sepsis spec, three engines: where compute time goes (committed full-run + live per-step)"
@@ -109,6 +128,9 @@ visualizations:
     display: primary
   - name: "Per-step compute — the stiff ODE solve is ~13,000× the surrogate forward pass"
     address: image:charts/02_compute_per_step.svg
+    display: secondary
+  - name: "Surrogate admissibility on severe sepsis — 8 of 9 observables leave physical bounds"
+    address: image:charts/04_surrogate_admissibility.svg
     display: secondary
 
 baseline:

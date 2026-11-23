@@ -53,6 +53,8 @@ from viva_simulation_core.composites.sepsis_sbml import SBML_PATH, SEPSIS_OBSERV
         "interval_s": {"type": "float", "default": 60.0, "description": "Seconds per co-sim tick"},
         "trigger_pb": {"type": "float", "default": 1.0,
                        "description": "Bacteremia (PB) that triggers treatment onset"},
+        "start_time_s": {"type": "float", "default": 0.0,
+                         "description": "Earliest treatment onset (0 = early; larger = delayed)"},
     },
     core_extensions=[build_core],
     default_n_steps=360,
@@ -60,7 +62,7 @@ from viva_simulation_core.composites.sepsis_sbml import SBML_PATH, SEPSIS_OBSERV
 )
 def make_sepsis_cosim_composite(core=None, *, severity: int = 3, treat: bool = True,
                                 infection_start_s: float = 1.0, interval_s: float = 60.0,
-                                trigger_pb: float = 1.0,
+                                trigger_pb: float = 1.0, start_time_s: float = 0.0,
                                 horizon_s: float = 86400.0) -> dict:
     """Build the coupled physiology<->controller composite document."""
     make_tellurium_document = require_engine("tellurium").make_tellurium_document
@@ -86,6 +88,7 @@ def make_sepsis_cosim_composite(core=None, *, severity: int = 3, treat: bool = T
         "config": {
             "enabled": bool(treat),
             "trigger_pb": float(trigger_pb),
+            "start_time_s": float(start_time_s),
             "pathogen_ids": ["PT", "PB"],
             "sense_id": "PB",
         },

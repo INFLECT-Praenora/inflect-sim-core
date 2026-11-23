@@ -48,6 +48,7 @@ class AntibioticControllerProcess(Process):
         "dose_rate": {"_type": "float", "_default": 2.0e-3},  # infusion rate while treating (mass/s)
         # Closed-loop sensing
         "trigger_pb": {"_type": "float", "_default": 1.0},    # start treatment when PB >= this
+        "start_time_s": {"_type": "float", "_default": 0.0},  # earliest treatment onset (early vs delayed)
         "pathogen_ids": {"_type": "list[string]", "_default": ["PT", "PB"]},
         "sense_id": {"_type": "string", "_default": "PB"},    # which observable triggers treatment
         "enabled": {"_type": "boolean", "_default": True},    # False -> inert (matched untreated arm)
@@ -57,6 +58,7 @@ class AntibioticControllerProcess(Process):
         super().__init__(config, core)
         self._C = 0.0          # drug concentration, carried across ticks
         self._active = False   # has treatment been triggered?
+        self._t = 0.0          # elapsed co-sim time (for delayed-treatment onset)
 
     def inputs(self):
         # Reads the physiology engine's full global-parameter map (holds PB/PT/...).
@@ -73,12 +75,16 @@ class AntibioticControllerProcess(Process):
 
     def update(self, state, interval):
         params = state.get("parameters") or {}
+        self._t += float(interval)
         if not self.config.get("enabled", True):
             # Inert controller: the matched untreated control. Still report telemetry.
             return {"parameters_in": {}, "drug": 0.0, "treating": 0.0}
 
+        # Treatment starts when the pathogen is sensed AND the onset time has passed
+        # (start_time_s = 0 is early treatment; a later value is delayed treatment).
         sense = float(params.get(self.config["sense_id"], 0.0))
-        if not self._active and sense >= float(self.config["trigger_pb"]):
+        if (not self._active and sense >= float(self.config["trigger_pb"])
+                and self._t >= float(self.config["start_time_s"])):
             self._active = True
 
         ke = float(self.config["ke"])
@@ -95,14 +101,18 @@ class AntibioticControllerProcess(Process):
         else:
             self._C += dose_rate / vd * dt
 
-        # Emax bactericidal kill; apply as first-order decay on the pathogen state.
-        kkill = float(self.config["kill_max"]) * self._C / (float(self.config["ec50"]) + self._C)
-        kill_decay = math.exp(-kkill * dt)
-
+        # Only act on the pathogen once treatment is active. Before then (delayed
+        # onset, or trigger not yet met) write nothing back, so the untreated
+        # pathogen dynamics run free — writing even an unchanged value would feed a
+        # one-tick-stale pathogen back and pin it artificially.
         writeback = {}
-        for pid in self.config["pathogen_ids"]:
-            if pid in params:
-                writeback[pid] = float(params[pid]) * kill_decay
+        if self._active:
+            # Emax bactericidal kill; apply as first-order decay on the pathogen state.
+            kkill = float(self.config["kill_max"]) * self._C / (float(self.config["ec50"]) + self._C)
+            kill_decay = math.exp(-kkill * dt)
+            for pid in self.config["pathogen_ids"]:
+                if pid in params:
+                    writeback[pid] = float(params[pid]) * kill_decay
 
         return {
             "parameters_in": writeback,
