@@ -20,3 +20,14 @@ def test_viva_run_command_produces_scale_b():
     out = subprocess.run(cmd, capture_output=True, text=True, env=env)
     assert out.returncode == 0, out.stderr
     assert "scale.b = 60.0" in out.stdout
+
+
+def test_sepsis_task_command_emits_observables():
+    """The command sepsis.nf's SEPSIS_RUN process invokes (run_sepsis_task.py):
+    build and run the real sepsis_sbml composite, print MAP/TI/PB."""
+    cmd = [sys.executable, str(NF / "run_sepsis_task.py"),
+           "--severity", "0", "--steps", "6", "--interval-s", "5"]
+    env = {**os.environ, "PYTHONPATH": str(REPO)}
+    out = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    assert out.returncode == 0, out.stderr
+    assert "MAP=" in out.stdout and "TI=" in out.stdout and "PB=" in out.stdout

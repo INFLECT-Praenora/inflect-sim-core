@@ -41,14 +41,18 @@ lead: |
 executive:
   what_is_this: |
     A guided tour of the simulation core's capabilities on one real model. The same
-    BioGears sepsis core is run under three interchangeable engines (BioGears C++,
-    exact SBML/Tellurium, PyTorch surrogate) and used to demonstrate four things, each
-    a runnable artifact: COMPOSITION (study 01 — the same spec under three engines by
-    one node swap), ENSEMBLES (study 02 — a severity × engine batch in one sweep),
-    ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes modules into a
-    pipeline and hands an Antimony/SBML file between engines), and PERFORMANCE
-    (study 04 — where the compute goes, and a ~40,000× surrogate tier). A fidelity
-    backbone (study 05) keeps it honest: where the engines agree, and where they do not.
+    BioGears sepsis core is run under interchangeable engines (BioGears C++, exact
+    SBML/Tellurium, PyTorch surrogate, and a Rust execution backend) and used to
+    demonstrate, each as a runnable artifact: COMPOSITION (study 01 — the same spec
+    under three engines by one node swap), ENSEMBLES (study 02 — a severity × engine
+    batch in one sweep), ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes
+    modules into a pipeline and hands an Antimony/SBML file between engines, and a
+    Nextflow pipeline fans the real composite across a severity grid), PERFORMANCE &
+    EXECUTION BACKENDS (study 04 — where the compute goes, a ~40,000× surrogate tier,
+    and the same composite run under the Rust viva-core backend), and CO-SIMULATION
+    (study 06 — two processes exchanging state every tick: the physiology engine
+    coupled to a closed-loop antibiotic controller). A fidelity backbone (study 05)
+    keeps it honest: where the engines agree, and where they do not.
   verdict: |
     The simulation core does all four, shown not told. ONE sepsis spec runs under
     three interchangeable engines by swapping a single box (01); a severity × engine
@@ -85,8 +89,9 @@ scientific_argument:
   evidence_for:
     - "COMPOSITION: one sepsis spec runs under BioGears, Tellurium, and the surrogate by swapping one box; the shared observables overlay (study 01)."
     - "ENSEMBLES: a severity {0,1,3} × engine batch runs as one orchestrated sweep into a single grid (study 02)."
-    - "ORCHESTRATION/WORKFLOWS: the four verbs compose registered modules into a pipeline and hand the Antimony/SBML extraction between engines, no new simulation code (study 03)."
-    - "PERFORMANCE: one 48 h run spans BioGears ~3.38 h / Tellurium ~2.81 h / surrogate ~0.2 s; live per-step micro-benchmark confirms the stiff-ODE bottleneck (study 04)."
+    - "ORCHESTRATION/WORKFLOWS: the four verbs compose registered modules into a pipeline and hand the Antimony/SBML extraction between engines; a Nextflow pipeline fans the real sepsis composite across a severity grid — no new simulation code (study 03)."
+    - "PERFORMANCE & EXECUTION BACKENDS: one 48 h run spans BioGears ~3.38 h / Tellurium ~2.81 h / surrogate ~0.2 s; a live per-step micro-benchmark confirms the stiff-ODE bottleneck; the same composite runs under the Rust viva-core backend with matching results (study 04)."
+    - "CO-SIMULATION: two processes in one composite exchange state every tick — the sepsis physiology engine coupled to a closed-loop antibiotic controller that senses bacteremia and writes the drug-killed pathogen back into the engine, clearing it relative to the matched untreated control (study 06)."
   evidence_against:
     - "Fidelity limit: the extraction reaches MAP<65 shock by a different hemodynamic mechanism and ~15 h earlier than the engine despite lagging ~11 h on systolic pressure (study 05)."
     - "The surrogate is an approximate tier — bounded over the full horizon but not yet clinically accurate; it trades accuracy for ~4-5 orders of magnitude of speed (study 04)."
@@ -97,6 +102,7 @@ scientific_argument:
     - "studies/03-workflows/charts/01_handoff_output.svg"
     - "studies/04-performance/charts/01_runtime_compare.svg"
     - "studies/05-fidelity/charts/01_divergence_heatmap.svg"
+    - "studies/06-cosimulation/charts/01_cosim_closed_loop.svg"
   caveats:
     - "Heavy full-run wall-clocks (BioGears, Tellurium) are cited from committed runs, not re-measured in this redesign; the new ensemble/workflow/micro-benchmark artifacts run live."
     - "'Functional-difference' attributions (study 05) come from the extraction report's own 'Differences from BioGears' inventory — documented omissions, not newly-measured mechanisms."
@@ -124,6 +130,7 @@ studies:
   - 03-workflows
   - 04-performance
   - 05-fidelity
+  - 06-cosimulation
 
 expert_docs: []
 acceptance_criteria:
@@ -139,14 +146,17 @@ acceptance_criteria:
     behavior: compute-profile-and-surrogate-speedup
   - study: 05-fidelity
     behavior: engines-agree-on-inflammation-diverge-on-hemodynamics
+  - study: 06-cosimulation
+    behavior: two-processes-exchange-state-each-tick
 
 at_a_glance:
   - {study: 00-simulation-core, role: "Start here — the one model, the three engines, and the four capabilities this investigation demonstrates."}
   - {study: 01-composition, role: "COMPOSITION — the same sepsis spec run under BioGears, Tellurium, and the surrogate by swapping one box; shared observables overlaid."}
   - {study: 02-ensembles, role: "ENSEMBLES — a severity × engine batch run as one orchestrated sweep, gathered into a single grid."}
-  - {study: 03-workflows, role: "ORCHESTRATION / WORKFLOWS — the four verbs compose registered modules into a pipeline and hand an Antimony/SBML file between engines, no new simulation code."}
-  - {study: 04-performance, role: "PERFORMANCE — one run from seconds to hours across engines; where the compute goes (the stiff ODE solve) and the ~40,000× surrogate tier."}
+  - {study: 03-workflows, role: "ORCHESTRATION / WORKFLOWS — the four verbs compose registered modules into a pipeline and hand an Antimony/SBML file between engines; a Nextflow pipeline fans the real sepsis composite across a severity grid (no new simulation code)."}
+  - {study: 04-performance, role: "PERFORMANCE / EXECUTION BACKENDS — one run from seconds to hours across engines; where the compute goes (the stiff ODE solve), the ~40,000× surrogate tier, and the Rust (viva-core) backend running the same composite."}
   - {study: 05-fidelity, role: "FIDELITY — the honest backbone: the engines agree on the inflammation core to within ~0.1%, and diverge in the hemodynamic layer (mechanism and timing)."}
+  - {study: 06-cosimulation, role: "CO-SIMULATION — two processes in one composite exchanging state every tick: the sepsis physiology engine coupled to a closed-loop antibiotic controller that senses bacteremia and doses against it."}
 
 how_to_read: |
   How the simulation core works, in one idea: a simulation is a COMPOSITE — a small

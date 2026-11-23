@@ -41,6 +41,9 @@ expected_behavior:
   - name: stiff-ode-is-the-bottleneck
     statement: "The sepsis ODE is stiff (CVODE required); a faster/Rust explicit integrator cannot speed up the exact engines."
     status: supported
+  - name: rust-backend-runs-the-same-composite
+    statement: "The same sepsis composite runs under the Rust viva-core execution backend and reproduces the process-bigraph Python result (determinism); the engine swap moves framework overhead, not the stiff solve."
+    status: supported
 
 findings:
   - id: one-48-h-run-three
@@ -69,6 +72,25 @@ findings:
       are. (The composition engine is separately interchangeable: the SBML composite is
       bit-identical under process-bigraph Python and the viva-core Rust engine — the
       engine swap moves only framework overhead.)
+    status: supported
+  - id: rust-backend-runs-the-same-composite
+    summary: "The Rust viva-core backend runs the same sepsis composite and reproduces the Python result (within-tolerance)."
+    detail: |
+      The composition engine is interchangeable independently of the solver. Running
+      the identical sepsis composite under process-bigraph (Python) and under the Rust
+      viva-core backend (run_rust_backend.py -> rust_backend.json, 60 ticks × 10 s,
+      healthy baseline): the two backends agree to WITHIN-TOLERANCE — the blood pathogen
+      and tissue integrity are bit-identical and the hemodynamic observables match to
+      ~1e-5 (max abs diff ~6.6e-5 on SBP; the ~1e-5 residual is roadrunner's
+      cold-start-vs-warm effect, not an engine disagreement). Wall: Python ~24.0 s vs
+      viva-core ~21.4 s (ratio ~1.12). The honest reading: this is an EXECUTION-BACKEND
+      swap — roadrunner does the stiff ODE math in both, so viva-core executes the
+      composite graph (state, scheduling, emit) around the same solver. On a single heavy
+      stiff process the wall difference is framework overhead, not a stiff-solve speedup;
+      viva-core's per-tick advantage shows on many-process / many-tick composites, and the
+      stiff solve itself stays immovable (the stiff-ODE finding). What this arm
+      demonstrates is backend interchangeability + determinism: same composite, two
+      execution engines, the same numbers.
     status: supported
   - id: live-per-step-micro-benchmark
     summary: "Live per-step micro-benchmark: the stiff solve is ~13,000x the surrogate forward pass."

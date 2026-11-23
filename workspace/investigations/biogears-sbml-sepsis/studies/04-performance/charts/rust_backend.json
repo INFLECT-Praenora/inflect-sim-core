@@ -1,0 +1,21 @@
+{
+ "verdict": "within-tolerance",
+ "abs_diff": {
+  "SBP": 6.622005631129468e-05,
+  "DBP": 5.694107416331917e-05,
+  "MAP": 2.4116873049706555e-05,
+  "HR": 5.364940800234308e-05,
+  "CO": 1.984535868970738e-06,
+  "SVR": 6.369764493641128e-08,
+  "blood_volume": 4.963508217770141e-06,
+  "tissue_integrity": 0.0,
+  "blood_pathogen": 0.0
+ },
+ "python_wall_s": 23.997075207997113,
+ "viva_core_wall_s": 21.441738999914378,
+ "wall_ratio_python_over_rust": 1.1191757911097109,
+ "n_ticks": 60,
+ "interval_s": 10.0,
+ "severity": 0,
+ "note": "Same sepsis composite under process-bigraph (Python) and viva-core (Rust). roadrunner does the ODE math in both; the swap is an execution-backend swap, so the wall difference is framework overhead, not a stiff-solve speedup."
+}

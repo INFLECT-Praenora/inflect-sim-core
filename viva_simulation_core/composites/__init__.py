@@ -10,5 +10,14 @@ from viva_simulation_core.composites.sepsis_sbml import (
     SEPSIS_OBSERVABLES,
     make_sepsis_sbml_composite,
 )
+from viva_simulation_core.composites.sepsis_cosim import (
+    make_sepsis_cosim_composite,
+    extract_cosim,
+)
 
-__all__ = ["make_sepsis_sbml_composite", "SEPSIS_OBSERVABLES"]
+__all__ = [
+    "make_sepsis_sbml_composite",
+    "SEPSIS_OBSERVABLES",
+    "make_sepsis_cosim_composite",
+    "extract_cosim",
+]

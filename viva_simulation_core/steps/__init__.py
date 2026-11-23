@@ -4,5 +4,6 @@ Re-exports concrete classes so ``build_core()``'s module walk (which registers
 Process/Step subclasses visible on each top-level module) discovers them.
 """
 from .api_call import ApiCallStep
+from .antibiotic_controller import AntibioticControllerProcess
 
-__all__ = ["ApiCallStep"]
+__all__ = ["ApiCallStep", "AntibioticControllerProcess"]
