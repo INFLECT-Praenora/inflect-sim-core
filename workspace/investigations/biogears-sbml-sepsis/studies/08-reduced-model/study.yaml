@@ -1,0 +1,97 @@
+schema_version: 3
+name: 08-reduced-model
+investigation: biogears-sbml-sepsis
+status: ran
+title: "Model Reduction — event-driven vs event-free (speed vs fidelity)"
+confidence: Accepted
+verdict: supported  # removing the beat event gives ~10^7x speed and closes the engine gap, at a stated fidelity cost
+
+parent_studies:
+  - study: 04-performance
+    relation: builds-on
+    rationale: "Performance localized the cost to the per-beat event; this study removes it."
+  - study: 05-fidelity
+    relation: tests
+    rationale: "Tests how much hemodynamic fidelity is lost when the pulsatile event layer is dropped."
+
+question: |
+  The per-beat event (E_beat) fires ~205k times over 48 h and is ~99% of the full
+  model's runtime. Can we replace the events with a continuous mean-hemodynamics model
+  that still reproduces the sepsis trajectory — and how much faster, and at what cost
+  to fidelity?
+
+objective: |
+  Build an event-free reduced model (continuous ODEs: pathogen -> inflammation ->
+  vasodilation + tissue damage -> mean MAP), fit it to the exact severe arm, and
+  compare it to the full pulsatile model on speed (both engines) and fidelity.
+
+claim: |
+  Removing the per-beat event and the pulsatile layer makes the 48 h sepsis run
+  ~10^7-10^8x faster and closes the COPASI-vs-Tellurium gap. The event-free model
+  (sources/eventfree_sepsis.ant) runs a 48 h severe course in ~0.2 ms under roadrunner
+  and ~0.06 ms under COPASI, versus ~2.81 h (roadrunner) and ~3.7 h (COPASI) for the
+  full model — and with the events gone COPASI is as fast as roadrunner, because the
+  ~3x engine gap was entirely per-event interpreter overhead. Fitted to the exact
+  severe arm, the reduced model tracks blood pathogen to ~10%, tissue integrity to
+  ~4%, and the mean-MAP decline to ~4% RMSE. It trades fidelity for that speed: it
+  under-reaches the shock depth (MAP ~80 vs 69.5 mmHg; SVR ~0.78 vs 0.665) and, being
+  monotonic, misses the full model's baroreflex SVR compensation-then-decompensation,
+  and it has no pulsatility (no SBP/DBP pulse pressure).
+
+expected_behavior:
+  - name: event-free-is-vastly-faster-both-engines
+    statement: "The event-free model runs a 48 h course orders of magnitude faster than the full pulsatile model under both roadrunner and COPASI, and COPASI is no longer slower than roadrunner."
+    status: supported
+  - name: reduced-model-tracks-the-sepsis-trajectory
+    statement: "Fitted to the exact severe arm, the event-free model reproduces blood pathogen, tissue integrity, and the mean-MAP decline to within ~10%, with the hemodynamic depth and SVR dynamics as the stated fidelity cost."
+    status: supported
+
+findings:
+  - id: removing-the-event-gives-10e7x-and-closes-the-engine-gap
+    summary: "Event-free: ~0.2 ms (roadrunner) / ~0.06 ms (COPASI) for 48 h vs ~2.81 h / ~3.7 h full — ~10^7-10^8x, and COPASI = roadrunner (see chart 02)."
+    detail: |
+      The full pulsatile model's ~205k beat events are ~99% of its runtime (study 04:
+      disabling the event dropped a 60 s COPASI run from 3.8 s to 0.04 s). The event-free
+      reduced model has no events and is non-stiff, so a 48 h course runs in ~0.2 ms
+      (roadrunner) and ~0.06 ms (COPASI), against ~2.81 h (roadrunner) and ~3.7 h (COPASI)
+      for the full model — a ~6x10^7 / ~2x10^8 speedup (out/comparison.json). Crucially,
+      with the events gone COPASI is as fast as roadrunner (slightly faster here): the
+      ~3x Tellurium-vs-COPASI gap was entirely the per-event interpreter overhead, so it
+      disappears when there are no events.
+    status: supported
+  - id: fidelity-cost-of-dropping-the-pulsatile-events
+    summary: "The reduced model tracks pathogen (~10%), tissue integrity (~4%), and the MAP decline (~4% RMSE), but under-reaches shock and misses the SVR compensation (chart 01)."
+    detail: |
+      Fitted to the exact severe arm (data/real_trajectories.json), the event-free model
+      (chart 01, out/comparison.json) tracks blood pathogen to ~10% RMSE, tissue integrity
+      to ~4%, and the mean-MAP decline to ~4%. The fidelity cost is specific and visible:
+      the full model's SVR is non-monotonic — it rises to ~1.12 (baroreflex vasoconstriction,
+      compensation) before crashing to 0.665 (decompensation) — whereas the reduced model's
+      SVR falls monotonically, so it ends at ~0.78 vs 0.665 and MAP at ~80 vs 69.5 mmHg. It
+      captures the direction and most of the shock but not its full depth or the
+      two-phase hemodynamic response, and it has no pulsatility (no SBP/DBP pulse pressure).
+      So the reduced model is a screening-grade surrogate for the slow sepsis outcome, not a
+      replacement for the pulsatile physiology.
+
+    statement: "The event-free model is a speed/fidelity trade, not a free lunch: ~10^7x faster and engine-agnostic, at the cost of hemodynamic depth, the baroreflex SVR dynamics, and pulsatility."
+    explanation: "The removed structure and the lost fidelity are the same thing. The per-beat event is what makes the full model both expensive (205k root-finds + reinits, ~99% of runtime) and detailed (beat-to-beat pulse pressure, and the baroreflex that drives SVR up before it collapses). Dropping it buys ~10^7x speed and removes the per-event interpreter overhead that made COPASI ~3x slower — so the engines converge. It costs the pulsatile layer (no SBP/DBP) and the compensation-then-decompensation SVR trajectory, which a monotonic mean-hemodynamics model cannot represent; hence the reduced model under-reaches the shock depth even after fitting. The honest placement: this is a fast screening surrogate for the slow sepsis outcome (pathogen, tissue integrity, mean-MAP trend), useful where thousands of runs or interactive exploration matter, and the full pulsatile model remains the reference where hemodynamic depth, pulse pressure, or the baroreflex dynamics matter. A closer fit would need a two-phase (compensation) hemodynamic term, a noted follow-up."
+visualizations:
+  - name: "Event-free vs full model — MAP / SVR / pathogen / tissue integrity overlay"
+    address: image:charts/01_fidelity_overlay.svg
+    display: primary
+  - name: "48 h wall-clock — removing the beat event collapses the cost and the engine gap"
+    address: image:charts/02_speed_comparison.svg
+    display: secondary
+
+baseline:
+  - name: sepsis-sbml-full
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+    config: {severity: 3}
+    note: "The full event-driven pulsatile model being reduced. Study 08 compares the event-free reduction (sources/eventfree_sepsis.ant) against this model's committed exact severe arm."
+
+variants:
+  - name: eventfree-reduced
+    note: "sources/eventfree_sepsis.ant — continuous mean-hemodynamics, no beat event; fitted to the exact severe arm."
+
+interventions: []
+runs: []

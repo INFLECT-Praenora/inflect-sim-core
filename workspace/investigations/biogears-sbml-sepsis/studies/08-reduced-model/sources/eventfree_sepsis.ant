@@ -1,0 +1,48 @@
+// Event-free (mean-hemodynamics) sepsis model.
+//
+// A reduced, continuous-ODE alternative to the BioGears sepsis extraction. It
+// drops the per-beat cardiac event (E_beat, which fires ~205k times over 48 h and
+// is ~99% of the full model's runtime) and the pulsatile layer. Instead it carries
+// the slow sepsis mechanism directly: blood pathogen -> immune activation ->
+// vasodilation (SVR down) and tissue damage (TI down) -> mean arterial pressure fall.
+//
+// No events. Non-stiff. Runs a 48 h course in < 1 ms under BOTH roadrunner and
+// COPASI (the engine gap vanishes with the events gone). Parameters fit to the exact
+// Tellurium severe-arm trajectory (data/real_trajectories.json, exact_sev3). It tracks
+// blood pathogen and tissue integrity to within ~10% and the mean-MAP decline to ~4%
+// RMSE, reaching ~80 mmHg vs the full model's 69.5 (it captures the direction and most
+// of the shock, under-reaching the deepest hemodynamic point). It trades pulsatility
+// (no SBP/DBP pulse pressure) and hemodynamic depth for ~10^7x speed.
+//
+// `seed` is the severity knob: 0 = healthy (all flat), ~0.9 = severe (severity 3).
+
+model eventfree_sepsis
+  PB = seed;        // blood pathogen (observable)
+  Mi = 0;           // activated inflammation / immune state
+  TI = 1;           // tissue integrity (1 healthy -> 0 destroyed)
+  seed = 0.8924122358115274;   // severity: 0 healthy, ~0.89 severe
+
+  // pathogen: logistic growth, immune killing
+  kg   = 2.9117310367966966e-05;
+  Pcap = 107.92931823869384;
+  kk   = 1.1613407512403125e-07;
+  // inflammation: activated by bacteremia (saturating), first-order decay
+  kM   = 0.00017532462622397023;
+  Kp   = 195.25428007800645;
+  dM   = 3.727723326000394e-06;
+  // hemodynamics + tissue: separate inflammation sensitivities
+  Ksvr = 3.579026950606395;    // vasodilation half-saturation
+  Kti  = 0.09898815786364182;  // tissue-damage half-saturation
+  vmax = 0.4499838715005071;   // max fractional vasodilation
+  kdmg = 0.0004551167422444504;
+  krep = 0.0002634038714982703;
+
+  PB' = kg*PB*(1 - PB/Pcap) - kk*Mi*PB;
+  Mi' = kM*PB/(Kp + PB) - dM*Mi;
+  TI' = -kdmg*(Mi/(Kti + Mi))*TI + krep*(1 - TI);
+
+  // mean hemodynamics (no beats): SVR falls with inflammation, MAP ~ constant * SVR
+  // (the exact model keeps MAP/SVR ~ 103 across healthy and severe -> CO ~ constant).
+  SVR := 0.929*(1 - vmax*Mi/(Ksvr + Mi));
+  MAP := 102.8*SVR;
+end

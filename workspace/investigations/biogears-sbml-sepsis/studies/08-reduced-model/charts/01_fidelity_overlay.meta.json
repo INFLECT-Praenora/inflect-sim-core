@@ -1,0 +1,3 @@
+{
+ "caption": "Event-free (mean-hemodynamics) reduced model vs the exact pulsatile BioGears extraction, severe arm, 48 h. The reduced model drops the per-beat event and tracks blood pathogen and tissue integrity to within ~10% and the mean-MAP decline to ~4% RMSE. It under-reaches the deepest hemodynamic point (SVR ~0.78 vs 0.665; MAP ~80 vs 69.5 mmHg) \u2014 it captures the direction and most of the shock, trading hemodynamic depth and pulsatility (no SBP/DBP) for ~10^7x speed."
+}
