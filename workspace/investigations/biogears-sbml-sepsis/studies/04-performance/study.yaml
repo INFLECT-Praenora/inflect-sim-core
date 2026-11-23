@@ -16,27 +16,27 @@ question: |
 
 objective: |
   Profile the compute across engines on one matched run: the full-run wall-clock
-  (BioGears, Tellurium), the dominant cost (stiff ODE integration), whether a faster
-  integrator can help, and the surrogate's per-step speedup — with a live, reproducible
-  micro-benchmark behind the full-run numbers.
+  (BioGears, Tellurium), the dominant cost (the stiff ODE integration), whether a
+  faster integrator helps, and the surrogate's per-step speedup. A live, reproducible
+  micro-benchmark sits behind the full-run numbers.
 
 claim: |
-  For one matched 48 h severe-sepsis run the same spec spans 4+ orders of magnitude of
-  compute: BioGears (C++ physiology) ~3.38 h, Tellurium (exact SBML via roadrunner/
-  CVODE) ~2.81 h, and the PyTorch surrogate ~0.2 s (~40,000x faster than the exact
-  SBML path). The exact engines spend essentially all of that time integrating the
-  stiff 91-state ODE — a stiff implicit solver (CVODE) is required, so a faster or
-  Rust explicit integrator cannot speed it up; the real levers are a better stiff
-  solver, GPU-parallel patients, or a surrogate. The surrogate replaces the ODE solve
-  with one forward pass: a live per-step micro-benchmark on this machine measures
-  ~526 ms for one exact CVODE step of the real model vs ~0.04 ms for one surrogate
-  forward pass — the exact per-step cost is ~13,000x the surrogate's. The surrogate is
-  a fast APPROXIMATE tier (bounded, not yet clinically accurate), not a drop-in
-  replacement.
+  For one matched 48 h severe-sepsis run, the same spec spans more than 4 orders of
+  magnitude of compute. BioGears (C++ physiology) takes ~3.38 h. Tellurium (exact SBML
+  via roadrunner/CVODE) takes ~2.81 h. The PyTorch surrogate takes ~0.2 s — about
+  40,000x faster than the exact SBML path. The exact engines spend nearly all of that
+  time integrating the stiff 91-state ODE. That solve needs an implicit stiff solver
+  (CVODE), so a faster or Rust explicit integrator cannot speed it up; the real levers
+  are a better stiff solver, GPU-parallel patients, or a surrogate. The surrogate
+  replaces the ODE solve with one forward pass. A live per-step micro-benchmark on this
+  machine measures ~526 ms for one exact CVODE step of the real model against ~0.04 ms
+  for one surrogate forward pass — the exact per-step cost is ~13,000x the surrogate's.
+  The surrogate is a fast approximate tier (bounded, not yet clinically accurate), not
+  a drop-in replacement.
 
 expected_behavior:
   - name: compute-profile-and-surrogate-speedup
-    statement: "Per-engine wall-clock for a matched 48 h run is recorded; the stiff ODE solve is the dominant cost; the surrogate is ~4 orders of magnitude faster."
+    statement: "Each engine's wall-clock for a matched 48 h run is recorded. The stiff ODE solve is the dominant cost. The surrogate is about 4 orders of magnitude faster."
     status: supported
   - name: stiff-ode-is-the-bottleneck
     statement: "The sepsis ODE is stiff (CVODE required); a faster/Rust explicit integrator cannot speed up the exact engines."
@@ -58,49 +58,49 @@ findings:
       stiff 91-state ODE solve. The surrogate skips the solve entirely (one forward
       pass per step), at the cost of accuracy.
     status: supported
-    statement: "The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate's ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here."
-    explanation: "What the measurement means: three engines running the same 48 h severe-sepsis spec separate into two regimes. The two exact engines (BioGears ~3.38 h, Tellurium ~2.81 h) sit within the same order of magnitude because both are dominated by the same stiff 91-state ODE solve; the PyTorch surrogate (~0.2 s) sits four orders below them because it replaces that solve with a single forward pass. The live per-step micro-benchmark (~526 ms for one exact CVODE step vs ~0.04 ms for one surrogate pass, ~13,000x) localizes the cost to exactly that solve, so the spread is explained by mechanism rather than measurement noise, and the companion finding rules out a faster integrator as the lever — the ODE is stiff, so an explicit method is unstable and wrong on the fast cardiovascular states.\n\nWhere it sits in the investigation: performance is downstream of composition -> ensembles -> workflows (the spec, the matched run, and the engine wrappers are inherited here, not re-derived) and it feeds fidelity (study 05). That ordering is what makes an honest reading possible — this study measures cost under a fixed spec and deliberately does not measure correctness.\n\nHonest limitation and open question: the speedups are compute-only. They adjudicate which engine is cheaper, not the competing prediction that actually matters — whether the surrogate is a drop-in replacement for the exact SBML path. That prediction is settled by a different quantity, held-out trajectory error against the exact engine, which is the province of study 05's fidelity validator, not this one. Until that validator passes, the surrogate is a fast approximate tier, and the bounded claim this study supports is: the bottleneck is the stiff solve and the surrogate removes it, at a cost in accuracy this study does not quantify."
+    statement: "The 4+ order-of-magnitude compute spread is a real, matched-spec measurement, but it is about cost alone. The surrogate's ~40,000x full-run and ~13,000x per-step speedups matter only once the fidelity gate is met. Whether the surrogate is a drop-in replacement is decided in study 05, not here."
+    explanation: "Three engines run the same 48 h severe-sepsis spec and split into two groups. The two exact engines (BioGears ~3.38 h, Tellurium ~2.81 h) sit within the same order of magnitude because both spend their time on the same stiff 91-state ODE solve. The PyTorch surrogate (~0.2 s) sits four orders below because it replaces that solve with a single forward pass. The live per-step micro-benchmark (~526 ms for one exact CVODE step vs ~0.04 ms for one surrogate pass, ~13,000x) pins the cost to that solve, so the spread comes from mechanism, not measurement noise. The companion finding rules out a faster integrator: the ODE is stiff, so an explicit method is unstable and wrong on the fast cardiovascular states.\n\nThis study sits downstream of composition -> ensembles -> workflows. It inherits the spec, the matched run, and the engine wrappers rather than re-deriving them, and it feeds fidelity (study 05). It measures cost under a fixed spec and does not measure correctness.\n\nThe speedups are compute-only. They tell you which engine is cheaper, not whether the surrogate can replace the exact SBML path. That question is answered by a different number, held-out trajectory error against the exact engine, which study 05's fidelity validator measures. Until that validator passes, the surrogate is a fast approximate tier. The claim this study supports is narrow: the bottleneck is the stiff solve, and the surrogate removes it, at a cost in accuracy this study does not quantify."
   - id: the-bottleneck-is-the-stiff
     summary: "The bottleneck is the stiff ODE solve — a faster integrator is not a lever."
     detail: |
-      The sepsis ODE is stiff, so the one solver class that works is an implicit stiff
-      method (CVODE/BDF), already compiled C inside libroadrunner. An explicit
-      fixed-step integrator (the kind a from-scratch Rust engine uses) is unstable on
-      the real model and wrong on the fast cardiovascular states even at ~173 M steps
-      per 48 h. Reimplementing the integrator in another language is not the speed
-      lever; a better/warm-started stiff solver, GPU-parallel patients, or a surrogate
-      are. (The composition engine is separately interchangeable: the SBML composite is
-      bit-identical under process-bigraph Python and the viva-core Rust engine — the
-      engine swap moves only framework overhead.)
+      The sepsis ODE is stiff, so only one solver class works: an implicit stiff method
+      (CVODE/BDF), already compiled as C inside libroadrunner. An explicit fixed-step
+      integrator (the kind a from-scratch Rust engine uses) is unstable on the real
+      model and wrong on the fast cardiovascular states, even at ~173 M steps per 48 h.
+      Rewriting the integrator in another language is not the speed lever. The levers
+      are a better or warm-started stiff solver, GPU-parallel patients, or a surrogate.
+      The composition engine is interchangeable on its own: the SBML composite is
+      bit-identical under process-bigraph Python and the viva-core Rust engine, so that
+      swap moves only framework overhead.
     status: supported
   - id: rust-backend-runs-the-same-composite
     summary: "The Rust viva-core backend runs the same sepsis composite and reproduces the Python result (within-tolerance)."
     detail: |
-      The composition engine is interchangeable independently of the solver. Running
-      the identical sepsis composite under process-bigraph (Python) and under the Rust
+      The composition engine is interchangeable independently of the solver. We ran the
+      identical sepsis composite under process-bigraph (Python) and under the Rust
       viva-core backend (run_rust_backend.py -> rust_backend.json, 60 ticks × 10 s,
-      healthy baseline): the two backends agree to WITHIN-TOLERANCE — the blood pathogen
-      and tissue integrity are bit-identical and the hemodynamic observables match to
-      ~1e-5 (max abs diff ~6.6e-5 on SBP; the ~1e-5 residual is roadrunner's
-      cold-start-vs-warm effect, not an engine disagreement). Wall: Python ~24.0 s vs
-      viva-core ~21.4 s (ratio ~1.12). The honest reading: this is an EXECUTION-BACKEND
-      swap — roadrunner does the stiff ODE math in both, so viva-core executes the
-      composite graph (state, scheduling, emit) around the same solver. On a single heavy
-      stiff process the wall difference is framework overhead, not a stiff-solve speedup;
-      viva-core's per-tick advantage shows on many-process / many-tick composites, and the
-      stiff solve itself stays immovable (the stiff-ODE finding). What this arm
-      demonstrates is backend interchangeability + determinism: same composite, two
-      execution engines, the same numbers.
+      healthy baseline). The two backends agree within tolerance: blood pathogen and
+      tissue integrity are bit-identical, and the hemodynamic observables match to ~1e-5
+      (max abs diff ~6.6e-5 on SBP). The ~1e-5 residual is roadrunner's
+      cold-start-vs-warm effect, not an engine disagreement. Wall-clock: Python ~24.0 s
+      vs viva-core ~21.4 s (ratio ~1.12). This is an execution-backend swap. Roadrunner
+      does the stiff ODE math in both, so viva-core just runs the composite graph
+      (state, scheduling, emit) around the same solver. On a single heavy stiff process
+      the wall-clock difference is framework overhead, not a faster stiff solve.
+      viva-core's per-tick advantage shows up on many-process or many-tick composites,
+      and the stiff solve itself stays fixed (see the stiff-ODE finding). What this arm
+      shows is backend interchangeability and determinism: same composite, two execution
+      engines, the same numbers.
     status: supported
   - id: live-per-step-micro-benchmark
     summary: "Live per-step micro-benchmark: the stiff solve is ~13,000x the surrogate forward pass."
     detail: |
       Reproducible on this machine (bench_live.py, warm): one exact CVODE step of the
-      real 91-state sepsis model costs ~526 ms, versus ~0.04 ms for one surrogate
-      forward pass — the exact per-step stiff solve is ~13,000x the surrogate's. This
-      is the per-step view behind the full-run wall-clocks and shows directly where the
-      compute goes: the stiff ODE solve. The surrogate is a fast approximate tier
-      (study 05 for the honest fidelity picture).
+      real 91-state sepsis model costs ~526 ms, against ~0.04 ms for one surrogate
+      forward pass — the exact per-step solve is ~13,000x the surrogate's. This is the
+      per-step view behind the full-run wall-clocks, and it shows directly where the
+      compute goes: the stiff ODE solve. The surrogate is a fast approximate tier (see
+      study 05 for the fidelity picture).
     status: supported
 
 visualizations:

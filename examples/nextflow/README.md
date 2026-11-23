@@ -17,10 +17,11 @@ nextflow run sepsis.nf --severities 0,1,2,3    # your own grid
 nextflow run sepsis.nf --steps 600             # longer horizon per task
 ```
 
-`SEPSIS_RUN` invokes `viva-sim run sepsis_sbml --param severity=<N> --emit
-parameters/MAP,parameters/TI,parameters/PB` (one task per severity); `SUMMARIZE`
-gathers every task's final state and scores each for septic shock
-(`sepsis_summary.tsv`). Needs the `tellurium` extra installed.
+`SEPSIS_RUN` runs one task per severity: `run_sepsis_task.py` builds and runs the
+real `sepsis_sbml` composite and prints its final MAP, tissue integrity, and blood
+pathogen. `SUMMARIZE` gathers every task's output and scores each for septic shock
+into one table (`sepsis_summary.tsv`). Needs the `tellurium` extra installed, and a
+`python` on PATH with the `simulation-core` package.
 
 ## The minimal example (`main.nf`)
 
@@ -36,18 +37,15 @@ nextflow run main.nf --spec my_workflow.json --steps 20
 `python -m viva_simulation_core.cli`). Swap in `viva-sim run <composite_id>` to
 run any registered composite.
 
-## Where the layers sit — and why this is interop, not a contest
+## The two layers are complementary
 
-Nextflow and vivarium operate at **different layers**, and that is the point:
+Nextflow and vivarium work at different levels, so you use both:
 
-- **Nextflow** schedules coarse, independent *tasks* (each a container or
-  script) across a DAG — great for data-parallel batch and provenance.
-- **Vivarium** composes *processes* that share state and step together at each
-  timestep — the fine-grained, tightly-coupled engine composition (an SBML
-  engine handing state to a surrogate handing state to a physiology engine on
-  every tick) that a task scheduler's process model cannot express.
+- **Nextflow** schedules coarse, independent tasks (each a container or script)
+  across a DAG. It is good at data-parallel batch and provenance.
+- **Vivarium** composes processes that share state and step together each timestep.
+  This is the tight per-tick coupling a task scheduler cannot express — for example
+  the physiology engine and the antibiotic controller exchanging state every tick in
+  the co-simulation study (06).
 
-So this is **not** a "faster than Nextflow" claim — the two solve different
-problems. Vivarium runs *inside* a Nextflow task when you want pipeline-level
-orchestration, and owns the in-process coupling within each task. Use both:
-Nextflow for the outer DAG, vivarium for the composite each stage runs.
+Nextflow owns the outer DAG; vivarium owns the composite each task runs.
