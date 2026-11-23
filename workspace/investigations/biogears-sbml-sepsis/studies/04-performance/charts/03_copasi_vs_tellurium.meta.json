@@ -1,0 +1,3 @@
+{
+ "caption": "The identical BioGears-sepsis SBML (severe, 2 h) under the main engine Tellurium (roadrunner/CVODE) and a second independent exact-SBML integrator, COPASI (LSODA, driven through libCOPASI directly). The two agree to within 5.0e-04 across all nine shared observables \u2014 the exact-SBML result is engine-independent, not a roadrunner artifact. The agreement costs 4.7\u00d7 more wall-clock in COPASI (168 s vs 784 s): the model is event-dense (the per-beat event), and COPASI evaluates each event through an interpreted math layer while roadrunner runs LLVM-compiled code."
+}

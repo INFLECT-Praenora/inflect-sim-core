@@ -52,8 +52,9 @@ lead: |
 executive:
   what_is_this: |
     A guided tour of the simulation core's capabilities on one real model. The same
-    BioGears sepsis core is run under interchangeable engines (BioGears C++, exact
-    SBML/Tellurium, PyTorch surrogate, and a Rust execution backend) and used to
+    BioGears sepsis core is run under interchangeable engines (BioGears C++, two exact
+    SBML integrators — Tellurium and COPASI — a PyTorch surrogate, and a Rust execution
+    backend) and used to
     demonstrate, each as a runnable artifact: COMPOSITION (study 01 — the same spec
     under three engines by one node swap), ENSEMBLES (study 02 — a severity × engine
     batch in one sweep), ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes
@@ -193,7 +194,7 @@ at_a_glance:
   - {study: 01-composition, role: "INTERCHANGEABILITY — which model properties survive an implementation swap (BioGears, Tellurium, surrogate); a common port layout does not guarantee equal physiology."}
   - {study: 02-ensembles, role: "EXPLORE — a severity × engine batch as one sweep, probing progression toward shock."}
   - {study: 03-workflows, role: "ORCHESTRATE — registered modules form a reproducible pipeline with no new integration code, handing an SBML file between engines and fanning the composite across a Nextflow severity grid."}
-  - {study: 04-performance, role: "SCALE — where acceleration preserves useful predictions and where it fails; the stiff-ODE cost, the ~40,000× surrogate tier, and the Rust (viva-core) backend."}
+  - {study: 04-performance, role: "SCALE — where acceleration preserves useful predictions and where it fails; the stiff-ODE cost, the ~40,000× surrogate tier, the Rust (viva-core) backend, and COPASI as a second exact-SBML engine that reproduces Tellurium at ~4.7× the cost."}
   - {study: 05-fidelity, role: "EXPLAIN — the engines agree on the inflammation core to within ~0.1% and diverge in the hemodynamic layer; the discrepancy to investigate."}
   - {study: 06-cosimulation, role: "INTERVENE — physiology coupled to a treatment process every tick; untreated vs early vs delayed, with a coupling-step convergence test."}
   - {study: 07-evidence, role: "VALIDATE — the Workbench turning runs into traceable evidence with explicit pass / fail / pending acceptance criteria."}

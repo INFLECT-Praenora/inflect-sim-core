@@ -68,6 +68,19 @@ findings:
 
     statement: 'The PyTorch surrogate is the third interchangeable engine at the interface. It constructs over the same 91-state sepsis spec and completes a full 48 h / 576-step rollout live (0.198 s, finite but out of physical range). Swapping to it is one node-address change, like swapping BioGears for exact Tellurium. That is interchangeability of interface; speed is deferred to study 04 and accuracy to study 05.'
     explanation: "This finding shows interchangeability of interface, not accuracy, and the honest work is saying which. In the live check (engines_live_check.json) the Tellurium/roadrunner engine constructs over the real 91-state SBML extraction, and the PyTorch surrogate (viva-torch NeuralProcess) completes a full 48 h / 576-step rollout in 0.198 s with finite output. The learned box plugs into the same typed observable ports as the two full-physics engines and runs end to end on the one spec. That is the third leg of the composition claim: swapping to the surrogate changes one node's address and nothing else in the composite — wiring, emitters, and analysis are untouched — just like swapping between BioGears and exact Tellurium.\n\nBut the surrogate's output, while bounded and finite over the horizon, is out of physical range and degenerate across severity. So the check shows the learned box fits the socket, not that it reproduces the physiology. Its two numeric claims are deferred by design: its speed (the 0.198 s rollout) is study 04, and whether its trajectories can be trusted at all is study 05. In the chain, this finding gives performance (04) and fidelity (05) a surrogate to time and to judge: composition shows a learned engine is swappable at the interface, and the downstream studies decide what that swap costs. Honest limit: interchangeable here is a structural existence claim backed by a single live construction-and-rollout check, not a graded accuracy band. The surrogate is known to be out of physical range, so no fidelity or clinical-accuracy claim is made."
+  - id: copasi-is-a-second-exact-sbml-engine
+    summary: "COPASI is a second interchangeable exact-SBML engine — it reproduces Tellurium's trajectory (cross-engine agreement in study 04)."
+    detail: |
+      Beyond the three engines overlaid here, the exact-SBML tier itself is
+      interchangeable. The identical SBML runs under Tellurium (roadrunner/CVODE, the
+      main engine) AND under COPASI (LSODA), and the two independent integrators produce
+      the same severe-arm trajectory — agreeing to a maximum relative difference of ~5e-4
+      across all nine observables (study 04, chart 03). So the exact-SBML result is a
+      property of the model, not of any one integrator, which strengthens the fidelity
+      backbone: when study 05 compares the SBML extraction to the BioGears engine, the
+      SBML side is cross-validated by two engines. Tellurium stays the main engine; COPASI
+      runs the same box at a few times the cost (study 04).
+    status: supported
 visualizations:
   - name: "Same sepsis spec, two full-physics engines, nine observables"
     address: image:charts/01_engine_overlay.svg
