@@ -118,6 +118,13 @@ def _chain_installed_module_cores(core):
         return core
     for name, spec in imports.items():
         spec = spec if isinstance(spec, dict) else {}
+        # `mode: reference` imports are declared for catalog visibility only (e.g. the
+        # optional engine wrappers). They register lazily on demand / via process-bigraph
+        # auto-discovery and must NOT be eagerly imported here — chaining them would pull
+        # in heavy engines (tellurium, torch) on every build_core() and break the
+        # "works with zero engines installed" guarantee.
+        if str(spec.get("mode", "")).lower() == "reference":
+            continue
         pkg = (spec.get("package") or str(name)).replace("-", "_")
         # Prefer ``<pkg>.core.build_core(core)``; fall back to ``<pkg>.build_core``
         # / ``<pkg>.register_types``. Each is a ``(core) -> core | None`` call.

@@ -4,6 +4,42 @@ created: "2026-11-16"
 plugin_version: 0.4.16
 package_path: viva_simulation_core
 
+# Imported modules this workspace integrates. The optional simulation-engine
+# wrappers are declared here so the catalog (Repositories tab) shows every engine
+# the workspace imports, not only the ones the ecosystem registry happens to know.
+# They are `mode: reference`: declared for visibility, loaded lazily on demand
+# (viva_simulation_core.engines) and registered by process-bigraph auto-discovery,
+# NOT eagerly chained into build_core() — so a bare install with no engines still
+# works. The set is enforced to match pyproject's engine extras by
+# tests/test_engine_imports_declared.py. Keep sources in sync with
+# [project.optional-dependencies] in pyproject.toml.
+imports:
+  viva-tellurium:
+    source: "git+https://github.com/vivarium-collective/viva-tellurium"
+    ref: "2d07d068bb4dd713c9ed61f59747d21b49498cc2"
+    mode: reference
+    description: "Tellurium / roadrunner engine — exact SBML (CVODE). Optional extra: tellurium."
+  viva-copasi:
+    source: "git+https://github.com/vivarium-collective/viva-copasi.git"
+    ref: "937ff132f2e8c755248a38a7440067f8d1871001"
+    mode: reference
+    description: "COPASI engine (basico) — exact SBML. Optional extra: copasi."
+  viva-biogears:
+    source: "git+https://github.com/vivarium-collective/viva-biogears"
+    ref: "8d0201976b2b3a008bc6406fdfe3f980d9bcb77f"
+    mode: reference
+    description: "BioGears 8.2.0 C++ whole-body physiology engine. Optional extra: biogears."
+  viva-torch:
+    source: "git+https://github.com/vivarium-collective/viva-torch"
+    ref: "bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5"
+    mode: reference
+    description: "PyTorch learned surrogate engine. Optional extra: surrogate."
+  viva-core:
+    source: "git+https://github.com/vivarium-collective/viva-core"
+    ref: "154d94c2f30050715e87aa89af2b93b04d5f77b7"
+    mode: reference
+    description: "Rust (viva-core) execution backend. Optional extra: rust."
+
 # Directory layout. New workspaces group their research directories under a
 # tidy `workspace/` subtree (the dirs below); the hidden `.pbg/` machine state
 # stays at the root like `.git/`. Tooling (dashboard, lint, skills) resolves
