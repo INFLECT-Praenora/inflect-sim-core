@@ -1,0 +1,30 @@
+{
+ "meta": {
+  "severity": 3,
+  "horizon_h": 1.0,
+  "arm": "early"
+ },
+ "runs": [
+  {
+   "interval_s": 240.0,
+   "blood_pathogen_end": 0.4114806985017005,
+   "tissue_integrity_end": 0.9999999891829994,
+   "MAP_end": 95.54117380926375,
+   "wall_s": 134.42995774978772
+  },
+  {
+   "interval_s": 120.0,
+   "blood_pathogen_end": 0.37471858477788733,
+   "tissue_integrity_end": 0.9999999973082944,
+   "MAP_end": 95.54119558008409,
+   "wall_s": 134.16473954217508
+  },
+  {
+   "interval_s": 60.0,
+   "blood_pathogen_end": 0.35664828935374865,
+   "tissue_integrity_end": 0.9999999987260032,
+   "MAP_end": 95.54121562590443,
+   "wall_s": 134.8962540407665
+  }
+ ]
+}

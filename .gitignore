@@ -39,3 +39,13 @@ todo.md
 
 # SDD controller scratch (ledgers, briefs, review packages)
 .superpowers/
+
+# Nextflow pipeline runtime artifacts (examples/nextflow)
+examples/nextflow/work/
+examples/nextflow/.nextflow/
+examples/nextflow/.nextflow.log
+examples/nextflow/sepsis_summary.tsv
+
+# SQLite WAL/shared-memory sidecars (ephemeral)
+*.db-shm
+*.db-wal

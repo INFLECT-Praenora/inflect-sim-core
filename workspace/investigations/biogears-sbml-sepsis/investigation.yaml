@@ -6,24 +6,34 @@ created: '2026-11-15'
 status: running
 
 question: |
-  What can the simulation core do? Taking ONE real model — the BioGears sepsis
-  core — can we show, as runnable artifacts rather than claims:
-    1. COMPOSITION — run the same spec under interchangeable engines (BioGears C++,
-       exact SBML via Tellurium, and a PyTorch surrogate) by swapping one box;
-    2. ENSEMBLES — run a severity × engine batch in one orchestrated sweep;
-    3. ORCHESTRATION / WORKFLOWS — compose modules into a pipeline and hand an
-       Antimony/SBML file between engines;
-    4. PERFORMANCE — profile where the compute goes and how fast each engine is;
-  while staying honest about where the engines agree and where they do not?
+  How can a compositional simulation core support interchangeable physiological
+  models, systematic perturbation studies, scalable execution, mechanistic
+  comparison, dynamic intervention, and evidence-based scientific validation? Taking
+  one real model, the BioGears sepsis core, each is a runnable artifact:
+    01 INTERCHANGEABILITY — which model properties are preserved when the
+       implementation changes (BioGears C++, extracted SBML/Tellurium, surrogate)?
+    02 ENSEMBLES — how do severity and physiological parameters drive progression
+       toward shock?
+    03 ORCHESTRATION — can registered modules form a reproducible investigation with
+       no new integration code, including inside a Nextflow pipeline?
+    04 SCALABLE EXECUTION — where does acceleration preserve useful predictions, and
+       where does it fail? Includes the Rust viva-core backend.
+    05 MECHANISTIC FIDELITY — what explains the inflammatory agreement and the
+       hemodynamic divergence between engines?
+    06 DYNAMIC COUPLING — can coupled physiology and treatment produce consistent
+       intervention responses (untreated vs early vs delayed)?
+    07 EVIDENCE & ACCEPTANCE — can the Workbench turn runs into traceable evidence
+       with explicit pass / fail / pending acceptance criteria?
+  The showcase is about what the core lets scientists test, not only what software it
+  can execute — while staying honest about where the engines agree and where they do not.
 
 hypothesis: |
-  This investigation is a capabilities DEMONSTRATION, not a single hypothesis test:
-  the thesis is that the simulation core already does all four of the above on a
-  real model, with each capability shown by an artifact that runs. The one place a
-  genuine hypothesis lives is the fidelity backbone (study 05): the SBML extraction
-  reproduces the inflammation core to within ~0.1% but diverges from the BioGears engine
-  in the hemodynamic layer — a real, measured result that keeps the demonstration
-  credible.
+  This is a capabilities demonstration, not a single hypothesis test. The claim is
+  that the simulation core already does all of the above on a real model, with each
+  capability shown by an artifact that runs. The one genuine hypothesis is in the
+  fidelity backbone (study 05): the SBML extraction reproduces the inflammation core
+  to within ~0.1% but diverges from the BioGears engine in the hemodynamic layer. That
+  is a real, measured result, and it keeps the demonstration credible.
 
 lead: |
   The simulation core takes one specification — the BioGears sepsis core, a
@@ -34,59 +44,85 @@ lead: |
   extraction integrated by roadrunner/CVODE (viva-tellurium), and a learned PyTorch
   surrogate (viva-torch). Because each engine is a box over the same observable
   ports, the core can compose them into workflows, sweep them as ensembles, pass a
-  model artifact from one to another, and profile their compute — the capabilities
-  this investigation puts in front of the INFLECT team, each as something you can
+  model artifact from one to another, profile their compute, run the same composite
+  under a Rust backend, and couple two engines in a closed loop. This investigation
+  puts those capabilities in front of the INFLECT team, each as something you can
   open and run.
 
 executive:
   what_is_this: |
     A guided tour of the simulation core's capabilities on one real model. The same
-    BioGears sepsis core is run under three interchangeable engines (BioGears C++,
-    exact SBML/Tellurium, PyTorch surrogate) and used to demonstrate four things, each
-    a runnable artifact: COMPOSITION (study 01 — the same spec under three engines by
-    one node swap), ENSEMBLES (study 02 — a severity × engine batch in one sweep),
-    ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes modules into a
-    pipeline and hands an Antimony/SBML file between engines), and PERFORMANCE
-    (study 04 — where the compute goes, and a ~40,000× surrogate tier). A fidelity
-    backbone (study 05) keeps it honest: where the engines agree, and where they do not.
+    BioGears sepsis core is run under interchangeable engines (BioGears C++, exact
+    SBML/Tellurium, PyTorch surrogate, and a Rust execution backend) and used to
+    demonstrate, each as a runnable artifact: COMPOSITION (study 01 — the same spec
+    under three engines by one node swap), ENSEMBLES (study 02 — a severity × engine
+    batch in one sweep), ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes
+    modules into a pipeline and hands an Antimony/SBML file between engines, and a
+    Nextflow pipeline fans the real composite across a severity grid), PERFORMANCE &
+    EXECUTION BACKENDS (study 04 — where the compute goes, a ~40,000× surrogate tier,
+    and the same composite run under the Rust viva-core backend), and CO-SIMULATION
+    (study 06 — two processes exchanging state every tick: the physiology engine
+    coupled to a closed-loop antibiotic controller, with untreated/early/delayed arms),
+    and EVIDENCE & ACCEPTANCE (study 07 — turning runs into traceable pass/fail/pending
+    acceptance criteria). A fidelity backbone (study 05) keeps it honest: where the
+    engines agree, and where they do not.
   verdict: |
-    The simulation core does all four, shown not told. ONE sepsis spec runs under
-    three interchangeable engines by swapping a single box (01); a severity × engine
-    batch runs as one orchestrated sweep (02); the four-verb workflow API composes
-    registered modules into a pipeline and passes the Antimony/SBML extraction from
-    one engine to another with no new simulation code (03); and the same run spans
-    4+ orders of magnitude of compute — BioGears ~3.38 h, Tellurium ~2.81 h, the
-    surrogate ~0.2 s — with the exact engines' time spent almost entirely in the
-    stiff 91-state ODE solve the surrogate replaces with one forward pass (04). The
-    demonstration stays honest (05): the extraction reproduces the inflammation core
+    The simulation core does all of this. One sepsis spec runs under three
+    interchangeable engines by swapping a single box (01). A severity × engine batch
+    runs as one sweep (02). The four-verb workflow API composes registered modules into
+    a pipeline and passes the SBML extraction from one engine to another with no new
+    simulation code, and a Nextflow pipeline fans the same composite across a severity
+    grid (03). The same run spans 4+ orders of magnitude of compute — BioGears ~3.38 h,
+    Tellurium ~2.81 h, the surrogate ~0.2 s — spent almost entirely in the stiff
+    91-state ODE solve the surrogate replaces with one forward pass, and the same
+    composite also runs under the Rust viva-core backend (04). Two processes exchange
+    state every tick in a closed loop: an antibiotic controller coupled to the sepsis
+    engine clears the pathogen, and early beats delayed treatment (06). The Workbench
+    then turns these runs into traceable acceptance criteria — the inflammation gates
+    pass, a hemodynamic gate fails, and a surrogate-accuracy gate is left pending (07).
+    The demonstration stays honest (05): the extraction reproduces the inflammation core
     to within ~0.1% but reaches septic shock by a different hemodynamic mechanism and on
-    a flipped timeline, and the surrogate is a fast APPROXIMATE tier (bounded, not yet
-    clinically accurate), not a drop-in replacement.
+    a flipped timeline, and the surrogate is fast but not admissible on the severe arm.
   verdict_status: complete
   verdict_detail: |
     Each capability is a runnable artifact in its study: the engine overlay (01), the
-    severity × engine ensemble grid (02), the live hand-off workflow + its DAG (03),
-    and the compute profile + live per-step micro-benchmark (04). Heavy full runs
-    (BioGears ~3.38 h, Tellurium ~2.81 h) are cited from committed wall-clock; the new
-    cheap demonstrations (the workflow, the surrogate, the ensemble sweep, the
-    micro-benchmark) run live. The fidelity backbone (05) carries the measured
-    engine-vs-extraction comparison (inflammation near-identical (~0.1%); hemodynamics diverge
-    in mechanism and timing) so the capabilities are shown on a model whose limits are
-    stated, not hidden.
-  decisions_needed: []
+    severity × engine ensemble grid (02), the hand-off workflow and its DAG plus the
+    Nextflow pipeline (03), the compute profile and live per-step micro-benchmark and
+    the Rust-backend run and the surrogate admissibility check (04), the closed-loop
+    co-simulation with treatment counterfactuals and a convergence test (06), and the
+    acceptance-gate evaluation (07). Heavy full runs (BioGears ~3.38 h, Tellurium
+    ~2.81 h) are cited from committed wall-clock; the cheaper demonstrations run live.
+    The fidelity backbone (05) carries the measured engine-vs-extraction comparison
+    (inflammation near-identical at ~0.1%; hemodynamics diverge in mechanism and
+    timing), so the capabilities are shown on a model whose limits are stated, not hidden.
+  decisions_needed:
+    - "Follow-up (05, staged): test one candidate mechanism for the hemodynamic divergence (e.g. a simplified vasodilatory effect) with a controlled perturbation; quantify whether it reduces the time-to-shock discrepancy. Do not present documented omissions as proven causes."
+    - "Follow-up (02, staged): a 5×5 severity × physiology-parameter sweep with time-to-hypotension, minimum MAP, and tissue integrity — an actual biological response surface (compute-heavy on the stiff engine)."
+    - "Follow-up (01, partial): a port / units / initialization / ownership compatibility report across the three implementations."
+    - "Follow-up (03, partial): automated shock-event detection and metric extraction as a reusable workflow step."
+    - "Done this pass (06): untreated vs early vs delayed treatment counterfactuals + a coupling-step convergence test."
+    - "Done this pass (04): surrogate admissibility on a withheld severity (screening-grade vs mechanistic)."
+    - "Done this pass (07): pass / fail / pending acceptance gates linked to evidence artifacts."
 
 scientific_argument:
   main_claim: |
-    The simulation core is simulation scaffolding: it runs one model under
-    interchangeable engines, composes and orchestrates them into workflows (including
-    passing a model artifact between engines), runs them as ensembles, and does it
-    performantly — all on existing registered components, with the engine-fidelity
-    limits measured and stated.
+    Vivarium is a shared computational architecture for executing, composing, and
+    investigating physiological models. Using a BioGears-derived sepsis model, the
+    showcase examines model interchangeability, simulation ensembles, interoperable
+    workflows, accelerated execution, mechanistic discrepancy, closed-loop intervention,
+    and evidence-based acceptance. Each capability answers a biological question,
+    produces a runnable artifact, and carries a scoped evidence verdict. The story runs
+    Represent -> Explore -> Orchestrate -> Scale -> Explain -> Intervene -> Validate.
+    Together these establish a foundation for INFLECT's broader adaptive physiological
+    modeling goals, without inflating the demonstration into a patient-specific digital
+    twin.
   evidence_for:
     - "COMPOSITION: one sepsis spec runs under BioGears, Tellurium, and the surrogate by swapping one box; the shared observables overlay (study 01)."
     - "ENSEMBLES: a severity {0,1,3} × engine batch runs as one orchestrated sweep into a single grid (study 02)."
-    - "ORCHESTRATION/WORKFLOWS: the four verbs compose registered modules into a pipeline and hand the Antimony/SBML extraction between engines, no new simulation code (study 03)."
-    - "PERFORMANCE: one 48 h run spans BioGears ~3.38 h / Tellurium ~2.81 h / surrogate ~0.2 s; live per-step micro-benchmark confirms the stiff-ODE bottleneck (study 04)."
+    - "ORCHESTRATION/WORKFLOWS: the four verbs compose registered modules into a pipeline and hand the Antimony/SBML extraction between engines; a Nextflow pipeline fans the real sepsis composite across a severity grid — no new simulation code (study 03)."
+    - "PERFORMANCE & EXECUTION BACKENDS: one 48 h run spans BioGears ~3.38 h / Tellurium ~2.81 h / surrogate ~0.2 s; a live per-step micro-benchmark confirms the stiff-ODE bottleneck; the same composite runs under the Rust viva-core backend with matching results; the surrogate leaves physical bounds on 8 of 9 severe observables (study 04)."
+    - "CO-SIMULATION: two processes in one composite exchange state every tick — the sepsis physiology engine coupled to a closed-loop antibiotic controller that senses bacteremia and writes the drug-killed pathogen back into the engine, clearing it relative to the matched untreated control; untreated/early/delayed arms and a coupling-step convergence test (study 06)."
+    - "EVIDENCE & ACCEPTANCE: pre-declared acceptance criteria evaluate against committed evidence to 2 pass / 1 fail / 1 pending, each linked to its artifact — the inflammation gates pass, the hemodynamic gate fails, the surrogate-accuracy gate is pending (study 07)."
   evidence_against:
     - "Fidelity limit: the extraction reaches MAP<65 shock by a different hemodynamic mechanism and ~15 h earlier than the engine despite lagging ~11 h on systolic pressure (study 05)."
     - "The surrogate is an approximate tier — bounded over the full horizon but not yet clinically accurate; it trades accuracy for ~4-5 orders of magnitude of speed (study 04)."
@@ -97,6 +133,8 @@ scientific_argument:
     - "studies/03-workflows/charts/01_handoff_output.svg"
     - "studies/04-performance/charts/01_runtime_compare.svg"
     - "studies/05-fidelity/charts/01_divergence_heatmap.svg"
+    - "studies/06-cosimulation/charts/01_cosim_closed_loop.svg"
+    - "studies/07-evidence/charts/01_acceptance_gates.svg"
   caveats:
     - "Heavy full-run wall-clocks (BioGears, Tellurium) are cited from committed runs, not re-measured in this redesign; the new ensemble/workflow/micro-benchmark artifacts run live."
     - "'Functional-difference' attributions (study 05) come from the extraction report's own 'Differences from BioGears' inventory — documented omissions, not newly-measured mechanisms."
@@ -124,6 +162,8 @@ studies:
   - 03-workflows
   - 04-performance
   - 05-fidelity
+  - 06-cosimulation
+  - 07-evidence
 
 expert_docs: []
 acceptance_criteria:
@@ -139,14 +179,20 @@ acceptance_criteria:
     behavior: compute-profile-and-surrogate-speedup
   - study: 05-fidelity
     behavior: engines-agree-on-inflammation-diverge-on-hemodynamics
+  - study: 06-cosimulation
+    behavior: two-processes-exchange-state-each-tick
+  - study: 07-evidence
+    behavior: pass-fail-pending-acceptance-criteria
 
 at_a_glance:
-  - {study: 00-simulation-core, role: "Start here — the one model, the three engines, and the four capabilities this investigation demonstrates."}
-  - {study: 01-composition, role: "COMPOSITION — the same sepsis spec run under BioGears, Tellurium, and the surrogate by swapping one box; shared observables overlaid."}
-  - {study: 02-ensembles, role: "ENSEMBLES — a severity × engine batch run as one orchestrated sweep, gathered into a single grid."}
-  - {study: 03-workflows, role: "ORCHESTRATION / WORKFLOWS — the four verbs compose registered modules into a pipeline and hand an Antimony/SBML file between engines, no new simulation code."}
-  - {study: 04-performance, role: "PERFORMANCE — one run from seconds to hours across engines; where the compute goes (the stiff ODE solve) and the ~40,000× surrogate tier."}
-  - {study: 05-fidelity, role: "FIDELITY — the honest backbone: the engines agree on the inflammation core to within ~0.1%, and diverge in the hemodynamic layer (mechanism and timing)."}
+  - {study: 00-simulation-core, role: "REPRESENT / start here — the one model, its engines, and the capabilities this investigation demonstrates."}
+  - {study: 01-composition, role: "INTERCHANGEABILITY — which model properties survive an implementation swap (BioGears, Tellurium, surrogate); a common port layout does not guarantee equal physiology."}
+  - {study: 02-ensembles, role: "EXPLORE — a severity × engine batch as one sweep, probing progression toward shock."}
+  - {study: 03-workflows, role: "ORCHESTRATE — registered modules form a reproducible pipeline with no new integration code, handing an SBML file between engines and fanning the composite across a Nextflow severity grid."}
+  - {study: 04-performance, role: "SCALE — where acceleration preserves useful predictions and where it fails; the stiff-ODE cost, the ~40,000× surrogate tier, and the Rust (viva-core) backend."}
+  - {study: 05-fidelity, role: "EXPLAIN — the engines agree on the inflammation core to within ~0.1% and diverge in the hemodynamic layer; the discrepancy to investigate."}
+  - {study: 06-cosimulation, role: "INTERVENE — physiology coupled to a treatment process every tick; untreated vs early vs delayed, with a coupling-step convergence test."}
+  - {study: 07-evidence, role: "VALIDATE — the Workbench turning runs into traceable evidence with explicit pass / fail / pending acceptance criteria."}
 
 how_to_read: |
   How the simulation core works, in one idea: a simulation is a COMPOSITE — a small

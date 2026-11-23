@@ -1,0 +1,111 @@
+{
+ "meta": {
+  "arm": "severe (severity 3)",
+  "timestep_s": 300.0,
+  "source": "data/real_trajectories.json"
+ },
+ "verdict": "inadmissible",
+ "n_observables": 9,
+ "n_inadmissible": 8,
+ "rows": [
+  {
+   "observable": "SBP",
+   "bound_lo": 0,
+   "bound_hi": 300,
+   "surr_min": -298.25027342606336,
+   "surr_max": 9.74919444322586,
+   "exact_min": 82.15006853998676,
+   "exact_max": 114.82049551338768,
+   "frac_out_of_bounds": 0.7881944444444444,
+   "admissible": false
+  },
+  {
+   "observable": "DBP",
+   "bound_lo": 0,
+   "bound_hi": 300,
+   "surr_min": -172.37355349352583,
+   "surr_max": 48.117427844554186,
+   "exact_min": 55.202105575476835,
+   "exact_max": 74.54600374205529,
+   "frac_out_of_bounds": 0.625,
+   "admissible": false
+  },
+  {
+   "observable": "MAP",
+   "bound_lo": 0,
+   "bound_hi": 300,
+   "surr_min": -158.16677570343018,
+   "surr_max": 42.97543141618371,
+   "exact_min": 69.4645011898855,
+   "exact_max": 95.5701443804143,
+   "frac_out_of_bounds": 0.5538194444444444,
+   "admissible": false
+  },
+  {
+   "observable": "HR",
+   "bound_lo": 0,
+   "bound_hi": 400,
+   "surr_min": -18.384591214358807,
+   "surr_max": 333.07917147967964,
+   "exact_min": 71.27590914048922,
+   "exact_max": 110.0480705606588,
+   "frac_out_of_bounds": 0.2222222222222222,
+   "admissible": false
+  },
+  {
+   "observable": "CO",
+   "bound_lo": 0,
+   "bound_hi": 50,
+   "surr_min": -9.855838067858713,
+   "surr_max": -0.03880350664258003,
+   "exact_min": 4.563758144878455,
+   "exact_max": 5.960132623002207,
+   "frac_out_of_bounds": 1.0,
+   "admissible": false
+  },
+  {
+   "observable": "SVR",
+   "bound_lo": 0,
+   "bound_hi": 50,
+   "surr_min": 0.015192557126283646,
+   "surr_max": 2.544560660258867,
+   "exact_min": 0.6645962849597935,
+   "exact_max": 1.1253224248505005,
+   "frac_out_of_bounds": 0.0,
+   "admissible": true
+  },
+  {
+   "observable": "blood_volume",
+   "bound_lo": 0,
+   "bound_hi": 100000.0,
+   "surr_min": -17633.468459129333,
+   "surr_max": -12.938345909118652,
+   "exact_min": 3900.2591476879243,
+   "exact_max": 5511.793189682064,
+   "frac_out_of_bounds": 1.0,
+   "admissible": false
+  },
+  {
+   "observable": "tissue_integrity",
+   "bound_lo": 0.0,
+   "bound_hi": 1.0,
+   "surr_min": -6.085384382968186,
+   "surr_max": 0.3466721734730527,
+   "exact_min": 0.32480331227246584,
+   "exact_max": 1.0,
+   "frac_out_of_bounds": 0.7569444444444444,
+   "admissible": false
+  },
+  {
+   "observable": "blood_pathogen",
+   "bound_lo": 0,
+   "bound_hi": null,
+   "surr_min": -40.16317079216242,
+   "surr_max": 1005.7044148109853,
+   "exact_min": 0.0,
+   "exact_max": 60.59967104347606,
+   "frac_out_of_bounds": 0.19791666666666666,
+   "admissible": false
+  }
+ ]
+}

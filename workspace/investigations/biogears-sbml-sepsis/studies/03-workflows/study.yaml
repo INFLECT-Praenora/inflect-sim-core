@@ -2,7 +2,7 @@ schema_version: 3
 name: 03-workflows
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Orchestration & workflows — compose modules, hand off an SBML file"
+title: "Model Orchestration — composable workflows across models, tools, and execution systems"
 confidence: Accepted
 # authored verdict — demonstration-level claim, backed by expected_behavior + runnable artifacts
 verdict: supported  # four-verb API composes + hands the model between engines end-to-end
@@ -36,6 +36,9 @@ expected_behavior:
   - name: four-verbs-are-the-surface
     statement: "The pipeline is built and run entirely via list / call / connect / run — no new simulation code."
     status: supported
+  - name: nextflow-fans-the-real-composite
+    statement: "A Nextflow DSL2 pipeline runs the real sepsis_sbml composite as a per-severity task via `viva-sim run` and gathers the results into one clinical table — vivarium dropping into a standard workflow engine with no special glue."
+    status: supported
 
 findings:
   - id: an-antimony-sbml-file-handed
@@ -59,7 +62,23 @@ findings:
       artifact is the interface between engines, and the exact engine drives the output.
     status: supported
 
-    explanation: "The four-verb path executed against real artifacts, not a mock: list enumerated 76 registered modules (engine boxes including TelluriumUTCStep, NeuralProcess, MathExpressionStep), call loaded the extracted biogears_sepsis.ant into TelluriumUTCStep (loaded_ok, ~3.0 s), connect wired a three-node DAG (exact Tellurium / neural surrogate / math derivation), and run advanced the composite to finite emitted observables. The handed-off file produced a physical result — a final MAP of 95.54 mmHg under the exact roadrunner integrator — so the portable Antimony/SBML artifact is a working interface between the BioGears-derived core and an SBML solver, with no sepsis-specific plumbing in the composition; this is what makes the orchestration claim an infrastructure result rather than a one-off script. The measurement also diverges from the claim's wording in one scoped way: the end-to-end workflow wall was 125.2 s, not 'a few seconds' — only the single Tellurium call was ~3.0 s. The 'few seconds' framing conflates per-engine load time with full-pipeline wall and should be read as per-call, not per-workflow; the competing prediction (few-seconds vs ~125 s end-to-end) is settled by the recorded wall_ms, and a timing behaviour test that separately asserts call wall and run wall is the open validator that would pin this down. The exact-minus-surrogate MAP gap of 95.43 mmHg (surrogate 0.11 vs exact 95.54) and the derived shock margin of -64.89 are not a fidelity failure of the workflow: the surrogate is a deliberately fast, approximate tier whose calibration is the subject of studies 04/05, so the orchestration claim stands independently of the surrogate's accuracy."
+    explanation: "The four-verb path ran against real artifacts, not a mock. list enumerated 76 registered modules (engine boxes including TelluriumUTCStep, NeuralProcess, MathExpressionStep). call loaded the extracted biogears_sepsis.ant into TelluriumUTCStep (loaded_ok, ~3.0 s). connect wired a three-node DAG (exact Tellurium / neural surrogate / math derivation). run advanced the composite to finite emitted observables. The handed-off file produced a physical result — a final MAP of 95.54 mmHg under the exact roadrunner integrator. So the portable Antimony/SBML artifact is a working interface between the BioGears-derived core and an SBML solver, with no sepsis-specific plumbing in the composition. That makes the orchestration claim an infrastructure result, not a one-off script.\n\nOne scoped caveat on the wording: the end-to-end workflow wall was 125.2 s, not 'a few seconds'. Only the single Tellurium call was ~3.0 s. The 'few seconds' framing mixes per-engine load time with full-pipeline wall and should be read as per-call, not per-workflow; the recorded wall_ms settles it, and a timing test that asserts call wall and run wall separately would pin it down.\n\nThe exact-minus-surrogate MAP gap of 95.43 mmHg (surrogate 0.11 vs exact 95.54) and the derived shock margin of -64.89 are not a fidelity failure of the workflow. The surrogate is a deliberately fast, approximate tier whose calibration is the subject of studies 04/05, so the orchestration claim stands on its own, independent of the surrogate's accuracy."
+  - id: nextflow-fans-the-real-sepsis-composite
+    summary: "A Nextflow pipeline fans the real sepsis composite across a severity grid — vivarium inside a standard workflow engine."
+    detail: |
+      Beyond the in-process four-verb workflow, the same composite drops into an
+      external workflow engine with no special glue. examples/nextflow/sepsis.nf is a
+      Nextflow DSL2 pipeline: a SEPSIS_RUN task runs the real sepsis_sbml composite
+      once per severity via `viva-sim run sepsis_sbml --param severity=<N> --emit
+      parameters/MAP,parameters/TI,parameters/PB` (the same built-in entrypoint the
+      rest of the core uses), and a SUMMARIZE task gathers every task's final state
+      into one clinical table (sepsis_summary.tsv), scoring each severity for septic
+      shock (MAP < 65). The layers are complementary, not competing: Nextflow owns the
+      outer data-parallel DAG and provenance across tasks; vivarium owns the in-process
+      engine composition inside each task (the tight per-tick coupling a task scheduler
+      cannot express — demonstrated in study 06). The toy MathExpressionStep pipeline
+      (main.nf) remains as the minimal mechanics example.
+    status: supported
 visualizations:
   - name: "Hand-off pipeline — real output: the handed-off .ant run under the exact engine → MAP + derived shock margin"
     address: image:charts/01_handoff_output.svg
