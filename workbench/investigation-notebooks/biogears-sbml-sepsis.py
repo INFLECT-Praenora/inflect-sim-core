@@ -309,6 +309,10 @@ def _render_one(address, config, runs_db, study_yaml, overrides=None):
 #
 # _study.yaml not found — skipped._
 
+# ## Study: `08-reduced-model`
+#
+# _study.yaml not found — skipped._
+
 # ## Open decisions
 # - Follow-up (05, staged): test one candidate mechanism for the hemodynamic divergence (e.g. a simplified vasodilatory effect) with a controlled perturbation; quantify whether it reduces the time-to-shock discrepancy. Do not present documented omissions as proven causes.
 # - Follow-up (02, staged): a 5×5 severity × physiology-parameter sweep with time-to-hypotension, minimum MAP, and tissue integrity — an actual biological response surface (compute-heavy on the stiff engine).
