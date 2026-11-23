@@ -23,7 +23,7 @@
   <div class="study-head-main" style="min-width:0; flex:1 1 auto">
   <div style="display:flex; align-items:center; gap:12px; min-width:0; flex-wrap:wrap">
   <h1 class="study-title" style="margin:0">
-    <span class="study-name" id="study-name" data-slug="02-ensembles" data-study-kind="computational" title="02-ensembles" data-edit-kind="study" data-edit-field="title" data-edit-value="Ensembles — a severity × engine batch in one sweep" data-edit-label="Title">Ensembles — a severity × engine batch in one sweep</span>
+    <span class="study-name" id="study-name" data-slug="02-ensembles" data-study-kind="computational" title="02-ensembles" data-edit-kind="study" data-edit-field="title" data-edit-value="Simulation Ensembles — systematic perturbation and comparative physiology" data-edit-label="Title">Simulation Ensembles — systematic perturbation and comparative physiology</span>
     
   </h1>
   </div>
@@ -689,7 +689,7 @@ grid — the same batch harness that would run any registered engine.
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
-            <span class="finding-claim finding-statement" data-edit-kind="study" data-edit-field="findings[the-surrogate-ran-live-across].statement" data-edit-value="The surrogate&#39;s divergence from the full-physics engines is a tier separation, not a competing prediction — within one batch, a fidelity claim and an orchestration claim are resolved side by side." data-edit-multiline data-edit-label="Finding the-surrogate-ran-live-across">The surrogate&#39;s divergence from the full-physics engines is a tier separation, not a competing prediction — within one batch, a fidelity claim and an orchestration claim are resolved side by side.</span>
+            <span class="finding-claim finding-statement" data-edit-kind="study" data-edit-field="findings[the-surrogate-ran-live-across].statement" data-edit-value="The surrogate&#39;s divergence from the full-physics engines is a difference in tier, not a rival prediction. One batch answers a fidelity question and an orchestration question side by side." data-edit-multiline data-edit-label="Finding the-surrogate-ran-live-across">The surrogate&#39;s divergence from the full-physics engines is a difference in tier, not a rival prediction. One batch answers a fidelity question and an orchestration question side by side.</span>
             
           </summary>
           <div class="finding-drawer">
@@ -700,7 +700,11 @@ grid — the same batch harness that would run any registered engine.
             </div>
             
             
-            <div class="finding-explanation"><em>Why:</em> The reconciling reading of this ensemble is that the batch makes two different kinds of claim, and the apparent divergence lives entirely at the boundary between them. BioGears and the exact Tellurium extraction — two independently implemented full-physics engines — agree to within ~0.1% on minimum tissue integrity across severities {0,1,3} (1.00 healthy -&gt; 0.968 mild -&gt; 0.243 severe). Because they are separate implementations, that agreement is cross-engine replication: the severity response is a property of the shared model, not an artifact of any single engine, which is the fidelity claim this study can support. The surrogate occupies a different tier. Its tissue-integrity endpoint is out of physical range, so it is not a third physical estimate competing with the full-physics pair; reading it as a competing prediction would be a category error. Its presence in every cell proves only what it is asked to prove here — that the harness orchestrates many cheap configurations in one sweep (the throughput claim, quantified in study 04). The divergence is therefore by design and not an unresolved contradiction: the full-physics engines answer &#39;does the model show the expected, engine-independent severity response?&#39; (yes), while the surrogate answers &#39;can the batch harness fan a cheap engine across the whole grid live?&#39; (yes), and neither answer bears on the other. The honest open question this leaves is the one the divergence makes visible: whether the surrogate can be moved from orchestration-proof to a science-grade tier at all. That cannot be decided from this grid — it needs a held-out quantitative fidelity validator for the surrogate against the full-physics endpoints, which is exactly the work deferred to study 05. Until that validator exists, the surrogate&#39;s number stays reported-for-transparency and excluded from any fidelity claim.</div>
+            <div class="finding-explanation"><em>Why:</em> The batch makes two different kinds of claim, and the apparent divergence sits entirely at the boundary between them. BioGears and the exact Tellurium extraction — two independently built full-physics engines — agree to within ~0.1% on minimum tissue integrity across severities {0,1,3} (1.00 healthy -&gt; 0.968 mild -&gt; 0.243 severe). Because they are separate implementations, that agreement is cross-engine replication: the severity response is a property of the shared model, not an artifact of one engine. That is the fidelity claim this study supports.
+
+The surrogate is a different tier. Its tissue-integrity endpoint is out of physical range, so it is not a third physical estimate competing with the full-physics pair; reading it that way would be wrong. Its presence in every cell proves only what it is meant to: the harness orchestrates many cheap configurations in one sweep (the throughput claim, quantified in study 04). The divergence is by design, not an unresolved contradiction. The full-physics engines answer &#39;does the model show the expected, engine-independent severity response?&#39; (yes); the surrogate answers &#39;can the batch harness fan a cheap engine across the whole grid live?&#39; (yes). Neither bears on the other.
+
+The open question the divergence makes visible is whether the surrogate can be moved from orchestration-proof to a science-grade tier at all. This grid cannot decide that; it needs a held-out quantitative fidelity test for the surrogate against the full-physics endpoints, which is the work deferred to study 05. Until that test exists, the surrogate&#39;s number stays reported for transparency and excluded from any fidelity claim.</div>
             
             
           </div>
@@ -1372,7 +1376,7 @@ grid — the same batch harness that would run any registered engine.
           
           <li>One batch, severity × engine — the full-physics engines show the severity response and agree.</li>
           
-          <li>The surrogate&#39;s divergence from the full-physics engines is a tier separation, not a competing prediction — within one batch, a fidelity claim and an orchestration claim are resolved side by side.</li>
+          <li>The surrogate&#39;s divergence from the full-physics engines is a difference in tier, not a rival prediction. One batch answers a fidelity question and an orchestration question side by side.</li>
           
         </ul>
         
@@ -1400,7 +1404,7 @@ grid — the same batch harness that would run any registered engine.
       
       <li style="display:flex;align-items:flex-start;gap:8px">
         <button type="button" class="action-btn study-finding-del" data-id="the-surrogate-ran-live-across" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
-        <span>The surrogate&#39;s divergence from the full-physics engines is a tier separation, not a competing prediction — within one batch, a fidelity claim and an orchestration claim are resolved side by side. <span class="muted small">(supported)</span></span>
+        <span>The surrogate&#39;s divergence from the full-physics engines is a difference in tier, not a rival prediction. One batch answers a fidelity question and an orchestration question side by side. <span class="muted small">(supported)</span></span>
       </li>
       
     </ul>
@@ -1457,7 +1461,7 @@ grid — the same batch harness that would run any registered engine.
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "946a728547950482cf55b78bcde7a8e6018b21a2", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/946a728547950482cf55b78bcde7a8e6018b21a2", "branch": "main", "lockfile": "uv.lock@b43237a591cb", "generated_at": "2026-11-23 04:26 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "bc239fc8935afe522addd9ba3daeff42d1f271ec", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/bc239fc8935afe522addd9ba3daeff42d1f271ec", "branch": "main", "lockfile": "uv.lock@b43237a591cb", "generated_at": "2026-11-23 15:34 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>

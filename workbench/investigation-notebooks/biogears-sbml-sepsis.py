@@ -21,25 +21,42 @@ if _os.environ.get("PYTHONUTF8") != "1":
 #
 # _Investigation `biogears-sbml-sepsis` — coder reproduction notebook._
 #
-# **Question.** What can the simulation core do? Taking ONE real model — the BioGears sepsis
-# core — can we show, as runnable artifacts rather than claims:
-#   1. COMPOSITION — run the same spec under interchangeable engines (BioGears C++,
-#      exact SBML via Tellurium, and a PyTorch surrogate) by swapping one box;
-#   2. ENSEMBLES — run a severity × engine batch in one orchestrated sweep;
-#   3. ORCHESTRATION / WORKFLOWS — compose modules into a pipeline and hand an
-#      Antimony/SBML file between engines;
-#   4. PERFORMANCE — profile where the compute goes and how fast each engine is;
-# while staying honest about where the engines agree and where they do not?
+# **Question.** How can a compositional simulation core support interchangeable physiological
+# models, systematic perturbation studies, scalable execution, mechanistic
+# comparison, dynamic intervention, and evidence-based scientific validation? Taking
+# one real model, the BioGears sepsis core, each is a runnable artifact:
+#   01 INTERCHANGEABILITY — which model properties are preserved when the
+#      implementation changes (BioGears C++, extracted SBML/Tellurium, surrogate)?
+#   02 ENSEMBLES — how do severity and physiological parameters drive progression
+#      toward shock?
+#   03 ORCHESTRATION — can registered modules form a reproducible investigation with
+#      no new integration code, including inside a Nextflow pipeline?
+#   04 SCALABLE EXECUTION — where does acceleration preserve useful predictions, and
+#      where does it fail? Includes the Rust viva-core backend.
+#   05 MECHANISTIC FIDELITY — what explains the inflammatory agreement and the
+#      hemodynamic divergence between engines?
+#   06 DYNAMIC COUPLING — can coupled physiology and treatment produce consistent
+#      intervention responses (untreated vs early vs delayed)?
+#   07 EVIDENCE & ACCEPTANCE — can the Workbench turn runs into traceable evidence
+#      with explicit pass / fail / pending acceptance criteria?
+# The showcase is about what the core lets scientists test, not only what software it
+# can execute — while staying honest about where the engines agree and where they do not.
 #
 # A guided tour of the simulation core's capabilities on one real model. The same
-# BioGears sepsis core is run under three interchangeable engines (BioGears C++,
-# exact SBML/Tellurium, PyTorch surrogate) and used to demonstrate four things, each
-# a runnable artifact: COMPOSITION (study 01 — the same spec under three engines by
-# one node swap), ENSEMBLES (study 02 — a severity × engine batch in one sweep),
-# ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes modules into a
-# pipeline and hands an Antimony/SBML file between engines), and PERFORMANCE
-# (study 04 — where the compute goes, and a ~40,000× surrogate tier). A fidelity
-# backbone (study 05) keeps it honest: where the engines agree, and where they do not.
+# BioGears sepsis core is run under interchangeable engines (BioGears C++, exact
+# SBML/Tellurium, PyTorch surrogate, and a Rust execution backend) and used to
+# demonstrate, each as a runnable artifact: COMPOSITION (study 01 — the same spec
+# under three engines by one node swap), ENSEMBLES (study 02 — a severity × engine
+# batch in one sweep), ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes
+# modules into a pipeline and hands an Antimony/SBML file between engines, and a
+# Nextflow pipeline fans the real composite across a severity grid), PERFORMANCE &
+# EXECUTION BACKENDS (study 04 — where the compute goes, a ~40,000× surrogate tier,
+# and the same composite run under the Rust viva-core backend), and CO-SIMULATION
+# (study 06 — two processes exchanging state every tick: the physiology engine
+# coupled to a closed-loop antibiotic controller, with untreated/early/delayed arms),
+# and EVIDENCE & ACCEPTANCE (study 07 — turning runs into traceable pass/fail/pending
+# acceptance criteria). A fidelity backbone (study 05) keeps it honest: where the
+# engines agree, and where they do not.
 #
 # ---
 #
@@ -283,3 +300,20 @@ def _render_one(address, config, runs_db, study_yaml, overrides=None):
 # ## Study: `05-fidelity`
 #
 # _study.yaml not found — skipped._
+
+# ## Study: `06-cosimulation`
+#
+# _study.yaml not found — skipped._
+
+# ## Study: `07-evidence`
+#
+# _study.yaml not found — skipped._
+
+# ## Open decisions
+# - Follow-up (05, staged): test one candidate mechanism for the hemodynamic divergence (e.g. a simplified vasodilatory effect) with a controlled perturbation; quantify whether it reduces the time-to-shock discrepancy. Do not present documented omissions as proven causes.
+# - Follow-up (02, staged): a 5×5 severity × physiology-parameter sweep with time-to-hypotension, minimum MAP, and tissue integrity — an actual biological response surface (compute-heavy on the stiff engine).
+# - Follow-up (01, partial): a port / units / initialization / ownership compatibility report across the three implementations.
+# - Follow-up (03, partial): automated shock-event detection and metric extraction as a reusable workflow step.
+# - Done this pass (06): untreated vs early vs delayed treatment counterfactuals + a coupling-step convergence test.
+# - Done this pass (04): surrogate admissibility on a withheld severity (screening-grade vs mechanistic).
+# - Done this pass (07): pass / fail / pending acceptance gates linked to evidence artifacts.

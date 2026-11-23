@@ -23,7 +23,7 @@
   <div class="study-head-main" style="min-width:0; flex:1 1 auto">
   <div style="display:flex; align-items:center; gap:12px; min-width:0; flex-wrap:wrap">
   <h1 class="study-title" style="margin:0">
-    <span class="study-name" id="study-name" data-slug="04-performance" data-study-kind="computational" title="04-performance" data-edit-kind="study" data-edit-field="title" data-edit-value="Performance — where the compute goes, and the surrogate speedup" data-edit-label="Title">Performance — where the compute goes, and the surrogate speedup</span>
+    <span class="study-name" id="study-name" data-slug="04-performance" data-study-kind="computational" title="04-performance" data-edit-kind="study" data-edit-field="title" data-edit-value="Scalable Simulation — performance, acceleration, and fidelity-aware execution" data-edit-label="Title">Scalable Simulation — performance, acceleration, and fidelity-aware execution</span>
     
   </h1>
   </div>
@@ -576,30 +576,30 @@ h1.study-title .study-name>.ie-pencil{right:4px;top:6px}
 
     <div class="ctr-block">
       <h2 class="overview-label ctr-h">Claim</h2>
-      <p class="ctr-text" data-edit-kind="study" data-edit-field="claim" data-edit-value="For one matched 48 h severe-sepsis run the same spec spans 4+ orders of magnitude of
-compute: BioGears (C++ physiology) ~3.38 h, Tellurium (exact SBML via roadrunner/
-CVODE) ~2.81 h, and the PyTorch surrogate ~0.2 s (~40,000x faster than the exact
-SBML path). The exact engines spend essentially all of that time integrating the
-stiff 91-state ODE — a stiff implicit solver (CVODE) is required, so a faster or
-Rust explicit integrator cannot speed it up; the real levers are a better stiff
-solver, GPU-parallel patients, or a surrogate. The surrogate replaces the ODE solve
-with one forward pass: a live per-step micro-benchmark on this machine measures
-~526 ms for one exact CVODE step of the real model vs ~0.04 ms for one surrogate
-forward pass — the exact per-step cost is ~13,000x the surrogate&#39;s. The surrogate is
-a fast APPROXIMATE tier (bounded, not yet clinically accurate), not a drop-in
-replacement.
-" data-edit-multiline data-edit-label="Claim">For one matched 48 h severe-sepsis run the same spec spans 4+ orders of magnitude of
-compute: BioGears (C++ physiology) ~3.38 h, Tellurium (exact SBML via roadrunner/
-CVODE) ~2.81 h, and the PyTorch surrogate ~0.2 s (~40,000x faster than the exact
-SBML path). The exact engines spend essentially all of that time integrating the
-stiff 91-state ODE — a stiff implicit solver (CVODE) is required, so a faster or
-Rust explicit integrator cannot speed it up; the real levers are a better stiff
-solver, GPU-parallel patients, or a surrogate. The surrogate replaces the ODE solve
-with one forward pass: a live per-step micro-benchmark on this machine measures
-~526 ms for one exact CVODE step of the real model vs ~0.04 ms for one surrogate
-forward pass — the exact per-step cost is ~13,000x the surrogate&#39;s. The surrogate is
-a fast APPROXIMATE tier (bounded, not yet clinically accurate), not a drop-in
-replacement.
+      <p class="ctr-text" data-edit-kind="study" data-edit-field="claim" data-edit-value="For one matched 48 h severe-sepsis run, the same spec spans more than 4 orders of
+magnitude of compute. BioGears (C++ physiology) takes ~3.38 h. Tellurium (exact SBML
+via roadrunner/CVODE) takes ~2.81 h. The PyTorch surrogate takes ~0.2 s — about
+40,000x faster than the exact SBML path. The exact engines spend nearly all of that
+time integrating the stiff 91-state ODE. That solve needs an implicit stiff solver
+(CVODE), so a faster or Rust explicit integrator cannot speed it up; the real levers
+are a better stiff solver, GPU-parallel patients, or a surrogate. The surrogate
+replaces the ODE solve with one forward pass. A live per-step micro-benchmark on this
+machine measures ~526 ms for one exact CVODE step of the real model against ~0.04 ms
+for one surrogate forward pass — the exact per-step cost is ~13,000x the surrogate&#39;s.
+The surrogate is a fast approximate tier (bounded, not yet clinically accurate), not
+a drop-in replacement.
+" data-edit-multiline data-edit-label="Claim">For one matched 48 h severe-sepsis run, the same spec spans more than 4 orders of
+magnitude of compute. BioGears (C++ physiology) takes ~3.38 h. Tellurium (exact SBML
+via roadrunner/CVODE) takes ~2.81 h. The PyTorch surrogate takes ~0.2 s — about
+40,000x faster than the exact SBML path. The exact engines spend nearly all of that
+time integrating the stiff 91-state ODE. That solve needs an implicit stiff solver
+(CVODE), so a faster or Rust explicit integrator cannot speed it up; the real levers
+are a better stiff solver, GPU-parallel patients, or a surrogate. The surrogate
+replaces the ODE solve with one forward pass. A live per-step micro-benchmark on this
+machine measures ~526 ms for one exact CVODE step of the real model against ~0.04 ms
+for one surrogate forward pass — the exact per-step cost is ~13,000x the surrogate&#39;s.
+The surrogate is a fast approximate tier (bounded, not yet clinically accurate), not
+a drop-in replacement.
 </p>
       
     </div>
@@ -623,18 +623,18 @@ does the learned surrogate save?
     <div class="ctr-block">
       <h2 class="overview-label ctr-h">Model &amp; approach</h2>
       <p class="ctr-text" data-edit-kind="study" data-edit-field="objective" data-edit-value="Profile the compute across engines on one matched run: the full-run wall-clock
-(BioGears, Tellurium), the dominant cost (stiff ODE integration), whether a faster
-integrator can help, and the surrogate&#39;s per-step speedup — with a live, reproducible
-micro-benchmark behind the full-run numbers.
+(BioGears, Tellurium), the dominant cost (the stiff ODE integration), whether a
+faster integrator helps, and the surrogate&#39;s per-step speedup. A live, reproducible
+micro-benchmark sits behind the full-run numbers.
 " data-edit-multiline data-edit-label="Objective">Profile the compute across engines on one matched run: the full-run wall-clock
-(BioGears, Tellurium), the dominant cost (stiff ODE integration), whether a faster
-integrator can help, and the surrogate&#39;s per-step speedup — with a live, reproducible
-micro-benchmark behind the full-run numbers.
+(BioGears, Tellurium), the dominant cost (the stiff ODE integration), whether a
+faster integrator helps, and the surrogate&#39;s per-step speedup. A live, reproducible
+micro-benchmark sits behind the full-run numbers.
 </p>
       <div class="ctr-meta">
         <div class="ctr-meta-row"><span class="ctr-meta-k">Model</span> <code>sepsis-sbml-exact</code><a class="ov-tablink" href="#" onclick="_setStudyTab('compose');return false;">model →</a></div>
         
-        <div class="ctr-meta-row"><span class="ctr-meta-k">Measures</span> <span class="ctr-meta-item">2 behavior tests</span><a class="ov-tablink" href="#" onclick="_setStudyTab('audit');return false;">see Tests →</a></div>
+        <div class="ctr-meta-row"><span class="ctr-meta-k">Measures</span> <span class="ctr-meta-item">4 behavior tests</span><a class="ov-tablink" href="#" onclick="_setStudyTab('audit');return false;">see Tests →</a></div>
         
       </div>
     </div>
@@ -647,7 +647,7 @@ micro-benchmark behind the full-run numbers.
     <div class="ctr-block">
       <h2 class="overview-label ctr-h">Result</h2>
       
-      <p class="ctr-text" data-edit-kind="study" data-edit-field="result" data-edit-value="" data-edit-multiline data-edit-label="Result">The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here.</p>
+      <p class="ctr-text" data-edit-kind="study" data-edit-field="result" data-edit-value="" data-edit-multiline data-edit-label="Result">The 4+ order-of-magnitude compute spread is a real, matched-spec measurement, but it is about cost alone. The surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups matter only once the fidelity gate is met. Whether the surrogate is a drop-in replacement is decided in study 05, not here.</p>
       
       
       
@@ -669,7 +669,7 @@ micro-benchmark behind the full-run numbers.
         <details class="finding-details">
           <summary class="finding-row">
             <span class="finding-status-glyph">◆</span>
-            <span class="finding-claim finding-statement" data-edit-kind="study" data-edit-field="findings[one-48-h-run-three].statement" data-edit-value="The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here." data-edit-multiline data-edit-label="Finding one-48-h-run-three">The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here.</span>
+            <span class="finding-claim finding-statement" data-edit-kind="study" data-edit-field="findings[one-48-h-run-three].statement" data-edit-value="The 4+ order-of-magnitude compute spread is a real, matched-spec measurement, but it is about cost alone. The surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups matter only once the fidelity gate is met. Whether the surrogate is a drop-in replacement is decided in study 05, not here." data-edit-multiline data-edit-label="Finding one-48-h-run-three">The 4+ order-of-magnitude compute spread is a real, matched-spec measurement, but it is about cost alone. The surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups matter only once the fidelity gate is met. Whether the surrogate is a drop-in replacement is decided in study 05, not here.</span>
             
           </summary>
           <div class="finding-drawer">
@@ -680,11 +680,11 @@ micro-benchmark behind the full-run numbers.
             </div>
             
             
-            <div class="finding-explanation"><em>Why:</em> What the measurement means: three engines running the same 48 h severe-sepsis spec separate into two regimes. The two exact engines (BioGears ~3.38 h, Tellurium ~2.81 h) sit within the same order of magnitude because both are dominated by the same stiff 91-state ODE solve; the PyTorch surrogate (~0.2 s) sits four orders below them because it replaces that solve with a single forward pass. The live per-step micro-benchmark (~526 ms for one exact CVODE step vs ~0.04 ms for one surrogate pass, ~13,000x) localizes the cost to exactly that solve, so the spread is explained by mechanism rather than measurement noise, and the companion finding rules out a faster integrator as the lever — the ODE is stiff, so an explicit method is unstable and wrong on the fast cardiovascular states.
+            <div class="finding-explanation"><em>Why:</em> Three engines run the same 48 h severe-sepsis spec and split into two groups. The two exact engines (BioGears ~3.38 h, Tellurium ~2.81 h) sit within the same order of magnitude because both spend their time on the same stiff 91-state ODE solve. The PyTorch surrogate (~0.2 s) sits four orders below because it replaces that solve with a single forward pass. The live per-step micro-benchmark (~526 ms for one exact CVODE step vs ~0.04 ms for one surrogate pass, ~13,000x) pins the cost to that solve, so the spread comes from mechanism, not measurement noise. The companion finding rules out a faster integrator: the ODE is stiff, so an explicit method is unstable and wrong on the fast cardiovascular states.
 
-Where it sits in the investigation: performance is downstream of composition -&gt; ensembles -&gt; workflows (the spec, the matched run, and the engine wrappers are inherited here, not re-derived) and it feeds fidelity (study 05). That ordering is what makes an honest reading possible — this study measures cost under a fixed spec and deliberately does not measure correctness.
+This study sits downstream of composition -&gt; ensembles -&gt; workflows. It inherits the spec, the matched run, and the engine wrappers rather than re-deriving them, and it feeds fidelity (study 05). It measures cost under a fixed spec and does not measure correctness.
 
-Honest limitation and open question: the speedups are compute-only. They adjudicate which engine is cheaper, not the competing prediction that actually matters — whether the surrogate is a drop-in replacement for the exact SBML path. That prediction is settled by a different quantity, held-out trajectory error against the exact engine, which is the province of study 05&#39;s fidelity validator, not this one. Until that validator passes, the surrogate is a fast approximate tier, and the bounded claim this study supports is: the bottleneck is the stiff solve and the surrogate removes it, at a cost in accuracy this study does not quantify.</div>
+The speedups are compute-only. They tell you which engine is cheaper, not whether the surrogate can replace the exact SBML path. That question is answered by a different number, held-out trajectory error against the exact engine, which study 05&#39;s fidelity validator measures. Until that validator passes, the surrogate is a fast approximate tier. The claim this study supports is narrow: the bottleneck is the stiff solve, and the surrogate removes it, at a cost in accuracy this study does not quantify.</div>
             
             
           </div>
@@ -729,6 +729,36 @@ Honest limitation and open question: the speedups are compute-only. They adjudic
       
       
       
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-rust-backend-runs-the-same-composite">
+        <details class="finding-details">
+          <summary class="finding-row">
+            <span class="finding-status-glyph">◆</span>
+            <span class="finding-claim finding-statement">The Rust viva-core backend runs the same sepsis composite and reproduces the Python result (within-tolerance).</span>
+            
+          </summary>
+          <div class="finding-drawer">
+            <div class="finding-header">
+              <span class="finding-id">rust-backend-runs-the-same-composite</span>
+              <span class="finding-kind">other</span>
+              <span class="finding-status-text">supported literature</span>
+            </div>
+            
+            
+            
+            
+            
+          </div>
+        </details>
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
       <div class="finding-card finding-kind-other finding-status-supported" id="finding-live-per-step-micro-benchmark">
         <details class="finding-details">
           <summary class="finding-row">
@@ -739,6 +769,36 @@ Honest limitation and open question: the speedups are compute-only. They adjudic
           <div class="finding-drawer">
             <div class="finding-header">
               <span class="finding-id">live-per-step-micro-benchmark</span>
+              <span class="finding-kind">other</span>
+              <span class="finding-status-text">supported literature</span>
+            </div>
+            
+            
+            
+            
+            
+          </div>
+        </details>
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-surrogate-inadmissible-on-severe">
+        <details class="finding-details">
+          <summary class="finding-row">
+            <span class="finding-status-glyph">◆</span>
+            <span class="finding-claim finding-statement">Speed without admissibility: on severe sepsis the surrogate leaves physical bounds for 8 of 9 observables.</span>
+            
+          </summary>
+          <div class="finding-drawer">
+            <div class="finding-header">
+              <span class="finding-id">surrogate-inadmissible-on-severe</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
@@ -1192,6 +1252,66 @@ Honest limitation and open question: the speedups are compute-only. They adjudic
       
     </li>
     
+    
+    
+    
+    
+    
+    
+    
+    <li class="expected-behavior-item" id="bt-rust-backend-runs-the-same-composite"
+        data-test-kind="behavioral"
+        
+        data-pytest-node="rust-backend-runs-the-same-composite"
+        data-classification="unclassified"
+        data-result="pending"
+        style="margin: 0 0 10px 0; padding: 10px 12px; border-left: 4px solid #cbd5e1; background: #f8fafc; border-radius: 4px;">
+      
+        
+      <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+        <span class="bt-result" style="font-size: 0.75em; font-family: monospace; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; color: #475569">⏳ pending</span>
+        <span class="classification-pill classification-unclassified">unclassified</span>
+        <strong style="font-size: 0.9em;">rust-backend-runs-the-same-composite</strong>
+        
+      </div>
+      <div style="margin-top: 6px; font-size: 0.95em;"></div>
+      
+      
+      
+      
+      
+    </li>
+    
+    
+    
+    
+    
+    
+    
+    
+    <li class="expected-behavior-item" id="bt-surrogate-admissibility-on-severe"
+        data-test-kind="behavioral"
+        
+        data-pytest-node="surrogate-admissibility-on-severe"
+        data-classification="unclassified"
+        data-result="pending"
+        style="margin: 0 0 10px 0; padding: 10px 12px; border-left: 4px solid #cbd5e1; background: #f8fafc; border-radius: 4px;">
+      
+        
+      <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+        <span class="bt-result" style="font-size: 0.75em; font-family: monospace; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; color: #475569">⏳ pending</span>
+        <span class="classification-pill classification-unclassified">unclassified</span>
+        <strong style="font-size: 0.9em;">surrogate-admissibility-on-severe</strong>
+        
+      </div>
+      <div style="margin-top: 6px; font-size: 0.95em;"></div>
+      
+      
+      
+      
+      
+    </li>
+    
   </ul>
   
   </div>
@@ -1349,7 +1469,7 @@ Honest limitation and open question: the speedups are compute-only. They adjudic
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span class="gate-status-blocked" style="padding:2px 12px;border-radius:9999px;font-weight:700;font-size:0.85em">blocked</span>
         <span class="muted small">evaluated by code</span>
-        <span class="muted small">0/2 passed</span>
+        <span class="muted small">0/4 passed</span>
       </div>
       
     </div>
@@ -1378,11 +1498,15 @@ Honest limitation and open question: the speedups are compute-only. They adjudic
         
         <ul class="synthesis-list">
           
-          <li>The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here.</li>
+          <li>The 4+ order-of-magnitude compute spread is a real, matched-spec measurement, but it is about cost alone. The surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups matter only once the fidelity gate is met. Whether the surrogate is a drop-in replacement is decided in study 05, not here.</li>
           
           <li>The bottleneck is the stiff ODE solve — a faster integrator is not a lever.</li>
           
+          <li>The Rust viva-core backend runs the same sepsis composite and reproduces the Python result (within-tolerance).</li>
+          
           <li>Live per-step micro-benchmark: the stiff solve is ~13,000x the surrogate forward pass.</li>
+          
+          <li>Speed without admissibility: on severe sepsis the surrogate leaves physical bounds for 8 of 9 observables.</li>
           
         </ul>
         
@@ -1405,7 +1529,7 @@ Honest limitation and open question: the speedups are compute-only. They adjudic
       
       <li style="display:flex;align-items:flex-start;gap:8px">
         <button type="button" class="action-btn study-finding-del" data-id="one-48-h-run-three" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
-        <span>The 4+ order-of-magnitude compute spread is a real, matched-spec measurement — but it is a statement about cost alone: the surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups become usable only once the fidelity gate is met, so the number that decides whether the surrogate is a drop-in replacement lives in study 05, not here. <span class="muted small">(supported)</span></span>
+        <span>The 4+ order-of-magnitude compute spread is a real, matched-spec measurement, but it is about cost alone. The surrogate&#39;s ~40,000x full-run and ~13,000x per-step speedups matter only once the fidelity gate is met. Whether the surrogate is a drop-in replacement is decided in study 05, not here. <span class="muted small">(supported)</span></span>
       </li>
       
       <li style="display:flex;align-items:flex-start;gap:8px">
@@ -1414,8 +1538,18 @@ Honest limitation and open question: the speedups are compute-only. They adjudic
       </li>
       
       <li style="display:flex;align-items:flex-start;gap:8px">
+        <button type="button" class="action-btn study-finding-del" data-id="rust-backend-runs-the-same-composite" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
+        <span>The Rust viva-core backend runs the same sepsis composite and reproduces the Python result (within-tolerance). <span class="muted small">(supported)</span></span>
+      </li>
+      
+      <li style="display:flex;align-items:flex-start;gap:8px">
         <button type="button" class="action-btn study-finding-del" data-id="live-per-step-micro-benchmark" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
         <span>Live per-step micro-benchmark: the stiff solve is ~13,000x the surrogate forward pass. <span class="muted small">(supported)</span></span>
+      </li>
+      
+      <li style="display:flex;align-items:flex-start;gap:8px">
+        <button type="button" class="action-btn study-finding-del" data-id="surrogate-inadmissible-on-severe" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
+        <span>Speed without admissibility: on severe sepsis the surrogate leaves physical bounds for 8 of 9 observables. <span class="muted small">(supported)</span></span>
       </li>
       
     </ul>
@@ -1472,7 +1606,7 @@ Honest limitation and open question: the speedups are compute-only. They adjudic
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "946a728547950482cf55b78bcde7a8e6018b21a2", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/946a728547950482cf55b78bcde7a8e6018b21a2", "branch": "main", "lockfile": "uv.lock@b43237a591cb", "generated_at": "2026-11-23 04:26 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "bc239fc8935afe522addd9ba3daeff42d1f271ec", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/bc239fc8935afe522addd9ba3daeff42d1f271ec", "branch": "main", "lockfile": "uv.lock@b43237a591cb", "generated_at": "2026-11-23 15:34 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>
