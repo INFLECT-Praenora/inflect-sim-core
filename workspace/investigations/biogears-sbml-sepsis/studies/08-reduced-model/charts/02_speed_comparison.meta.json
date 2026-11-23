@@ -1,0 +1,3 @@
+{
+ "caption": "48 h wall-clock, log scale. The full pulsatile model (~205k beat events) takes ~2.81 h under roadrunner and ~3.7 h under COPASI. The event-free model runs in ~0.18 ms (roadrunner) and ~0.06 ms (COPASI) \u2014 ~6e+07x / ~2e+08x faster. With the events gone, COPASI is as fast as roadrunner (no per-event interpreter overhead), so the ~3x engine gap vanishes too."
+}
