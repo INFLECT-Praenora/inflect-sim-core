@@ -7,7 +7,13 @@ confidence: Accepted
 # authored verdict — the acceptance machinery runs and produces linked pass/fail/pending verdicts
 verdict: supported
 
-parent_studies: [05-fidelity]
+parent_studies:
+  - study: 05-fidelity
+    relation: tests
+    rationale: "Evaluates the fidelity discrepancy as acceptance criteria."
+  - study: 06-cosimulation
+    relation: tests
+    rationale: "Evaluates the intervention evidence (discrepancy -> counterfactual -> evidence)."
 
 question: |
   Can the Workbench turn simulation outputs into traceable evidence, evaluate explicit
