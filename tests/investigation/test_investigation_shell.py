@@ -18,6 +18,8 @@ STUDIES = [
     "03-workflows",
     "04-performance",
     "05-fidelity",
+    "06-cosimulation",
+    "07-evidence",
 ]
 BANNED = ("vivarium", "process-bigraph", "process bigraph")
 
