@@ -9,7 +9,7 @@ INV = INV_DIR / "investigation.yaml"
 
 
 def _d():
-    return yaml.safe_load(INV.read_text())
+    return yaml.safe_load(INV.read_text(encoding="utf-8"))
 
 
 def test_disk_matches_declared_studies():

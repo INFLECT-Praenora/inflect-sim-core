@@ -8,7 +8,7 @@ S = ROOT / "workspace/investigations/biogears-sbml-sepsis/studies/05-fidelity"
 
 
 def test_study_yaml_shape():
-    d = yaml.safe_load((S / "study.yaml").read_text())
+    d = yaml.safe_load((S / "study.yaml").read_text(encoding="utf-8"))
     assert d["name"] == "05-fidelity"
     c = d["claim"].lower()
     # honest: both agreement AND divergence

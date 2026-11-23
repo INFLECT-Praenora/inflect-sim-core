@@ -12,13 +12,13 @@ SEVS = {"0", "1", "3"}
 
 
 def test_study_yaml_shape():
-    d = yaml.safe_load((S / "study.yaml").read_text())
+    d = yaml.safe_load((S / "study.yaml").read_text(encoding="utf-8"))
     assert d["name"] == "02-ensembles"
     assert "ensemble" in d["claim"].lower()
 
 
 def test_ensemble_results_grid():
-    j = json.loads((S / "charts/ensemble_results.json").read_text())
+    j = json.loads((S / "charts/ensemble_results.json").read_text(encoding="utf-8"))
     cells = j["cells"]
     assert set(cells) == ENGINES
     for eng in ENGINES:
@@ -39,5 +39,5 @@ def test_ensemble_results_grid():
 
 def test_grid_chart_present():
     assert (S / "charts/01_ensemble_grid.svg").exists()
-    meta = json.loads((S / "charts/01_ensemble_grid.meta.json").read_text())
+    meta = json.loads((S / "charts/01_ensemble_grid.meta.json").read_text(encoding="utf-8"))
     assert meta.get("provenance")

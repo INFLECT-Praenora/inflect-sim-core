@@ -75,6 +75,6 @@ def test_model_server_step_route(served):
 
 @pytest.mark.slow
 def test_served_model_loads_real_sepsis_without_crashing():
-    m = ServedModel(SEPSIS_SBML.read_text(), "sbml")
+    m = ServedModel(SEPSIS_SBML.read_text(encoding="utf-8"), "sbml")
     assert m.observables()          # real 91-state model, rules included
     assert isinstance(m.step(), dict)
