@@ -58,31 +58,28 @@ A fidelity backbone keeps it honest. The engines agree on the inflammation core 
 within ~0.1% but diverge in the hemodynamic layer, where the SBML extraction reaches
 septic shock by a different mechanism and on a shifted timeline.
 
-## The unified simulation-core API
+## The contract: model in, results + verification out
 
-Register simulation modules, engine adapters, and API-calling steps into one
-registry, then drive them from one API — as a Python import or the `viva-sim` CLI:
+One interface is the whole surface. Hand the simulation core a model, say what to
+run, and get back the results **and** a verification that the run can be trusted —
+through one entry point, with the engine swappable behind it:
 
 ```python
-from viva_simulation_core import catalog, call, connect, run, serve
+from viva_simulation_core import simulate
+
+out = simulate(model,                       # SBML/Antimony file or string, or a composite id
+               duration=7200, interval=60,
+               observables=["MAP", "SVR", "PB", "TI"],
+               engine="tellurium",          # the main SBML engine; "copasi" is a second
+               cross_engine="copasi")       # optional: re-run and check agreement
+
+out.results            # {"time": [...], "MAP": [...], ...}
+out.verification       # ran / finite / admissible / cross-engine agreement
+out.verification.passed
 ```
 
-Six ways to run your task, each a runnable example:
-
-| Way | What it is | Example |
-|---|---|---|
-| **call** | run one engine/module | `demo_call` |
-| **connect + run** | compose engines, hand a model between them | `demo_connect_run` |
-| **sweep** | ensemble the same spec across a grid | `demo_sweep` |
-| **serve** | a model as a stepping API | [`examples/serve_demo.py`](examples/serve_demo.py) |
-| **api-call** | a step that calls a served/remote model | `serve_demo.serve_and_call` |
-| **Nextflow** | vivarium inside a workflow engine | [`examples/nextflow/`](examples/nextflow/) |
-
-See it all at once:
-
-    uv run python -m examples.workflow_tour
-
-Reference: [`docs/simulation-core.md`](docs/simulation-core.md).
+Or from the shell: `viva-sim simulate <model> --observables MAP,SVR --cross-engine copasi`.
+Every run ships with its own evidence (see [`examples/contract_demo.py`](examples/contract_demo.py)).
 
 ## Getting started
 
@@ -144,22 +141,20 @@ EngineNotInstalled: the 'copasi' simulation engine is not installed. Install it 
 | Fast test suite | `uv run pytest` (framework-level tests need no engine) |
 | Slow / engine tests | `uv run pytest -m slow` with the relevant `--extra` (real-engine tests skip cleanly when an engine is absent) |
 | Workbench (browser UI) | `bash scripts/serve.sh` |
-| Unified API tour | `uv run python -m examples.workflow_tour` |
 | CLI | `uv run viva-sim list` (then `call` / `workflow` / `serve` / `run`) |
 | Neural surrogate (torch) | `uv sync --extra surrogate` |
 
 ### The API
 
-One registry, four verbs, many ways to run — as a Python import or the `viva-sim`
-CLI, both thin over `viva_simulation_core/api/workflow.py` + `serving.py`:
+One registry, four verbs — `catalog` / `call` / `connect` / `run` (plus `serve`
+to expose a model over HTTP) — as a Python import or the `viva-sim` CLI, both thin
+over `viva_simulation_core/api/workflow.py` + `serving.py`:
 
 ```python
 from viva_simulation_core import catalog, call, connect, run, serve
 ```
 
-`python -m examples.workflow_tour` runs every way end to end and prints each
-result — the fastest way to see what the API does. Full reference:
-[`docs/simulation-core.md`](docs/simulation-core.md).
+Full reference: [`docs/simulation-core.md`](docs/simulation-core.md).
 
 Code lives in `viva_simulation_core/`; `build_core()` in `core.py` registers the
 processes and composites.

@@ -11,6 +11,7 @@ DEAD = [
     "surrogate_torch", "surrogate_curate", "surrogate_backend", "heavy_plane",
     "digital-twin API", "Digital-twin simulation API", "digital twins", "/twins",
     "digital_twin_demo", "vivarium_workflow_demo", "live_surrogate_demo",
+    "workflow_tour", "serve_demo", "surrogate_demo",
     "docs/api.md", "docs/workflow-api.md",
 ]
 
