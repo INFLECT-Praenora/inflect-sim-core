@@ -14,9 +14,7 @@ hypothesis: |
   verification. A model (SBML/Antimony or a registered composite) goes in; the core
   runs it under a swappable engine and returns the observables together with a
   structured verification (ran, finite, physically admissible, and — on request —
-  cross-engine agreement). This is the contract the broader INFLECT workflow builds on:
-  ensemble generators produce models, the simulation core runs them and returns results
-  + verification, and downstream uncertainty and reporting consume both.
+  cross-engine agreement).
 
 lead: |
   One function is the whole surface. `from viva_simulation_core import simulate`, or
@@ -46,7 +44,7 @@ executive:
     and no simulator is wrapped more than once.
   verdict_status: complete
   decisions_needed:
-    - "Model handoff for forecasting: let simulate() accept a pre-compiled / in-memory model handle (not only SBML text), so the runtime's JIT model registry can feed the core without re-parsing — the construction-vs-execution boundary from the INFLECT architecture thread."
+    - "Model intake: let simulate() also accept a pre-compiled / in-memory model handle, not only SBML text or a composite id, so a caller can re-run many models without re-parsing each one — a performance path on top of the same contract."
 
 studies:
   - 00-contract

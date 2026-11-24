@@ -80,35 +80,6 @@ out.verification.passed
 
 Or from the shell: `viva-sim simulate <model> --observables MAP,SVR --cross-engine copasi`.
 Every run ships with its own evidence (see [`examples/contract_demo.py`](examples/contract_demo.py)).
-This is the contract the broader INFLECT workflow builds on: ensemble generators
-produce models, the simulation core runs them and returns results + verification, and
-downstream uncertainty and reporting consume both.
-
-## The unified simulation-core API
-
-Under the contract, the same registry of modules, engine adapters, and API-calling
-steps is drivable directly — as a Python import or the `viva-sim` CLI:
-
-```python
-from viva_simulation_core import catalog, call, connect, run, serve
-```
-
-Six ways to run your task, each a runnable example:
-
-| Way | What it is | Example |
-|---|---|---|
-| **call** | run one engine/module | `demo_call` |
-| **connect + run** | compose engines, hand a model between them | `demo_connect_run` |
-| **sweep** | ensemble the same spec across a grid | `demo_sweep` |
-| **serve** | a model as a stepping API | [`examples/serve_demo.py`](examples/serve_demo.py) |
-| **api-call** | a step that calls a served/remote model | `serve_demo.serve_and_call` |
-| **Nextflow** | vivarium inside a workflow engine | [`examples/nextflow/`](examples/nextflow/) |
-
-See it all at once:
-
-    uv run python -m examples.workflow_tour
-
-Reference: [`docs/simulation-core.md`](docs/simulation-core.md).
 
 ## Getting started
 
@@ -170,22 +141,20 @@ EngineNotInstalled: the 'copasi' simulation engine is not installed. Install it 
 | Fast test suite | `uv run pytest` (framework-level tests need no engine) |
 | Slow / engine tests | `uv run pytest -m slow` with the relevant `--extra` (real-engine tests skip cleanly when an engine is absent) |
 | Workbench (browser UI) | `bash scripts/serve.sh` |
-| Unified API tour | `uv run python -m examples.workflow_tour` |
 | CLI | `uv run viva-sim list` (then `call` / `workflow` / `serve` / `run`) |
 | Neural surrogate (torch) | `uv sync --extra surrogate` |
 
 ### The API
 
-One registry, four verbs, many ways to run — as a Python import or the `viva-sim`
-CLI, both thin over `viva_simulation_core/api/workflow.py` + `serving.py`:
+One registry, four verbs — `catalog` / `call` / `connect` / `run` (plus `serve`
+to expose a model over HTTP) — as a Python import or the `viva-sim` CLI, both thin
+over `viva_simulation_core/api/workflow.py` + `serving.py`:
 
 ```python
 from viva_simulation_core import catalog, call, connect, run, serve
 ```
 
-`python -m examples.workflow_tour` runs every way end to end and prints each
-result — the fastest way to see what the API does. Full reference:
-[`docs/simulation-core.md`](docs/simulation-core.md).
+Full reference: [`docs/simulation-core.md`](docs/simulation-core.md).
 
 Code lives in `viva_simulation_core/`; `build_core()` in `core.py` registers the
 processes and composites.

@@ -67,8 +67,7 @@ def main():
            "results (left) plus a structured verification (right): ran, finite, physical "
            "admissibility per observable, and optional cross-engine agreement. "
            f"{npass}/{len(runs)} runs verified; the two exact-SBML engines (Tellurium, COPASI) "
-           "agree to ~1e-4. Every run carries its own evidence — the contract the broader "
-           "workflow (ensemble generation → simulation → uncertainty → reporting) builds on.")
+           "agree to ~1e-4. Every run carries its own evidence.")
     stem.with_name(stem.name + ".meta.json").write_text(json.dumps({"caption": cap}, indent=1))
     print("wrote 01_contract.svg |", npass, "/", len(runs), "verified")
 

@@ -85,9 +85,7 @@ machinery. CLI: `viva-sim serve model.ant`.
 `ApiCallStep` is a Process whose update is a *remote model call*: it POSTs its
 declared observables to a model-serving URL (a `model_server`, or a remote
 viva-api) and applies the stepped state. A vivarium composite can therefore
-orchestrate a remote simulation as one interchangeable node — see
-[`examples/serve_demo.py`](../examples/serve_demo.py) for the full serve/consume
-loop.
+orchestrate a remote simulation as one interchangeable node.
 
 ## run a registered composite
 
@@ -95,15 +93,8 @@ loop.
 process-bigraph (no server). This is the path a workflow engine calls — see the
 Nextflow example below.
 
-## The six ways, as runnable examples
+## Runnable examples
 
-| Way | Example |
-|---|---|
-| call one module | [`examples/workflow_tour.py`](../examples/workflow_tour.py) `demo_call` |
-| compose + run | `demo_connect_run` |
-| ensemble / sweep | `demo_sweep` |
-| serve a model | [`examples/serve_demo.py`](../examples/serve_demo.py) |
-| api-call step | `serve_demo.serve_and_call` |
-| Nextflow interop | [`examples/nextflow/`](../examples/nextflow/) |
-
-`python -m examples.workflow_tour` runs the whole tour.
+The contract end to end: [`examples/contract_demo.py`](../examples/contract_demo.py)
+(`python -m examples.contract_demo`). Workflow-engine interop:
+[`examples/nextflow/`](../examples/nextflow/).

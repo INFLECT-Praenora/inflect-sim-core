@@ -14,10 +14,6 @@ The engine is swappable behind the same interface (``engine="tellurium"`` is the
 main exact-SBML engine; ``engine="copasi"`` is a second one), and the verification
 layer reuses the core's own checks — finiteness, physical admissibility, and
 cross-engine agreement — so every simulation carries its own evidence.
-
-This is the contract the broader INFLECT workflow builds on: ensemble generators
-produce models, the simulation core runs them and returns results + verification,
-and downstream uncertainty/reporting consume both.
 """
 from __future__ import annotations
 

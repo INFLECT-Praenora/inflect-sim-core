@@ -51,8 +51,8 @@ findings:
       VerificationReport. All four verify (ran, finite, physically admissible on every
       observable). The model form (file vs composite) and the engine (Tellurium vs COPASI)
       change behind the interface; the call, the result shape, and the verification are the
-      same. This is "vivarium is the simulation provider" made concrete: one entry point,
-      any model, any engine, no per-caller re-wrapping.
+      same. The simulation core made concrete: one entry point, any model, any engine,
+      no per-caller re-wrapping.
     status: supported
   - id: verification-ships-with-every-run
     summary: "Verification is a first-class output: ran / finite / admissible / cross-engine, with Tellurium and COPASI agreeing to ~1e-4."
@@ -69,7 +69,7 @@ findings:
       the gate bites: a run with a negative MAP or a NaN fails verification.
 
     statement: "The simulation core's value is one interface plus built-in verification — results you can trust, with the engine swappable behind the contract."
-    explanation: "The point of the contract is that the two outputs travel together. A caller — a module, the runtime, a downstream uncertainty step — hands a model to simulate() and gets back results and a verdict on whether to trust them, without knowing or managing which engine ran it. That is the division the INFLECT architecture settled on: the simulation core is the single simulation provider, and everything that needs a simulation asks it. The engine behind the contract is a box: Tellurium is the main exact-SBML engine, COPASI a second, and a cross-engine run is itself a verification primitive (two independent integrators agreeing to ~1e-4 is evidence the result is engine-independent). The honest limit, and the next step, is the model-handoff: today simulate() accepts SBML text or a composite, which the engine parses; for the forecasting case where new models are produced constantly, it should also accept a pre-compiled / in-memory model handle so the runtime's JIT model registry can feed the core without re-parsing — the construction-vs-execution boundary. The contract is in place; widening its model intake is the forward work."
+    explanation: "The point of the contract is that the two outputs travel together. A caller hands a model to simulate() and gets back results and a verdict on whether to trust them, without knowing or managing which engine ran it. The engine behind the contract is a box: Tellurium is the main exact-SBML engine, COPASI a second, and a cross-engine run is itself a verification primitive (two independent integrators agreeing to ~1e-4 is evidence the result is engine-independent). The honest limit, and the next step, is the model intake: today simulate() accepts SBML text or a composite, which the engine parses; letting it also accept a pre-compiled / in-memory model handle would let a caller re-run many models without re-parsing each one. The contract is in place; widening its model intake is the forward work."
 visualizations:
   - name: "The contract — results out (left) and verification out (right), across models and engines"
     address: image:charts/01_contract.svg

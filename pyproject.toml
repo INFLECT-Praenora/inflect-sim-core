@@ -44,7 +44,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7.4", "httpx"]
-# Serving a model over HTTP: serve.model_server + examples/serve_demo.
+# Serving a model over HTTP: serve.model_server (viva-sim serve).
 serve = ["starlette", "uvicorn[standard]"]
 
 # --- Simulation engines (optional; install only the ones you want) ---
