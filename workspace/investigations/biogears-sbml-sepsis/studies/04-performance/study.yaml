@@ -50,6 +50,9 @@ expected_behavior:
   - name: surrogate-admissibility-on-severe
     statement: "Acceleration is only useful where predictions stay admissible: on the severe arm the surrogate leaves physical bounds for 8 of 9 observables, so it is screening-grade at best and the exact engine is required."
     status: supported
+  - name: copasi-second-exact-sbml-engine
+    statement: "A second independent exact-SBML integrator, COPASI (LSODA), reproduces Tellurium's severe-arm trajectory on all 9 observables, at a few times the wall-clock cost — so the SBML result is engine-independent and the cost reflects the event-dense model."
+    status: supported
 
 findings:
   - id: one-48-h-run-three
@@ -124,6 +127,26 @@ findings:
       physical. A fair held-out-severity admissibility protocol at the trained timestep is
       the pending validator (study 07, criterion SURR-01).
     status: supported
+  - id: copasi-reproduces-tellurium-at-higher-cost
+    summary: "COPASI, a second exact-SBML engine, reproduces Tellurium's severe trajectory to ~5e-4 across all 9 observables, at ~4.7x the wall-clock (chart 03)."
+    detail: |
+      Tellurium (roadrunner/CVODE) is the workspace's main SBML engine. Running the
+      identical BioGears-sepsis SBML (severe, 2 h) under a second, independent exact-SBML
+      integrator — COPASI (LSODA), driven through libCOPASI's C++ bindings directly, no
+      basico/pandas layer — reproduces the same trajectory
+      (run_copasi_vs_tellurium.py -> copasi_vs_tellurium.json, chart 03): the two engines
+      agree to a maximum relative difference of 5.0e-4 across all nine shared observables
+      (blood pathogen and tissue integrity agree to ~1e-8; the worst is SBP at 5e-4). So
+      the exact-SBML behavior is engine-independent, not a roadrunner artifact — an
+      independent cross-check on the SBML extraction used throughout the investigation.
+      The agreement costs more: COPASI took ~784 s versus Tellurium's ~168 s (~4.7x). The
+      cost is the event-dense model — the per-beat event (study 04's event analysis fires
+      it ~205k times over 48 h). COPASI evaluates each event through an interpreted math
+      layer while roadrunner runs LLVM-compiled code; bypassing basico's DataFrame (direct
+      libCOPASI) and loosening tolerance narrow the gap but do not close it, and the
+      trigger operator (>= vs >) makes no difference. Tellurium remains the main SBML
+      engine for the investigation; COPASI is the cross-engine validator.
+    status: supported
 
 visualizations:
   - name: "Same sepsis spec, three engines: where compute time goes (committed full-run + live per-step)"
@@ -134,6 +157,9 @@ visualizations:
     display: secondary
   - name: "Surrogate admissibility on severe sepsis — 8 of 9 observables leave physical bounds"
     address: image:charts/04_surrogate_admissibility.svg
+    display: secondary
+  - name: "Same sepsis SBML, two exact engines — Tellurium and COPASI agree to ~5e-4, at 4.7× the cost"
+    address: image:charts/03_copasi_vs_tellurium.svg
     display: secondary
 
 baseline:
