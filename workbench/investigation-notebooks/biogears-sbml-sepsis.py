@@ -43,8 +43,9 @@ if _os.environ.get("PYTHONUTF8") != "1":
 # can execute — while staying honest about where the engines agree and where they do not.
 #
 # A guided tour of the simulation core's capabilities on one real model. The same
-# BioGears sepsis core is run under interchangeable engines (BioGears C++, exact
-# SBML/Tellurium, PyTorch surrogate, and a Rust execution backend) and used to
+# BioGears sepsis core is run under interchangeable engines (BioGears C++, two exact
+# SBML integrators — Tellurium and COPASI — a PyTorch surrogate, and a Rust execution
+# backend) and used to
 # demonstrate, each as a runnable artifact: COMPOSITION (study 01 — the same spec
 # under three engines by one node swap), ENSEMBLES (study 02 — a severity × engine
 # batch in one sweep), ORCHESTRATION/WORKFLOWS (study 03 — the four-verb API composes

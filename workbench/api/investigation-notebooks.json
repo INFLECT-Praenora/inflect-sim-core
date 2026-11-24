@@ -1,1 +1,1 @@
-{"notebooks": [{"slug": "biogears-sbml-sepsis", "ipynb": "investigation-notebooks/biogears-sbml-sepsis.ipynb", "py": "investigation-notebooks/biogears-sbml-sepsis.py"}]}
+{"notebooks": [{"slug": "biogears-sbml-sepsis", "ipynb": "investigation-notebooks/biogears-sbml-sepsis.ipynb", "py": "investigation-notebooks/biogears-sbml-sepsis.py"}, {"slug": "simulation-core-contract", "ipynb": "investigation-notebooks/simulation-core-contract.ipynb", "py": "investigation-notebooks/simulation-core-contract.py"}]}

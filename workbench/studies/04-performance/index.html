@@ -634,7 +634,7 @@ micro-benchmark sits behind the full-run numbers.
       <div class="ctr-meta">
         <div class="ctr-meta-row"><span class="ctr-meta-k">Model</span> <code>sepsis-sbml-exact</code><a class="ov-tablink" href="#" onclick="_setStudyTab('compose');return false;">model →</a></div>
         
-        <div class="ctr-meta-row"><span class="ctr-meta-k">Measures</span> <span class="ctr-meta-item">4 behavior tests</span><a class="ov-tablink" href="#" onclick="_setStudyTab('audit');return false;">see Tests →</a></div>
+        <div class="ctr-meta-row"><span class="ctr-meta-k">Measures</span> <span class="ctr-meta-item">5 behavior tests</span><a class="ov-tablink" href="#" onclick="_setStudyTab('audit');return false;">see Tests →</a></div>
         
       </div>
     </div>
@@ -799,6 +799,36 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
           <div class="finding-drawer">
             <div class="finding-header">
               <span class="finding-id">surrogate-inadmissible-on-severe</span>
+              <span class="finding-kind">other</span>
+              <span class="finding-status-text">supported literature</span>
+            </div>
+            
+            
+            
+            
+            
+          </div>
+        </details>
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-copasi-reproduces-tellurium-at-higher-cost">
+        <details class="finding-details">
+          <summary class="finding-row">
+            <span class="finding-status-glyph">◆</span>
+            <span class="finding-claim finding-statement">COPASI, a second exact-SBML engine, reproduces Tellurium&#39;s severe trajectory to ~5e-4 across all 9 observables, at ~4.7x the wall-clock (chart 03).</span>
+            
+          </summary>
+          <div class="finding-drawer">
+            <div class="finding-header">
+              <span class="finding-id">copasi-reproduces-tellurium-at-higher-cost</span>
               <span class="finding-kind">other</span>
               <span class="finding-status-text">supported literature</span>
             </div>
@@ -1312,6 +1342,36 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
       
     </li>
     
+    
+    
+    
+    
+    
+    
+    
+    <li class="expected-behavior-item" id="bt-copasi-second-exact-sbml-engine"
+        data-test-kind="behavioral"
+        
+        data-pytest-node="copasi-second-exact-sbml-engine"
+        data-classification="unclassified"
+        data-result="pending"
+        style="margin: 0 0 10px 0; padding: 10px 12px; border-left: 4px solid #cbd5e1; background: #f8fafc; border-radius: 4px;">
+      
+        
+      <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+        <span class="bt-result" style="font-size: 0.75em; font-family: monospace; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; color: #475569">⏳ pending</span>
+        <span class="classification-pill classification-unclassified">unclassified</span>
+        <strong style="font-size: 0.9em;">copasi-second-exact-sbml-engine</strong>
+        
+      </div>
+      <div style="margin-top: 6px; font-size: 0.95em;"></div>
+      
+      
+      
+      
+      
+    </li>
+    
   </ul>
   
   </div>
@@ -1469,7 +1529,7 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span class="gate-status-blocked" style="padding:2px 12px;border-radius:9999px;font-weight:700;font-size:0.85em">blocked</span>
         <span class="muted small">evaluated by code</span>
-        <span class="muted small">0/4 passed</span>
+        <span class="muted small">0/5 passed</span>
       </div>
       
     </div>
@@ -1507,6 +1567,8 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
           <li>Live per-step micro-benchmark: the stiff solve is ~13,000x the surrogate forward pass.</li>
           
           <li>Speed without admissibility: on severe sepsis the surrogate leaves physical bounds for 8 of 9 observables.</li>
+          
+          <li>COPASI, a second exact-SBML engine, reproduces Tellurium&#39;s severe trajectory to ~5e-4 across all 9 observables, at ~4.7x the wall-clock (chart 03).</li>
           
         </ul>
         
@@ -1550,6 +1612,11 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
       <li style="display:flex;align-items:flex-start;gap:8px">
         <button type="button" class="action-btn study-finding-del" data-id="surrogate-inadmissible-on-severe" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
         <span>Speed without admissibility: on severe sepsis the surrogate leaves physical bounds for 8 of 9 observables. <span class="muted small">(supported)</span></span>
+      </li>
+      
+      <li style="display:flex;align-items:flex-start;gap:8px">
+        <button type="button" class="action-btn study-finding-del" data-id="copasi-reproduces-tellurium-at-higher-cost" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
+        <span>COPASI, a second exact-SBML engine, reproduces Tellurium&#39;s severe trajectory to ~5e-4 across all 9 observables, at ~4.7x the wall-clock (chart 03). <span class="muted small">(supported)</span></span>
       </li>
       
     </ul>
@@ -1606,7 +1673,7 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "97d2ca0b6bf32dcc1bd61157b507d0a0db76ccef", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/97d2ca0b6bf32dcc1bd61157b507d0a0db76ccef", "branch": "main", "lockfile": "uv.lock@b43237a591cb", "generated_at": "2026-11-23 20:17 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "74c03263649881aa42878ac534332fad196de680", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/74c03263649881aa42878ac534332fad196de680", "branch": "main", "lockfile": "uv.lock@b43237a591cb", "generated_at": "2026-11-24 01:31 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>
