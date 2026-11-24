@@ -1,0 +1,86 @@
+schema_version: 3
+name: 00-contract
+investigation: simulation-core-contract
+status: ran
+title: "The contract — simulate(model, request) → results + verification"
+confidence: Accepted
+verdict: supported
+
+parent_studies: []
+
+question: |
+  Can one interface take any model, run it under any engine, and return both the results
+  and a verification that the run can be trusted?
+
+objective: |
+  Demonstrate the simulation-core contract end to end: run several models through the
+  single simulate() entry point — an SBML file under Tellurium, the same model
+  cross-checked against COPASI, a different engine, and a registered composite — and show
+  each returns results plus a passing structured verification.
+
+claim: |
+  simulate(model, request) is the simulation core's one interface: model in, results +
+  verification out. Four runs through the identical call (run_contract.py ->
+  out/contract_runs.json, chart 01) each return their observables together with a
+  VerificationReport — ran, finite, physical admissibility per observable, and, when a
+  second engine is requested, cross-engine agreement. The SBML file runs under Tellurium
+  and under COPASI; the same model cross-checked against COPASI agrees with Tellurium to
+  ~1e-4; a registered composite runs through the same interface with a severity override.
+  Every run is self-verified; the engine is a swappable box behind the contract, and no
+  simulator is wrapped more than once.
+
+expected_behavior:
+  - name: one-interface-model-in-results-and-verification-out
+    statement: "The same simulate() call accepts different model forms (SBML file, registered composite) and engines (Tellurium, COPASI) and returns, for each, the results plus a structured verification with a pass verdict."
+    status: supported
+  - name: verification-is-first-class
+    statement: "The verification is returned alongside the results and reuses the core's own checks (finite, admissible, cross-engine agreement); a non-finite or out-of-bounds result fails it."
+    status: supported
+
+findings:
+  - id: one-interface-across-models-and-engines
+    summary: "Four model/engine combinations run through one simulate() call, each returning results + a passing verification (chart 01)."
+    detail: |
+      run_contract.py drives four runs through the single interface
+      simulate(model, request) (out/contract_runs.json, chart 01):
+        * an SBML file under Tellurium (roadrunner/CVODE);
+        * the same SBML file with a cross-engine check against COPASI;
+        * the same SBML file under COPASI directly;
+        * a registered composite id with a severity override.
+      Each returns a SimulationResult: the requested observables over time, plus a
+      VerificationReport. All four verify (ran, finite, physically admissible on every
+      observable). The model form (file vs composite) and the engine (Tellurium vs COPASI)
+      change behind the interface; the call, the result shape, and the verification are the
+      same. This is "vivarium is the simulation provider" made concrete: one entry point,
+      any model, any engine, no per-caller re-wrapping.
+    status: supported
+  - id: verification-ships-with-every-run
+    summary: "Verification is a first-class output: ran / finite / admissible / cross-engine, with Tellurium and COPASI agreeing to ~1e-4."
+    detail: |
+      The contract returns evidence, not just a trajectory. The VerificationReport carries
+      ran and finite (no NaN/inf), physical admissibility per observable (e.g. MAP and SVR
+      positive, tissue integrity in [0,1]), and — when a second engine is named — the
+      cross-engine agreement. On the cross-checked run, Tellurium and COPASI (two
+      independent exact-SBML integrators) agree to a maximum relative difference of ~1e-4
+      across the observables, so the run passes the cross-engine gate. The verification
+      layer is the same set of checks developed across the companion investigation
+      (finiteness, admissibility bounds from study 04, cross-engine agreement from the
+      COPASI arm), now returned automatically with every simulation. A unit check confirms
+      the gate bites: a run with a negative MAP or a NaN fails verification.
+
+    statement: "The simulation core's value is one interface plus built-in verification — results you can trust, with the engine swappable behind the contract."
+    explanation: "The point of the contract is that the two outputs travel together. A caller — a module, the runtime, a downstream uncertainty step — hands a model to simulate() and gets back results and a verdict on whether to trust them, without knowing or managing which engine ran it. That is the division the INFLECT architecture settled on: the simulation core is the single simulation provider, and everything that needs a simulation asks it. The engine behind the contract is a box: Tellurium is the main exact-SBML engine, COPASI a second, and a cross-engine run is itself a verification primitive (two independent integrators agreeing to ~1e-4 is evidence the result is engine-independent). The honest limit, and the next step, is the model-handoff: today simulate() accepts SBML text or a composite, which the engine parses; for the forecasting case where new models are produced constantly, it should also accept a pre-compiled / in-memory model handle so the runtime's JIT model registry can feed the core without re-parsing — the construction-vs-execution boundary. The contract is in place; widening its model intake is the forward work."
+visualizations:
+  - name: "The contract — results out (left) and verification out (right), across models and engines"
+    address: image:charts/01_contract.svg
+    display: primary
+
+baseline:
+  - name: sepsis-sbml
+    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+    config: {severity: 1}
+    note: "One of the models driven through the contract. Study 00 runs it (and an SBML file and COPASI) through simulate() and records results + verification."
+
+variants: []
+interventions: []
+runs: []

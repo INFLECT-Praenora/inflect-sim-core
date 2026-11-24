@@ -21,7 +21,8 @@ from typing import Any
 
 from viva_simulation_core import composites  # noqa: F401 — register generators on import
 
-__all__ = ["composites", "catalog", "call", "connect", "run", "serve"]
+__all__ = ["composites", "catalog", "call", "connect", "run", "serve",
+           "simulate", "SimulationRequest", "SimulationResult", "VerificationReport"]
 
 
 def _core(core: Any = None) -> Any:
@@ -61,3 +62,22 @@ def serve(source: str, model_format: str = "antimony") -> Any:
     """Load a model and return a stepping handle (``ServedModel``)."""
     from .serving import ServedModel
     return ServedModel(source, model_format)
+
+
+def simulate(model: Any, request: Any = None, **kwargs) -> Any:
+    """The simulation-core contract: model in, results + verification out.
+
+    Hand it a model (SBML/Antimony string or file, or a registered composite id),
+    say what to run, and get back a ``SimulationResult`` carrying both the results and
+    a structured verification (ran / finite / admissible / optional cross-engine
+    agreement). See :mod:`viva_simulation_core.contract`.
+    """
+    from .contract import simulate as _simulate
+    return _simulate(model, request, **kwargs)
+
+
+def __getattr__(name: str) -> Any:  # lazy access to the contract dataclasses
+    if name in ("SimulationRequest", "SimulationResult", "VerificationReport"):
+        from . import contract
+        return getattr(contract, name)
+    raise AttributeError(name)

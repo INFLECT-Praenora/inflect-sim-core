@@ -1,0 +1,67 @@
+schema_version: 2
+name: simulation-core-contract
+title: "The simulation-core contract — model in, results + verification out"
+created: '2026-11-23'
+status: running
+
+question: |
+  What is the simulation core, in one interface? Can you hand it any model, ask it to
+  run under any engine, and get back both the results AND a verification that the run
+  can be trusted — through one common entry point, with no re-wrapping per caller?
+
+hypothesis: |
+  The simulation core is a single contract: simulate(model, request) -> results +
+  verification. A model (SBML/Antimony or a registered composite) goes in; the core
+  runs it under a swappable engine and returns the observables together with a
+  structured verification (ran, finite, physically admissible, and — on request —
+  cross-engine agreement). This is the contract the broader INFLECT workflow builds on:
+  ensemble generators produce models, the simulation core runs them and returns results
+  + verification, and downstream uncertainty and reporting consume both.
+
+lead: |
+  One function is the whole surface. `from viva_simulation_core import simulate`, or
+  `viva-sim simulate <model>`. You pass a model in any accepted form, choose the engine
+  (or a second engine to cross-check against), and get a SimulationResult carrying the
+  results and a VerificationReport. The engine is a box behind the contract — Tellurium
+  (roadrunner) is the main exact-SBML engine, COPASI a second — and the verification
+  reuses the core's own checks (finiteness, admissibility bounds, cross-engine
+  agreement), so every simulation ships with its own evidence instead of a bare
+  trajectory.
+
+executive:
+  what_is_this: |
+    The simulation core reduced to its contract. Where the companion investigation
+    (biogears-sbml-sepsis) demonstrates the core's capabilities one by one, this one
+    shows the single interface they all sit behind: simulate(model, request) -> results
+    + verification. Study 00 runs several models through that one interface — an SBML
+    file under Tellurium, the same model cross-checked against COPASI, a different
+    engine, and a registered composite — and shows each returns results plus a passing
+    verification.
+  verdict: |
+    The simulation core is one interface: model in, results + verification out. The same
+    simulate() call runs an SBML file, the same model under a second engine, and a
+    registered composite, and each run returns its observables together with a structured
+    verification — ran, finite, admissible, and (when asked) cross-engine agreement
+    (Tellurium and COPASI agree to ~1e-4). The engine is swappable behind the contract,
+    and no simulator is wrapped more than once.
+  verdict_status: complete
+  decisions_needed:
+    - "Model handoff for forecasting: let simulate() accept a pre-compiled / in-memory model handle (not only SBML text), so the runtime's JIT model registry can feed the core without re-parsing — the construction-vs-execution boundary from the INFLECT architecture thread."
+
+studies:
+  - 00-contract
+
+acceptance_criteria:
+  - study: 00-contract
+    behavior: one-interface-model-in-results-and-verification-out
+
+at_a_glance:
+  - {study: 00-contract, role: "THE CONTRACT — simulate(model, request) → results + verification, across model forms and engines, each run self-verified."}
+
+how_to_read: |
+  The contract is one call: simulate(model, request) -> SimulationResult. `model` is an
+  SBML/Antimony string or file, or a dotted registered-composite id. `request` sets the
+  duration, interval, observables, engine, and an optional second engine to cross-check
+  against. The result carries `results` (observables over time) and `verification` (a
+  report with ran / finite / admissible-per-observable / optional cross-engine
+  agreement, and one `passed` verdict). Same interface, any model, any engine.

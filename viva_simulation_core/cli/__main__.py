@@ -223,6 +223,40 @@ def serve_cmd(
         console.print({k: v[-1] for k, v in final.items()})
 
 
+@app.command(name="simulate")
+def simulate_cmd(
+    model: str = typer.Argument(..., help="SBML/Antimony file or a dotted composite id."),
+    duration: float = typer.Option(3600.0, "--duration", help="Simulation duration (model time units)."),
+    interval: float = typer.Option(60.0, "--interval", help="Output interval."),
+    observables: str = typer.Option("", "--observables", help="Comma-separated observable ids to return."),
+    engine: str = typer.Option("tellurium", "--engine", help="tellurium | copasi."),
+    model_format: str = typer.Option("sbml", "--format", help="For a raw model file: sbml | antimony."),
+    cross_engine: str = typer.Option("", "--cross-engine", help="Second engine to cross-check (e.g. copasi)."),
+) -> None:
+    """The contract: model in, results + verification out. One interface, any engine."""
+    from viva_simulation_core import simulate, SimulationRequest
+
+    obs = [o.strip() for o in observables.split(",") if o.strip()] or None
+    req = SimulationRequest(duration=duration, interval=interval, observables=obs, engine=engine,
+                            model_format=model_format, cross_engine=cross_engine or None,
+                            verify=("ran", "finite", "admissible"))
+    out = simulate(model, req)
+    v = out.verification
+    console.print(f"engine: {out.engine}  |  wall: {out.wall_s:.2f}s  |  points: {len(out.results.get('time', []))}")
+    for k in (obs or []):
+        series = out.results.get(k)
+        if series:
+            console.print(f"  {k}: {series[0]:.4g} -> {series[-1]:.4g}")
+    console.print(f"verification: {'PASSED' if v.passed else 'FAILED'}  "
+                  f"(ran={v.ran}, finite={v.finite})")
+    if v.admissible is not None:
+        console.print(f"  admissible: {v.admissible}")
+    if v.cross_engine is not None:
+        console.print(f"  cross-engine ({v.cross_engine['engine']}): "
+                      f"max rel diff {v.cross_engine['max_rel_diff']:.2e}, "
+                      f"within tolerance: {v.cross_engine['within_tolerance']}")
+
+
 def main() -> None:
     app()
 

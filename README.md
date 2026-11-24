@@ -58,10 +58,36 @@ A fidelity backbone keeps it honest. The engines agree on the inflammation core 
 within ~0.1% but diverge in the hemodynamic layer, where the SBML extraction reaches
 septic shock by a different mechanism and on a shifted timeline.
 
+## The contract: model in, results + verification out
+
+One interface is the whole surface. Hand the simulation core a model, say what to
+run, and get back the results **and** a verification that the run can be trusted —
+through one entry point, with the engine swappable behind it:
+
+```python
+from viva_simulation_core import simulate
+
+out = simulate(model,                       # SBML/Antimony file or string, or a composite id
+               duration=7200, interval=60,
+               observables=["MAP", "SVR", "PB", "TI"],
+               engine="tellurium",          # the main SBML engine; "copasi" is a second
+               cross_engine="copasi")       # optional: re-run and check agreement
+
+out.results            # {"time": [...], "MAP": [...], ...}
+out.verification       # ran / finite / admissible / cross-engine agreement
+out.verification.passed
+```
+
+Or from the shell: `viva-sim simulate <model> --observables MAP,SVR --cross-engine copasi`.
+Every run ships with its own evidence (see [`examples/contract_demo.py`](examples/contract_demo.py)).
+This is the contract the broader INFLECT workflow builds on: ensemble generators
+produce models, the simulation core runs them and returns results + verification, and
+downstream uncertainty and reporting consume both.
+
 ## The unified simulation-core API
 
-Register simulation modules, engine adapters, and API-calling steps into one
-registry, then drive them from one API — as a Python import or the `viva-sim` CLI:
+Under the contract, the same registry of modules, engine adapters, and API-calling
+steps is drivable directly — as a Python import or the `viva-sim` CLI:
 
 ```python
 from viva_simulation_core import catalog, call, connect, run, serve

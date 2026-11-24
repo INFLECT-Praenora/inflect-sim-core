@@ -1,0 +1,229 @@
+{
+ "runs": [
+  {
+   "label": "SBML file \u2192 Tellurium",
+   "engine": "tellurium",
+   "wall_s": 16.350352542009205,
+   "n_points": 11,
+   "results_end": {
+    "MAP": 95.49762203254325,
+    "SVR": 0.9285453431855437,
+    "PB": 0.0,
+    "TI": 1.0
+   },
+   "verification": {
+    "passed": true,
+    "ran": true,
+    "finite": true,
+    "admissible": {
+     "MAP": true,
+     "SVR": true,
+     "PB": true,
+     "TI": true
+    },
+    "cross_engine": null
+   },
+   "provenance": {
+    "model_kind": "sbml",
+    "engine": "tellurium",
+    "cross_engine": null,
+    "duration": 600,
+    "interval": 60,
+    "observables": [
+     "MAP",
+     "SVR",
+     "PB",
+     "TI"
+    ],
+    "parameters": {}
+   },
+   "trajectory": null
+  },
+  {
+   "label": "same model + cross-engine verification (COPASI)",
+   "engine": "tellurium",
+   "wall_s": 15.11176725011319,
+   "n_points": 11,
+   "results_end": {
+    "MAP": 95.49762203254325,
+    "SVR": 0.9285453431855437,
+    "PB": 0.0,
+    "TI": 1.0
+   },
+   "verification": {
+    "passed": true,
+    "ran": true,
+    "finite": true,
+    "admissible": {
+     "MAP": true,
+     "SVR": true,
+     "PB": true,
+     "TI": true
+    },
+    "cross_engine": {
+     "engine": "copasi",
+     "max_rel_diff": 0.00017255402881103402,
+     "within_tolerance": true
+    }
+   },
+   "provenance": {
+    "model_kind": "sbml",
+    "engine": "tellurium",
+    "cross_engine": "copasi",
+    "duration": 600,
+    "interval": 60,
+    "observables": [
+     "MAP",
+     "SVR",
+     "PB",
+     "TI"
+    ],
+    "parameters": {}
+   },
+   "trajectory": {
+    "time_h": [
+     0.0,
+     0.016666666666666666,
+     0.03333333333333333,
+     0.05,
+     0.06666666666666667,
+     0.08333333333333333,
+     0.1,
+     0.11666666666666667,
+     0.13333333333333333,
+     0.15,
+     0.16666666666666666
+    ],
+    "MAP": [
+     95.48812361,
+     95.48885078617779,
+     95.48504717113894,
+     95.49875332515876,
+     95.49161245812896,
+     95.50469592855336,
+     95.49435933629799,
+     95.49683275604306,
+     95.4955487869021,
+     95.5061751236175,
+     95.49762203254325
+    ],
+    "SVR": [
+     0.9289911985234041,
+     0.9289092405881901,
+     0.9288455917432624,
+     0.9287718686971133,
+     0.9287129512853586,
+     0.9287298941224802,
+     0.9286210003393401,
+     0.9285358472672524,
+     0.9285701182649628,
+     0.9286706688021162,
+     0.9285453431855437
+    ],
+    "PB": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "TI": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "label": "SBML file \u2192 COPASI engine",
+   "engine": "copasi",
+   "wall_s": 67.49028879217803,
+   "n_points": 11,
+   "results_end": {
+    "MAP": 95.49561870573,
+    "SVR": 0.9284699057759915,
+    "PB": 0.0,
+    "TI": 1.0
+   },
+   "verification": {
+    "passed": true,
+    "ran": true,
+    "finite": true,
+    "admissible": {
+     "MAP": true,
+     "SVR": true,
+     "PB": true,
+     "TI": true
+    },
+    "cross_engine": null
+   },
+   "provenance": {
+    "model_kind": "sbml",
+    "engine": "copasi",
+    "cross_engine": null,
+    "duration": 600,
+    "interval": 60,
+    "observables": [
+     "MAP",
+     "SVR",
+     "PB",
+     "TI"
+    ],
+    "parameters": {}
+   },
+   "trajectory": null
+  },
+  {
+   "label": "registered composite id (severity 1)",
+   "engine": "tellurium",
+   "wall_s": 11.643212624825537,
+   "n_points": 40,
+   "results_end": {
+    "MAP": 95.48989273611964,
+    "SVR": 0.9286745354630231,
+    "TI": 1.0
+   },
+   "verification": {
+    "passed": true,
+    "ran": true,
+    "finite": true,
+    "admissible": {
+     "MAP": true,
+     "SVR": true,
+     "TI": true
+    },
+    "cross_engine": null
+   },
+   "provenance": {
+    "model_kind": "composite",
+    "engine": "tellurium",
+    "cross_engine": null,
+    "duration": 300,
+    "interval": 30,
+    "observables": [
+     "MAP",
+     "SVR",
+     "TI"
+    ],
+    "parameters": {
+     "severity": 1
+    }
+   },
+   "trajectory": null
+  }
+ ]
+}
