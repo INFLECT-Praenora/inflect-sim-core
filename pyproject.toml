@@ -8,13 +8,15 @@ dependencies = [
     # dashboard relies on AND the emitter fix (#217) + `requests`/`fire` server
     # deps. Below this, composite type-registration and agent-embedded emits
     # break — the root cause behind the map[...] type errors seen in the field.
-    "process-bigraph>=1.8.5",
-    # Cap below 1.8.4: bigraph-schema 1.8.4 REMOVED `bigraph_schema.matching`,
-    # which process-bigraph 1.11.0 still imports (via process_bigraph.holes) but
-    # only requires as `bigraph-schema>=1.8.1` (no upper cap). Without this cap the
-    # resolver grabs 1.8.4 and collection fails with
-    # `ModuleNotFoundError: No module named 'bigraph_schema.matching'`.
-    "bigraph-schema>=1.8.1,<1.8.4",
+    # >=1.11.2: the first release whose holes.py no longer imports the removed
+    # `bigraph_schema.matching`, so it does not transitively cap bigraph-schema
+    # below 1.8.4 (see the bigraph-schema pin below).
+    "process-bigraph>=1.11.2",
+    # bigraph-schema 1.8.4 removed the top-level `matching` module. The <1.8.4 cap
+    # was only needed because process-bigraph's holes.py imported it transitively;
+    # process-bigraph 1.11.2 no longer does (holes.py dropped it), so the cap is
+    # retired. This workspace does not import `bigraph_schema.matching` directly.
+    "bigraph-schema>=1.8.1",
     "bigraph-viz>=2.0.3",
     "pyyaml>=6.0",
     "jsonschema[format-nongpl]>=4.21",

@@ -2305,20 +2305,16 @@ wheels = [
 
 [[package]]
 name = "process-bigraph"
-version = "1.11.0"
+version = "1.11.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bigraph-schema" },
-    { name = "matplotlib" },
-    { name = "pandas" },
     { name = "pint" },
     { name = "requests" },
-    { name = "scipy" },
-    { name = "sympy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/31/17/a2e8246a1c7149d3fd18e63e333353a45c13a93fd07ce3691b3badaecf87/process_bigraph-1.11.0.tar.gz", hash = "sha256:df0433e462a9a1cef3b6cf66290c789a202997e714a9f6f3e8984fadbc07a176", size = 273107, upload-time = "2026-11-01T03:13:27.295Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/80/db8b9f06ba2dbb91ee1f83847f48539e7244e0037ff81ee25b33a5609da1/process_bigraph-1.11.2.tar.gz", hash = "sha256:1157bb80699c7cfca772d7145660c6111a7c3869e5eac752cef89a02e603d431", size = 264101, upload-time = "2026-11-24T05:15:52.169Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/8e/f0c2fca736d84dd1e6d18894b438419cf38619721d31e39b1b3b42678a1f/process_bigraph-1.11.0-py3-none-any.whl", hash = "sha256:c299fbe1b34f1c04e23ced19db3445ff33b1bc6fcdcce3d2dfed0a40938a62c7", size = 291298, upload-time = "2026-11-01T03:13:25.806Z" },
+    { url = "https://files.pythonhosted.org/packages/de/d2/b9774e37ddae62a7f450061a7bf867e822401d2889d387faf74b16efa828/process_bigraph-1.11.2-py3-none-any.whl", hash = "sha256:e1e1cfe9e91d0ead1cf585d30efa6747e2c3917901415bc5dcd8eb75ba7b4865", size = 280195, upload-time = "2026-11-24T05:15:50.407Z" },
 ]
 
 [[package]]
@@ -3389,14 +3385,14 @@ tellurium = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bigraph-schema", specifier = ">=1.8.1,<1.8.4" },
+    { name = "bigraph-schema", specifier = ">=1.8.1" },
     { name = "bigraph-viz", specifier = ">=2.0.3" },
     { name = "httpx", marker = "extra == 'dev'" },
     { name = "jinja2", specifier = ">=3.1" },
     { name = "jsonschema", extras = ["format-nongpl"], specifier = ">=4.21" },
     { name = "matplotlib" },
     { name = "plotly" },
-    { name = "process-bigraph", specifier = ">=1.8.5" },
+    { name = "process-bigraph", specifier = ">=1.11.2" },
     { name = "pypdf", specifier = ">=4.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4" },
     { name = "pyyaml", specifier = ">=6.0" },
@@ -3766,8 +3762,8 @@ wheels = [
 
 [[package]]
 name = "viva-basic-processes"
-version = "0.4.0"
-source = { git = "https://github.com/vivarium-collective/viva-basic-processes.git?rev=f9ea4bd35f1ab94e4a8e9e715eaf78da0d04fcc4#f9ea4bd35f1ab94e4a8e9e715eaf78da0d04fcc4" }
+version = "0.4.1"
+source = { git = "https://github.com/vivarium-collective/viva-basic-processes.git?branch=main#6df549394fbbc1a513acf0b2fbcde731ec6024d2" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "numpy" },
@@ -3880,7 +3876,7 @@ xarray = [
 [[package]]
 name = "viva-superpowers"
 version = "0.30.0"
-source = { git = "https://github.com/vivarium-collective/viva-superpowers.git?rev=fe4064a65d1da63452af73de49e57cc975f47bb4#fe4064a65d1da63452af73de49e57cc975f47bb4" }
+source = { git = "https://github.com/vivarium-collective/viva-superpowers.git?branch=main#6284dbafad830a436cf1fb711ced1eaae44a7a78" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "click" },
@@ -3932,7 +3928,7 @@ dependencies = [
 [[package]]
 name = "viva-workspace"
 version = "0.1.0"
-source = { git = "https://github.com/vivarium-collective/viva-workspace.git?rev=7ad2eb1a43bbb502158a69982c608f5aa66a1de6#7ad2eb1a43bbb502158a69982c608f5aa66a1de6" }
+source = { git = "https://github.com/vivarium-collective/viva-workspace.git?branch=main#7ad2eb1a43bbb502158a69982c608f5aa66a1de6" }
 dependencies = [
     { name = "jsonschema" },
     { name = "pyyaml" },
