@@ -21,7 +21,7 @@ from typing import Any
 
 from viva_simulation_core import composites  # noqa: F401 — register generators on import
 
-__all__ = ["composites", "catalog", "call", "connect", "run", "serve",
+__all__ = ["composites", "models_db", "catalog", "call", "connect", "run", "serve",
            "simulate", "SimulationRequest", "SimulationResult", "VerificationReport"]
 
 

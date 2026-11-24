@@ -15,6 +15,12 @@ from viva_simulation_core.composites.sepsis_cosim import (
     extract_cosim,
 )
 
+# Register every curated model from inflect-models-db as a composite generator, so
+# the catalog/workbench lists them alongside the workspace's own composites. This is
+# a no-op when inflect-models-db isn't installed (optional, lazy — engine-free).
+from viva_simulation_core import models_db as _models_db  # noqa: E402
+_models_db.register_all()
+
 __all__ = [
     "make_sepsis_sbml_composite",
     "SEPSIS_OBSERVABLES",
