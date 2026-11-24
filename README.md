@@ -81,6 +81,33 @@ out.verification.passed
 Or from the shell: `viva-sim simulate <model> --observables MAP,SVR --cross-engine copasi`.
 Every run ships with its own evidence (see [`examples/contract_demo.py`](examples/contract_demo.py)).
 
+### Running a curated model from the database by slug
+
+With the [`inflect-models-db`](https://github.com/INFLECT-Praenora/inflect-models-db)
+extra installed, any **curated model** runs by its slug — the model, observables,
+and time window come from the card; `scenario` picks one of its named scenarios:
+
+```python
+out = simulate("reynolds-2006-acute-inflammation", scenario="aseptic-death")
+out.results["D"][-1]     # final tissue damage, reproducing the paper
+```
+
+Every database model is also registered as a composite (`modelsdb_<slug>`), so it
+shows up in the workbench catalog beside the workspace's own composites.
+
+The database is an **optional, lazy** dependency (like the engines): it's not in the
+lockfile, so install it alongside the simulation core when you want it — an editable
+sibling checkout is the ecosystem norm and exposes the curated `models/` directory:
+
+```bash
+uv pip install -e ../inflect-models-db          # dev: editable sibling checkout
+# or:  uv pip install "inflect-models-db @ git+https://github.com/INFLECT-Praenora/inflect-models-db"
+# or:  export INFLECT_MODELS_DB_ROOT=/path/to/inflect-models-db/models
+```
+
+With it absent, `import viva_simulation_core` and every other feature work unchanged;
+`simulate("<slug>")` simply reports the model isn't found.
+
 ## Getting started
 
 You need [`uv`](https://docs.astral.sh/uv/) (and a C/C++ toolchain only for the

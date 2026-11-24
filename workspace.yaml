@@ -39,6 +39,11 @@ imports:
     ref: "154d94c2f30050715e87aa89af2b93b04d5f77b7"
     mode: reference
     description: "Rust (viva-core) execution backend. Optional extra: rust."
+  inflect-models-db:
+    source: "git+https://github.com/INFLECT-Praenora/inflect-models-db"
+    ref: "152d6f5297f0026f4cb2ef215d03ff8d9613d0e8"
+    mode: reference
+    description: "Curated paper-extracted model database. SOURCE of models (not an engine): every model is discoverable as a composite and runs by slug via simulate(). Optional extra: models-db."
 
 # Directory layout. New workspaces group their research directories under a
 # tidy `workspace/` subtree (the dirs below); the hidden `.pbg/` machine state

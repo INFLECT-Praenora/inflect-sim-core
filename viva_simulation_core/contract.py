@@ -258,13 +258,27 @@ def verify(results: dict, req: SimulationRequest, cross: dict | None = None) -> 
 
 # --------------------------------------------------------------------- the front door
 
-def simulate(model: Any, request: SimulationRequest | None = None, **kwargs) -> SimulationResult:
+def simulate(model: Any, request: SimulationRequest | None = None, *,
+             scenario: str | None = None, **kwargs) -> SimulationResult:
     """Run ``model`` and return results + verification. One interface, any engine.
 
-    ``model`` is an SBML/Antimony string or file path, or a dotted registered-composite
-    id. Pass a :class:`SimulationRequest` or request fields as keyword arguments
-    (``duration``, ``interval``, ``observables``, ``engine``, ``cross_engine`` ...).
+    ``model`` is an SBML/Antimony string or file path, a dotted registered-composite
+    id, OR the **slug of a curated model** in ``inflect-models-db`` (e.g.
+    ``"reynolds-2006-acute-inflammation"``) — then the card supplies the model, the
+    observables, and the time window, and ``scenario`` picks one of the card's named
+    scenarios (its initial conditions). Pass a :class:`SimulationRequest` or request
+    fields as keyword arguments (``duration``, ``interval``, ``observables``,
+    ``engine``, ``cross_engine`` ...).
     """
+    # A bare curated-model slug resolves to the card's run spec (model + scenario
+    # initials + observables + time), filling only what the caller didn't set.
+    if request is None and isinstance(model, str):
+        from . import models_db
+        if models_db.is_slug(model):
+            model, kwargs = models_db.apply_to_request_kwargs(model, scenario, kwargs)
+    elif scenario is not None:
+        raise ValueError("scenario=... only applies to a curated-model slug "
+                         "(and not together with an explicit request=)")
     req = request or SimulationRequest(**kwargs)
     kind, payload = _resolve_model(model, req)
     results, wall = _run(kind, payload, req.engine, req)
