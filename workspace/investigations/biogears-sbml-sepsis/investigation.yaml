@@ -167,6 +167,7 @@ studies:
   - 06-cosimulation
   - 07-evidence
   - 08-reduced-model
+  - 09-event-architecture
 
 expert_docs: []
 acceptance_criteria:
@@ -188,6 +189,8 @@ acceptance_criteria:
     behavior: pass-fail-pending-acceptance-criteria
   - study: 08-reduced-model
     behavior: event-free-is-vastly-faster-both-engines
+  - study: 09-event-architecture
+    behavior: hybrid-reproduces-the-full-model
 
 at_a_glance:
   - {study: 00-simulation-core, role: "REPRESENT / start here — the one model, its engines, and the capabilities this investigation demonstrates."}
@@ -199,6 +202,7 @@ at_a_glance:
   - {study: 06-cosimulation, role: "INTERVENE — physiology coupled to a treatment process every tick; untreated vs early vs delayed, with a coupling-step convergence test."}
   - {study: 07-evidence, role: "VALIDATE — the Workbench turning runs into traceable evidence with explicit pass / fail / pending acceptance criteria."}
   - {study: 08-reduced-model, role: "REDUCE — drop the per-beat event for a continuous mean-hemodynamics model: ~10^7x faster and engine-agnostic, at a stated fidelity cost (speed vs fidelity)."}
+  - {study: 09-event-architecture, role: "RELOCATE — lift the model's discrete events (infection, TLR hysteresis) OUT of the SBML into the vivarium layer as viva-impulse Steps; reproduces the full model at the fastest exact option's runtime, with the events now explicit and swappable (event-driven simulator)."}
 
 how_to_read: |
   How the simulation core works, in one idea: a simulation is a COMPOSITE — a small
