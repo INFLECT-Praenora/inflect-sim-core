@@ -39,6 +39,11 @@ imports:
     ref: "154d94c2f30050715e87aa89af2b93b04d5f77b7"
     mode: reference
     description: "Rust (viva-core) execution backend. Optional extra: rust."
+  viva-impulse:
+    source: "git+https://github.com/vivarium-collective/viva-impulse"
+    ref: "35f1fc112c77419f7595baffe81f021cf749c8c1"
+    mode: reference
+    description: "Hybrid continuous + discrete-event simulator (events as first-class Steps). Powers the sepsis_hybrid composite. Optional extra: impulse."
   inflect-models-db:
     source: "git+https://github.com/INFLECT-Praenora/inflect-models-db"
     ref: "152d6f5297f0026f4cb2ef215d03ff8d9613d0e8"

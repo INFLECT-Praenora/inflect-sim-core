@@ -2,7 +2,7 @@ schema_version: 3
 name: 09-event-architecture
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Event architecture — lifting the discrete sepsis events into vivarium"
+title: "Event architecture — lifting the discrete sepsis events out of the model"
 confidence: Accepted
 verdict: supported  # the event-free SBML core + viva-impulse events reproduces the full model
 
