@@ -43,6 +43,9 @@ expected_behavior:
   - name: engines-agree-on-inflammation-diverge-on-hemodynamics
     statement: "Baseline and the inflammation core agree to within ~0.1%; the hemodynamic layer diverges in mechanism and timing, mapped to omitted subsystems."
     status: supported
+  - name: event-free-reduction-tracks-the-full-model-within-one-engine
+    statement: "Run under the same roadrunner engine, the event-free proto_valve reduction tracks the full model's filtered hemodynamics to well under 1 mmHg and its immune core to ~1e-9, with cardiac output and SVR as the stated ~6% cost of dropping the per-beat layer — so the event-free speedup is nearly fidelity-free on the slow observables."
+    status: supported
 
 findings:
   - id: where-they-agree-baseline-parity
@@ -65,6 +68,29 @@ findings:
       divergence to the BioGears subsystem the extraction omits or leaves inert (nitric
       oxide, fever vasodilation, renal/urine, lactate, intracellular water).
     status: supported
+  - id: event-free-reduction-is-near-fidelity-free-on-the-slow-observables
+    summary: "Within one engine, the event-free proto_valve reduction tracks the full model to <0.7 mmHg on pressures, ~0.1 /min on HR, and ~1e-9 on the immune core, at a ~6% cost on CO/SVR (chart 04)."
+    detail: |
+      A separate fidelity axis from the engine-vs-engine comparison above: here both arms
+      are the same roadrunner/CVODE engine, so any difference isolates the event-free
+      structural change alone. Running the full sepsis_sbml model and the event-free
+      proto_valve reduction (sources/proto_valve.xml) through the identical Composite
+      harness (severity 3, 2 h, 10 s interval, this machine; study 04's
+      run_proto_valve_compare.py -> proto_valve_compare.json) and taking the max absolute
+      difference over the run: SBP 0.66 mmHg (0.58%), DBP 0.63, MAP 0.56, HR 0.098 /min
+      (0.14%), blood volume 0.34 mL (6e-5 rel), and the immune core essentially exact —
+      tissue integrity ~9e-11 and blood pathogen ~1e-8 relative. The cost of dropping the
+      per-beat layer concentrates in two observables: cardiac output and SVR differ by
+      ~6%, because the 5 s filters and the continuous beat phase replace the per-beat
+      latched values. Instantaneous points are not meant to line up (the beat phase
+      differs); on per-beat averages the prototype report measures the pressures within
+      ~0.2 mmHg and the immune variables within ~1e-6. So the event-free reduction is
+      near-fidelity-free on the slow sepsis observables and the mean hemodynamics, trading
+      only the beat-resolved CO/SVR detail for its ~1.20x speed (study 04) — a much gentler
+      trade than study 08's radical mean-hemodynamics surrogate, which drops pulsatility
+      entirely for ~10^7x. This is measured within one engine, so it does not touch the
+      engine-vs-engine divergence that is the rest of this study.
+    status: supported
 
     statement: "The hemodynamic divergence is not transcription noise. It is two internally consistent, opposite shock trajectories: the engine reaches MAP<65 by a hypodynamic low-output route (69.3 h), the extraction by a hyperdynamic vasodilatory route (54.1 h). The ~15 h timing gap — earlier even though the extraction lags ~11 h on systolic pressure — and the engine's continuous fluctuation against the extraction's near-flat profile both point to the vasomotor, fluid, and metabolic subsystems the extraction omits, not to a faithfulness failure in the shared spec."
     explanation: "Agreement on the inflammation core to within ~0.1% (tissue integrity, blood pathogen) bounds the extraction's error to the hemodynamic layer. The acute inflammatory response is a faithful translation of the engine's; the closed-loop cardiovascular control is not. That turns the divergence into a testable disagreement. The two engines make different predictions about the same severe patient. The C++ engine predicts low-output shock: output falls and MAP<65 arrives later, at 69.3 h. The extraction predicts vasodilatory shock: peripheral resistance falls and MAP<65 arrives earlier, at 54.1 h, even though its systolic pressure trails by ~11 h. Both cannot be right about the real trajectory, so at least one route is an artifact of what the model carries, and every mapped divergence traces to a subsystem the extraction leaves out or inert (nitric oxide, fever vasodilation, renal/urine fluid handling, lactate, intracellular water).\n\nThis leaves one test open: trace the cardiac-output-versus-systemic-vascular-resistance split through the shock crossing across the severity sweep and compare it against the BioGears C++ reference. The engine whose output-vs-resistance partition matches the reference at MAP<65 is the faithful one; the other's shock route is the artifact. On the committed severe runs alone, this study measures that the engines diverge and maps each divergence to an omitted subsystem, but it does not yet settle which shock trajectory is correct. The study-04 surrogate is a further, coarser approximation on top of the extraction. The divergence is real and subsystem-localised; which of the two routes is right is still open."
@@ -78,6 +104,9 @@ visualizations:
   - name: "Inflammation core matches to within ~0.1%"
     address: image:charts/02_inflammation_match.svg
     display: secondary
+  - name: "Event-free proto_valve vs full model (same engine) — tracks to <0.7 mmHg / ~1e-9, at ~6% on CO/SVR"
+    address: image:charts/04_eventfree_valve_fidelity.svg
+    display: secondary
 
 baseline:
   - name: sepsis-engine-vs-sbml
@@ -85,7 +114,11 @@ baseline:
     config: {severity: 3}
     note: "The exact SBML extraction compared against the BioGears engine (both committed severe runs); the comparison that keeps the capabilities demonstration honest."
 
-variants: []
+variants:
+  - name: eventfree-proto-valve
+    composite: viva_simulation_core.composites.sepsis_sbml_eventfree_valve.sepsis_sbml_eventfree_valve
+    config: {severity: 3}
+    note: "The event-free proto_valve reduction (sources/proto_valve.xml) run under the SAME engine as the full model, to isolate the event-free structural change from the engine-vs-engine divergence. Tracks the full model to <0.7 mmHg / ~1e-9 immune, ~6% on CO/SVR (run_proto_valve_compare.py; chart 04)."
 interventions: []
 runs: []
 

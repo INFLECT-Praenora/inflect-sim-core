@@ -36,6 +36,7 @@ below.
 |---|---|
 | `sepsis_cosim` | Closed-loop sepsis CO-SIMULATION: the Tellurium sepsis physiology engine and an antibiotic-PK controller process exchange state every tick. |
 | `sepsis_sbml` | The BioGears sepsis core as its SBML/Antimony extraction (Sauro), run via Tellurium / roadrunner. |
+| `sepsis_sbml_eventfree_valve` | Event-free (proto_valve) reduction of the BioGears sepsis core: the same SBML model with the per-beat E_beat event and piecewise pulOpen valve replaced by a continuous phase oscillator + per-artery v… |
 <!-- END:composites -->
 
 <!-- BEGIN:investigations -->
@@ -43,7 +44,8 @@ below.
 
 | Investigation | Research question |
 |---|---|
-| [Simulation core — one sepsis model, every engine: composed, ensembled, orchestrated, benchmarked _(running)_](https://INFLECT-Praenora.github.io/inflect-sim-core/workbench/reports/investigation-biogears-sbml-sepsis.html) | What can the simulation core do? |
+| [Simulation core — one sepsis model, every engine: composed, ensembled, orchestrated, benchmarked _(running)_](https://INFLECT-Praenora.github.io/inflect-sim-core/workbench/reports/investigation-biogears-sbml-sepsis.html) | How can a compositional simulation core support interchangeable physiological models, systematic perturbation studies, scalable execution, mechanistic comparison, dynamic intervention, and evidence-b… |
+| [The simulation-core contract — model in, results + verification out _(running)_](https://INFLECT-Praenora.github.io/inflect-sim-core/workbench/reports/investigation-simulation-core-contract.html) | What is the simulation core, in one interface? |
 <!-- END:investigations -->
 
 The investigation shows these capabilities on that one model:
