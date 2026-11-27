@@ -40,6 +40,9 @@ _ENGINES: dict[str, tuple[str, str, str]] = {
     "surrogate": ("viva_torch", "surrogate", "PyTorch learned surrogate"),
     "rust": ("viva_core", "rust", "viva-core (Rust execution backend)"),
     "julia": ("viva_julia_diffeqs", "julia", "Julia DifferentialEquations.jl (exact ODE)"),
+    "impulse": ("viva_impulse", "impulse",
+                "viva-impulse (hybrid continuous + discrete-event simulator: events as "
+                "first-class process-bigraph Steps)"),
 }
 
 
