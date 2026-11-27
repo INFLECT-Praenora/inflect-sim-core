@@ -63,9 +63,9 @@ surrogate = ["viva-torch @ git+https://github.com/vivarium-collective/viva-torch
 rust      = ["viva-core @ git+https://github.com/vivarium-collective/viva-core@154d94c2f30050715e87aa89af2b93b04d5f77b7"]
 # julia — added when vivarium-collective/viva-julia-diffeqs lands (DifferentialEquations.jl):
 # julia  = ["viva-julia-diffeqs @ git+https://github.com/vivarium-collective/viva-julia-diffeqs@<sha>"]
-# impulse — the hybrid continuous+discrete-event simulator (events as first-class PBG Steps);
-# added when vivarium-collective/viva-impulse lands. Powers the `sepsis_hybrid` composite.
-# impulse = ["viva-impulse @ git+https://github.com/vivarium-collective/viva-impulse@<sha>"]
+# impulse — the hybrid continuous+discrete-event simulator (events as first-class PBG Steps).
+# Powers the `sepsis_hybrid` composite.
+impulse = ["viva-impulse @ git+https://github.com/vivarium-collective/viva-impulse@35f1fc112c77419f7595baffe81f021cf749c8c1"]
 
 # Bundles (self-referential; resolve to the per-engine extras above).
 sbml = ["simulation-core[tellurium,copasi]"]                            # the exact-SBML engines (+ julia later)
