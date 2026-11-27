@@ -41,7 +41,7 @@ imports:
     description: "Rust (viva-core) execution backend. Optional extra: rust."
   viva-impulse:
     source: "git+https://github.com/vivarium-collective/viva-impulse"
-    ref: "35f1fc112c77419f7595baffe81f021cf749c8c1"
+    ref: "dfc6c86d85d7aba746b256ad4296ef3f0005b972"
     mode: reference
     description: "Hybrid continuous + discrete-event simulator (events as first-class Steps). Powers the sepsis_hybrid composite. Optional extra: impulse."
   inflect-models-db:

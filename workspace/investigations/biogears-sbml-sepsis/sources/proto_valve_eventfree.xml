@@ -9790,5 +9790,6 @@
         </math>
       </rateRule>
     </listOfRules>
+    <listOfEvents/>
   </model>
 </sbml>

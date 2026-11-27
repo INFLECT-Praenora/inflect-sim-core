@@ -1,0 +1,45 @@
+{
+ "source": "proto_valve.xml",
+ "generated_by": "viva_impulse.extract.extract_events",
+ "lifted": [
+  {
+   "name": "E_tlrOn+E_tlrOff",
+   "kind": "ThresholdSwitch",
+   "config": {
+    "watch": "PT",
+    "upper": 2000000.0,
+    "lower": 1000.0,
+    "up_actions": {
+     "TLR": "1"
+    },
+    "down_actions": {
+     "TLR": "0"
+    }
+   },
+   "sbml_ids": [
+    "E_tlrOn",
+    "E_tlrOff"
+   ]
+  },
+  {
+   "name": "E_infect",
+   "kind": "ScheduledEvent",
+   "config": {
+    "time": 1000000000000.0,
+    "actions": {
+     "infOn": "1",
+     "TLR": "1",
+     "PT": "piecewise(1000000, severity < 1.5, 5000000, severity < 2.5, 25000000)"
+    }
+   },
+   "sbml_ids": [
+    "E_infect"
+   ]
+  }
+ ],
+ "kept": [],
+ "model_values": {
+  "PT": 0.0,
+  "severity": 0.0
+ }
+}

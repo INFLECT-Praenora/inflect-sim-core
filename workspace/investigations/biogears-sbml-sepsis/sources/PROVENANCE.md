@@ -36,8 +36,11 @@ events also removed — `E_tlrOn`, `E_tlrOff` (the TLR hysteresis) and `E_infect
 timed infection seed). The continuous core then has **no events at all**; `PT`, `TLR`,
 `infOn` stay at their initial 0 and are driven from the vivarium layer by general
 viva-impulse Steps (a `ScheduledEvent` for the infection, a `ThresholdSwitch` for the
-TLR hysteresis), coupled through the engine's `parameters_in` override. Regenerate with
-`make_eventfree_sbml.py`. Run via the `sepsis_hybrid` composite — it reproduces the full
+TLR hysteresis), coupled through the engine's `parameters_in` override. Both this event-free
+SBML **and** the event specs the composite builds from (`sepsis_events.json`) are GENERATED
+from `proto_valve.xml` by `extract_hybrid_events.py` (which runs `viva_impulse.extract`), so
+the hybrid's thresholds and seed formula are derived from the model, not hand-copied.
+Run via the `sepsis_hybrid` composite — it reproduces the full
 event-driven model to ~1e-6 on the hemodynamics and ~0.2% on blood pathogen (the residual
 is the tick-quantization of the infection timing). Same authorship/license/caveats as above.
 
