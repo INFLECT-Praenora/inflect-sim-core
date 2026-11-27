@@ -18,10 +18,17 @@ event-driven model to within the tick-quantization of the infection timing — t
 cost of lifting the events to the composition layer, where they are now explicit and
 swappable (change the protocol, chain a controller) without touching the SBML.
 
+The discrete layer is **extracted from the model, not hand-authored**: both the event-free
+SBML and the event specs this composite builds from (``sources/sepsis_events.json`` — the
+thresholds and the severity-dependent seed formula) are generated from ``proto_valve.xml``
+by ``sources/extract_hybrid_events.py`` (``viva_impulse.extract``). The composite supplies
+only the engine-coupling routing (one-shot PT seed, TLR owned by the switch, PT sensed back).
+
 Requires the ``impulse`` engine (viva-impulse) and ``tellurium``.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from process_bigraph.composite_generator import composite_generator
@@ -29,13 +36,19 @@ from process_bigraph.composite_generator import composite_generator
 from viva_simulation_core.core import build_core
 from viva_simulation_core.engines import require as require_engine
 
-EVENTFREE_SBML_PATH = (Path(__file__).resolve().parents[2] / 'workspace' / 'investigations'
-                       / 'biogears-sbml-sepsis' / 'sources' / 'proto_valve_eventfree.xml')
+_SOURCES = (Path(__file__).resolve().parents[2] / 'workspace' / 'investigations'
+            / 'biogears-sbml-sepsis' / 'sources')
+EVENTFREE_SBML_PATH = _SOURCES / 'proto_valve_eventfree.xml'
+# The discrete layer is GENERATED from the model: extract_hybrid_events.py runs
+# viva_impulse.extract over proto_valve.xml and writes these specs (thresholds, the
+# severity-dependent seed formula). Re-run that script if the model changes.
+EVENTS_SPEC_PATH = _SOURCES / 'sepsis_events.json'
 
-# tissue-pathogen seed by severity (the piecewise in the full model's E_infect)
-_SEED = {1: 1.0e6, 2: 5.0e6, 3: 2.5e7}
-# TLR hysteresis band (the full model's pUpper / pLower)
-_P_UPPER, _P_LOWER = 2.0e6, 1.0e3
+
+def _lifted_spec(kind: str) -> dict:
+    """The extracted spec for the one lifted event of the given viva-impulse kind."""
+    lifted = json.loads(EVENTS_SPEC_PATH.read_text())["lifted"]
+    return next(s for s in lifted if s["kind"] == kind)
 
 
 def _register_impulse(core):
@@ -86,21 +99,27 @@ def make_sepsis_hybrid_composite(core=None, *, severity: int = 3,
         emit.pop(k, None)
         doc['emitter']['inputs'].pop(k, None)
 
-    seed = _SEED.get(int(severity), 0.0)
-
-    # --- The discrete layer: general viva-impulse events (only when infecting) ---
+    # --- The discrete layer: EXTRACTED from the model (sepsis_events.json), not hardcoded ---
+    # The specs carry the triggers/thresholds/seed formula; the composite supplies only the
+    # engine-coupling routing: the ScheduledEvent's one-shot PT seed goes to the `pt_seed`
+    # store (injected once by the bridge), TLR is owned by the ThresholdSwitch (so dropped
+    # from the infection event), and the switch watches the engine-sensed PT (`PT_sensed`).
     if severity > 0:
+        infect = _lifted_spec("ScheduledEvent")["config"]["actions"]
         doc['infection'] = {
             '_type': 'step', 'address': 'local:ScheduledEvent',
             'config': {'time': float(infection_start_s),
-                       'actions': {'infOn': '1', 'pt_seed': repr(float(seed))}},
+                       # held infection flag + the extracted severity-dependent seed formula
+                       'actions': {'infOn': infect['infOn'], 'pt_seed': infect['PT']},
+                       'params': {'severity': float(severity)}},
             'inputs': {'global_time': ['global_time'], 'infOn': ['infOn'], 'pt_seed': ['pt_seed']},
             'outputs': {'infOn': ['infOn'], 'pt_seed': ['pt_seed']},
         }
+        tlr = _lifted_spec("ThresholdSwitch")["config"]
         doc['tlr_switch'] = {
             '_type': 'step', 'address': 'local:ThresholdSwitch',
-            'config': {'watch': 'PT_sensed', 'upper': _P_UPPER, 'lower': _P_LOWER,
-                       'up_actions': {'TLR': '1'}, 'down_actions': {'TLR': '0'}},
+            'config': {'watch': 'PT_sensed', 'upper': tlr['upper'], 'lower': tlr['lower'],
+                       'up_actions': tlr['up_actions'], 'down_actions': tlr['down_actions']},
             'inputs': {'global_time': ['global_time'], 'PT_sensed': ['PT_sensed'], 'TLR': ['TLR']},
             'outputs': {'TLR': ['TLR']},
         }

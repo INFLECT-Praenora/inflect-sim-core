@@ -3410,7 +3410,7 @@ requires-dist = [
     { name = "viva-copasi", marker = "extra == 'copasi'", git = "https://github.com/vivarium-collective/viva-copasi.git?rev=937ff132f2e8c755248a38a7440067f8d1871001" },
     { name = "viva-core", marker = "extra == 'rust'", git = "https://github.com/vivarium-collective/viva-core?rev=154d94c2f30050715e87aa89af2b93b04d5f77b7" },
     { name = "viva-emitters" },
-    { name = "viva-impulse", marker = "extra == 'impulse'", git = "https://github.com/vivarium-collective/viva-impulse?rev=35f1fc112c77419f7595baffe81f021cf749c8c1" },
+    { name = "viva-impulse", marker = "extra == 'impulse'", git = "https://github.com/vivarium-collective/viva-impulse?rev=dfc6c86d85d7aba746b256ad4296ef3f0005b972" },
     { name = "viva-tellurium", marker = "extra == 'tellurium'", git = "https://github.com/vivarium-collective/viva-tellurium?rev=2d07d068bb4dd713c9ed61f59747d21b49498cc2" },
     { name = "viva-torch", marker = "extra == 'surrogate'", git = "https://github.com/vivarium-collective/viva-torch?rev=bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" },
     { name = "vivarium-workbench", git = "https://github.com/vivarium-collective/vivarium-workbench.git?rev=cd6258699f61674021b24a15e7d93cea4c5c5d0a" },
@@ -3880,7 +3880,7 @@ xarray = [
 [[package]]
 name = "viva-impulse"
 version = "0.1.0"
-source = { git = "https://github.com/vivarium-collective/viva-impulse?rev=35f1fc112c77419f7595baffe81f021cf749c8c1#35f1fc112c77419f7595baffe81f021cf749c8c1" }
+source = { git = "https://github.com/vivarium-collective/viva-impulse?rev=dfc6c86d85d7aba746b256ad4296ef3f0005b972#dfc6c86d85d7aba746b256ad4296ef3f0005b972" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "process-bigraph" },

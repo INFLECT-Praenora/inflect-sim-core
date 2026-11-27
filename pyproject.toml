@@ -65,7 +65,7 @@ rust      = ["viva-core @ git+https://github.com/vivarium-collective/viva-core@1
 # julia  = ["viva-julia-diffeqs @ git+https://github.com/vivarium-collective/viva-julia-diffeqs@<sha>"]
 # impulse — the hybrid continuous+discrete-event simulator (events as first-class PBG Steps).
 # Powers the `sepsis_hybrid` composite.
-impulse = ["viva-impulse @ git+https://github.com/vivarium-collective/viva-impulse@35f1fc112c77419f7595baffe81f021cf749c8c1"]
+impulse = ["viva-impulse @ git+https://github.com/vivarium-collective/viva-impulse@dfc6c86d85d7aba746b256ad4296ef3f0005b972"]
 
 # Bundles (self-referential; resolve to the per-engine extras above).
 sbml = ["simulation-core[tellurium,copasi]"]                            # the exact-SBML engines (+ julia later)
