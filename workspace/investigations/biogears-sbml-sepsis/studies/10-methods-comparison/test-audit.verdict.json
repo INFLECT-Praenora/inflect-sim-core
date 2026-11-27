@@ -17,7 +17,7 @@
      "detail": {
       "wide_bands": [],
       "one_sided_loose_primary": [],
-      "n_tests": 3
+      "n_tests": 2
      },
      "expected": {
       "kind": "value",
@@ -37,12 +37,12 @@
     },
     {
      "id": "objective_coverage",
-     "label": "Comparison coverage (each compared card tested)",
+     "label": "Objective coverage (mechanisms tested)",
      "verdict": "ungraded",
      "value": null,
      "meter": null,
      "detail": {
-      "reason": "no comparison axes declared \u2014 coverage not assessable"
+      "reason": "no mechanisms named in question / purpose.mechanism / study_card \u2014 coverage not assessable"
      },
      "expected": {
       "kind": "value",
@@ -87,12 +87,12 @@
     },
     {
      "id": "discriminating_control",
-     "label": "Reference standard present (the comparison discriminator)",
+     "label": "Discriminating control present",
      "verdict": "drift",
      "value": null,
      "meter": null,
      "detail": {
-      "comparison": true
+      "comparison": false
      },
      "expected": {
       "kind": "value",

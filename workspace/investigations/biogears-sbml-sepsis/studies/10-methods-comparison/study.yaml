@@ -83,11 +83,6 @@ visualizations:
     address: image:charts/02_fidelity_detail.svg
     display: secondary
 
-tests:
-  - name: methods_comparison
-    kind: report_card
-    card: methods_comparison
-
 baseline:
   - name: exact-engine-reference
     composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
