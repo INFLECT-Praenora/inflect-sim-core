@@ -168,6 +168,7 @@ studies:
   - 07-evidence
   - 08-reduced-model
   - 09-event-architecture
+  - 10-methods-comparison
 
 expert_docs: []
 acceptance_criteria:
@@ -191,6 +192,8 @@ acceptance_criteria:
     behavior: event-free-is-vastly-faster-both-engines
   - study: 09-event-architecture
     behavior: hybrid-reproduces-the-full-model
+  - study: 10-methods-comparison
+    behavior: methods-form-a-graded-speed-fidelity-frontier
 
 at_a_glance:
   - {study: 00-simulation-core, role: "REPRESENT / start here — the one model, its engines, and the capabilities this investigation demonstrates."}
@@ -203,6 +206,7 @@ at_a_glance:
   - {study: 07-evidence, role: "VALIDATE — the Workbench turning runs into traceable evidence with explicit pass / fail / pending acceptance criteria."}
   - {study: 08-reduced-model, role: "REDUCE — drop the per-beat event for a continuous mean-hemodynamics model: ~10^7x faster and engine-agnostic, at a stated fidelity cost (speed vs fidelity)."}
   - {study: 09-event-architecture, role: "RELOCATE — lift the model's discrete events (infection, TLR hysteresis) OUT of the SBML into the composition layer as discrete-event Steps; reproduces the full model at the fastest exact option's runtime, with the events now explicit and swappable (event-driven simulator)."}
+  - {study: 10-methods-comparison, role: "COMPARE — place every method on one graded speed-vs-fidelity frontier with per-observable detail; a report-card Test gates cross-engine agreement + reproduction + physical admissibility (the control the surrogate fails)."}
 
 how_to_read: |
   How the simulation core works, in one idea: a simulation is a COMPOSITE — a small
