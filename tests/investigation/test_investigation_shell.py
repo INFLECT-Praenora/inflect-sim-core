@@ -22,6 +22,7 @@ STUDIES = [
     "07-evidence",
     "08-reduced-model",
     "09-event-architecture",
+    "10-methods-comparison",
 ]
 BANNED = ("vivarium", "process-bigraph", "process bigraph")
 
