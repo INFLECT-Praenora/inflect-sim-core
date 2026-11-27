@@ -4,6 +4,16 @@ created: "2026-11-16"
 plugin_version: 0.4.16
 package_path: viva_simulation_core
 
+# Runtime config. Force the reliable per-step SQLite emitter. The framework
+# default emitter (xarray/zarr) under-fills its size-3 async buffer
+# non-deterministically for these interval-chunked SBML runs, so the recorded
+# history comes back shorter than the executed ticks and run_runner rejects the
+# run as "run truncated" — nothing lands in studies/<slug>/runs.db, which is why
+# every sepsis study showed an empty Simulations tab. SQLite records every tick
+# durably, so runs are actually recorded.
+runtime:
+  default_emitter: sqlite
+
 # Imported modules this workspace integrates. The optional simulation-engine
 # wrappers are declared here so the catalog (Repositories tab) shows every engine
 # the workspace imports, not only the ones the ecosystem registry happens to know.

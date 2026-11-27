@@ -2,93 +2,201 @@ schema_version: 3
 name: 10-methods-comparison
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Methods comparison — how every simulation method stacks up on speed and fidelity"
+title: Methods comparison — how every simulation method stacks up on speed and fidelity
 confidence: Accepted
-verdict: supported  # the methods form a clear speed-fidelity frontier; the comparison is graded + admissibility-controlled
-
+verdict: supported
 parent_studies:
-  - study: 04-performance
-    relation: builds-on
-    rationale: "Pulls the per-engine runtimes and the surrogate admissibility check into one cross-method frontier."
-  - study: 05-fidelity
-    relation: builds-on
-    rationale: "Pulls the per-observable fidelity numbers into one matrix across methods."
-  - study: 08-reduced-model
-    relation: builds-on
-    rationale: "Places the radical mean-hemodynamics reduction on the shared frontier."
-  - study: 09-event-architecture
-    relation: builds-on
-    rationale: "Places the event-driven hybrid on the frontier and grades its reproduction + admissibility."
+- study: 04-performance
+  relation: builds-on
+  rationale: Pulls the per-engine runtimes and the surrogate admissibility check into one cross-method frontier.
+- study: 05-fidelity
+  relation: builds-on
+  rationale: Pulls the per-observable fidelity numbers into one matrix across methods.
+- study: 08-reduced-model
+  relation: builds-on
+  rationale: Places the radical mean-hemodynamics reduction on the shared frontier.
+- study: 09-event-architecture
+  relation: builds-on
+  rationale: Places the event-driven hybrid on the frontier and grades its reproduction + admissibility.
+question: 'The investigation now runs the one sepsis model under many simulation methods — exact
 
-question: |
-  The investigation now runs the one sepsis model under many simulation methods — exact
   engines, a reduced model, a learned surrogate, and the event-driven hybrid. How do they
+
   actually stack up against each other in runtime and in results, and can we grade the
+
   comparison rather than just assert it?
 
-objective: |
-  Put every method on one speed-vs-fidelity frontier from the committed run data, show the
+  '
+objective: 'Put every method on one speed-vs-fidelity frontier from the committed run data, show the
+
   per-observable detail (where each agrees and diverges), and grade the comparison with a
+
   report-card Test: the exact engines agree, the hybrid reproduces them AND stays physically
+
   admissible (the discriminating control the surrogate fails), at a competitive runtime.
 
-claim: |
-  The simulation methods form a clean speed-fidelity frontier, and the comparison is graded,
+  '
+claim: 'The simulation methods form a clean speed-fidelity frontier, and the comparison is graded,
+
   not asserted. The exact engines (BioGears C++, Tellurium, COPASI) are the slow faithful
+
   reference — two independent exact-SBML integrators agree to ~5e-4. The event-free proto_valve
+
   and the event-driven hybrid sit at the sweet spot: ~1e-3 hemodynamic error at ~1.2x the full
-  model's speed (233 s vs 284 s for a 2 h severe run), the hybrid adding explicit, swappable
+
+  model''s speed (233 s vs 284 s for a 2 h severe run), the hybrid adding explicit, swappable
+
   events. The mean-hemodynamics reduction (~5.6e7x) and the PyTorch surrogate (~4e4x) buy orders
+
   of magnitude of speed but give up fidelity — and the surrogate is inadmissible, leaving
+
   physical bounds on 8 of 9 severe observables. A report-card Test grades this: cross-engine
+
   agreement and hybrid hemodynamic fidelity are hard gates (both pass), physical admissibility
+
   is a hard gate the hybrid passes and the surrogate fails (the discriminating control), runtime
-  is a directional axis (1.22x), and the hybrid's ~20% blood-pathogen transient is recorded as
+
+  is a directional axis (1.22x), and the hybrid''s ~20% blood-pathogen transient is recorded as
+
   the stated cost of the tick-quantized infection timing. The per-observable matrix localizes
-  every method's cost: proto_valve and the hybrid are identical everywhere except blood pathogen,
+
+  every method''s cost: proto_valve and the hybrid are identical everywhere except blood pathogen,
+
   where the hybrid pays the event-relocation timing residual.
 
+  '
 expected_behavior:
-  - name: methods-form-a-graded-speed-fidelity-frontier
-    statement: "Across methods, higher speed trades against fidelity along a clear frontier; the exact engines agree to ~1e-3, the hybrid reproduces them, and the surrogate is inadmissible — and these are graded report-card checks, not assertions."
-    status: supported
-  - name: admissibility-discriminates-correct-from-degenerate
-    statement: "A physical-admissibility gate passes for the exact/hybrid methods and fails for the surrogate (8/9 observables out of bounds) — a discriminating control, not a trivially-wide band."
-    status: supported
-
+- name: methods-form-a-graded-speed-fidelity-frontier
+  statement: Across methods, higher speed trades against fidelity along a clear frontier; the exact engines agree to ~1e-3, the hybrid reproduces them, and the surrogate is inadmissible — and these are graded report-card checks, not assertions.
+  status: supported
+- name: admissibility-discriminates-correct-from-degenerate
+  statement: A physical-admissibility gate passes for the exact/hybrid methods and fails for the surrogate (8/9 observables out of bounds) — a discriminating control, not a trivially-wide band.
+  status: supported
 findings:
-  - id: the-methods-form-a-speed-fidelity-frontier
-    summary: "Every method placed on one speed-vs-fidelity frontier: exact engines (~1x, <1%), proto_valve/hybrid (~1.2x, ~1e-3), reduced (~5.6e7x, ~10%), surrogate (~4e4x, inadmissible) — chart 01."
-    detail: |
-      One frontier, from the committed run data (chart 01). The exact engines cluster at ~1x
-      speed and sub-1% error: Tellurium (reference), COPASI (~5e-4 vs Tellurium, 4.67x the raw
-      2 h cost), the viva-core Rust backend (bit-close, 1.12x framework), BioGears the physiology
-      reference. proto_valve and the event-driven hybrid sit just above 1x speed inside the
-      exact-fidelity band (~1e-3 hemodynamic error, 233-236 s vs 284 s for a 2 h severe run). The
-      mean-hemodynamics reduction (~5.6e7x) and the PyTorch surrogate (~4e4x) sit far right at
-      high error, the surrogate in the inadmissible zone. The per-observable matrix (chart 02)
-      localizes each cost: COPASI agrees everywhere (<5e-4); proto_valve and the hybrid are
-      identical on every observable (~6% on CO/SVR from the dropped per-beat layer, else <1%)
-      EXCEPT blood pathogen — exact for proto_valve (events in SBML, exact timing) but a ~20%
-      transient for the hybrid (events in the composition layer, seeded at the 10 s tick).
-    status: supported
-    statement: "The comparison is a graded, admissibility-controlled frontier, not a table of assertions. Each method's cost is localized to specific observables, and the grading gate discriminates a faithful method from a degenerate one."
-    explanation: "Running one model under many methods only means something if the comparison is graded and the grade discriminates. This study does both. The speed axis is measured (same-harness 2 h runtime for the composite set; committed 48 h and per-step figures for the accelerated tiers), and the fidelity axis is the max relative error vs the appropriate exact reference, per observable. That turns the frontier into a report-card Test (methods_comparison) whose hard gates are cross-engine agreement and hybrid hemodynamic fidelity (both within_tol), whose discriminating control is physical admissibility — the exact/hybrid methods stay in bounds, the surrogate leaves 8 of 9, so the gate is not a trivially-wide band a wrong model would also pass — and whose directional axis is runtime. The per-observable matrix is the honest part: it shows proto_valve and the hybrid are the SAME continuous core (identical CO/SVR cost) and that the hybrid's only extra cost is the blood-pathogen timing transient, recorded as a soft axis rather than hidden. The placement: the exact engines are the reference where fidelity must be exact; proto_valve and the hybrid are the practical sweet spot (exact-engine fidelity, fastest-exact runtime, and for the hybrid, explicit events); the reduction and the surrogate are screening tiers whose speed is only useful inside the regime where they stay admissible — which, for the surrogate on severe sepsis, they do not."
+- id: the-methods-form-a-speed-fidelity-frontier
+  summary: 'Every method placed on one speed-vs-fidelity frontier: exact engines (~1x, <1%), proto_valve/hybrid (~1.2x, ~1e-3), reduced (~5.6e7x, ~10%), surrogate (~4e4x, inadmissible) — chart 01.'
+  detail: 'One frontier, from the committed run data (chart 01). The exact engines cluster at ~1x
 
+    speed and sub-1% error: Tellurium (reference), COPASI (~5e-4 vs Tellurium, 4.67x the raw
+
+    2 h cost), the viva-core Rust backend (bit-close, 1.12x framework), BioGears the physiology
+
+    reference. proto_valve and the event-driven hybrid sit just above 1x speed inside the
+
+    exact-fidelity band (~1e-3 hemodynamic error, 233-236 s vs 284 s for a 2 h severe run). The
+
+    mean-hemodynamics reduction (~5.6e7x) and the PyTorch surrogate (~4e4x) sit far right at
+
+    high error, the surrogate in the inadmissible zone. The per-observable matrix (chart 02)
+
+    localizes each cost: COPASI agrees everywhere (<5e-4); proto_valve and the hybrid are
+
+    identical on every observable (~6% on CO/SVR from the dropped per-beat layer, else <1%)
+
+    EXCEPT blood pathogen — exact for proto_valve (events in SBML, exact timing) but a ~20%
+
+    transient for the hybrid (events in the composition layer, seeded at the 10 s tick).
+
+    '
+  status: supported
+  statement: The comparison is a graded, admissibility-controlled frontier, not a table of assertions. Each method's cost is localized to specific observables, and the grading gate discriminates a faithful method from a degenerate one.
+  explanation: 'Running one model under many methods only means something if the comparison is graded and the grade discriminates. This study does both. The speed axis is measured (same-harness 2 h runtime for the composite set; committed 48 h and per-step figures for the accelerated tiers), and the fidelity axis is the max relative error vs the appropriate exact reference, per observable. That turns the frontier into a report-card Test (methods_comparison) whose hard gates are cross-engine agreement and hybrid hemodynamic fidelity (both within_tol), whose discriminating control is physical admissibility — the exact/hybrid methods stay in bounds, the surrogate leaves 8 of 9, so the gate is not a trivially-wide band a wrong model would also pass — and whose directional axis is runtime. The per-observable matrix is the honest part: it shows proto_valve and the hybrid are the SAME continuous core (identical CO/SVR cost) and that the hybrid''s only extra cost is the blood-pathogen timing transient, recorded as a soft axis rather than hidden. The placement: the exact engines are the reference where fidelity must be exact; proto_valve and the hybrid are the practical sweet spot (exact-engine fidelity, fastest-exact runtime, and for the hybrid, explicit events); the reduction and the surrogate are screening tiers whose speed is only useful inside the regime where they stay admissible — which, for the surrogate on severe sepsis, they do not.'
 visualizations:
-  - name: "Speed-vs-fidelity frontier + same-harness runtime — every method on the sepsis core"
-    address: image:charts/01_frontier_and_runtime.svg
-    display: primary
-  - name: "Per-observable fidelity matrix + trajectory detail — where the methods agree and diverge"
-    address: image:charts/02_fidelity_detail.svg
-    display: secondary
-
+- name: Speed-vs-fidelity frontier + same-harness runtime — every method on the sepsis core
+  address: image:charts/01_frontier_and_runtime.svg
+  display: primary
+- name: Per-observable fidelity matrix + trajectory detail — where the methods agree and diverge
+  address: image:charts/02_fidelity_detail.svg
+  display: secondary
 baseline:
-  - name: exact-engine-reference
-    composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
-    config: {severity: 3}
-    note: "The full exact-SBML engine every other method is compared against."
-
+- name: exact-engine-reference
+  composite: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+  params:
+    severity: 3
+    interval_s: 1
+  note: The full exact-SBML engine every other method is compared against.
 variants: []
+readouts:
+- name: SBP
+  store_path: stores/parameters/SBP
+  units: mmHg
+- name: DBP
+  store_path: stores/parameters/DBP
+  units: mmHg
+- name: MAP
+  store_path: stores/parameters/MAP
+  units: mmHg
+- name: HR
+  store_path: stores/parameters/HR
+  units: 1/min
+- name: CO
+  store_path: stores/parameters/COmeas
+  units: L/min
+- name: SVR
+  store_path: stores/parameters/SVR
+  units: mmHg·s/mL
+- name: blood_volume
+  store_path: stores/parameters/Vblood
+  units: mL
+- name: tissue_integrity
+  store_path: stores/parameters/TI
+  units: 0..1
+- name: blood_pathogen
+  store_path: stores/parameters/PB
+  units: a.u.
 interventions: []
-runs: []
+runs:
+- name: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml__1795816093__99a76a
+  status: completed
+  timestamp: 1795816396.25975
+  emitter:
+    kind: unknown
+  env_id: c1456316261260f9
+  variant: exact-engine-reference
+  params: '{"severity": 3, "interval_s": 1}'
+  computed_outcomes:
+    _grader:
+      version: 3-freshness
+      graded_at: '2026-11-27T21:53:16.416035+00:00'
+      inputs_hash: 0001665f84ce77e5
+      store: resolved
+  provenance:
+    params:
+      interval_s:
+        value: 1
+        source: override
+      n_steps:
+        value: 7200
+        source: resolved
+      severity:
+        value: 3
+        source: override
+    params_captured_at: '2026-11-27'
+    params_source: dashboard-runner
+simulation_set:
+- name: exact-engine-reference-baseline
+  kind: single
+  base_model: viva_simulation_core.composites.sepsis_sbml.sepsis_sbml
+  is_baseline: true
+  status: ran
+  params:
+    severity: 3
+    interval_s: 1
+  metrics:
+  - SBP
+  - DBP
+  - MAP
+  - HR
+  - CO
+  - SVR
+  - blood_volume
+  - tissue_integrity
+  - blood_pathogen
+pipeline_gate:
+  gate_evaluator:
+    result: blocked
+    blocked_by:
+    - methods-form-a-graded-speed-fidelity-frontier
+    - admissibility-discriminates-correct-from-degenerate
+    evaluated_by: code
+    diverges_from_authored: false
