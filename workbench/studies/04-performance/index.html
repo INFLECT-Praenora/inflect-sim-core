@@ -634,7 +634,7 @@ micro-benchmark sits behind the full-run numbers.
       <div class="ctr-meta">
         <div class="ctr-meta-row"><span class="ctr-meta-k">Model</span> <code>sepsis-sbml-exact</code><a class="ov-tablink" href="#" onclick="_setStudyTab('compose');return false;">model →</a></div>
         
-        <div class="ctr-meta-row"><span class="ctr-meta-k">Measures</span> <span class="ctr-meta-item">5 behavior tests</span><a class="ov-tablink" href="#" onclick="_setStudyTab('audit');return false;">see Tests →</a></div>
+        <div class="ctr-meta-row"><span class="ctr-meta-k">Measures</span> <span class="ctr-meta-item">6 behavior tests</span><a class="ov-tablink" href="#" onclick="_setStudyTab('audit');return false;">see Tests →</a></div>
         
       </div>
     </div>
@@ -842,6 +842,36 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
       </div>
       
       
+      
+      
+      
+      
+      
+      
+      
+      <div class="finding-card finding-kind-other finding-status-supported" id="finding-event-free-reduction-is-a-faster-arm-same-engine">
+        <details class="finding-details">
+          <summary class="finding-row">
+            <span class="finding-status-glyph">◆</span>
+            <span class="finding-claim finding-statement">The event-free proto_valve reduction runs the same exact-SBML model ~1.20x faster on a matched severity-3 run (same roadrunner engine, same harness, measured this machine; chart 05).</span>
+            
+          </summary>
+          <div class="finding-drawer">
+            <div class="finding-header">
+              <span class="finding-id">event-free-reduction-is-a-faster-arm-same-engine</span>
+              <span class="finding-kind">other</span>
+              <span class="finding-status-text">supported literature</span>
+            </div>
+            
+            
+            
+            
+            
+          </div>
+        </details>
+      </div>
+      
+      
     </div>
     
       
@@ -895,7 +925,7 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
   <div class="model-subtabs" role="tablist" aria-label="Model sections">
     <button type="button" class="model-subtab active" data-modelsub="composition" role="tab" aria-selected="true" onclick="_setModelSubtab('composition')">Composition</button>
     <button type="button" class="model-subtab" data-modelsub="loom" role="tab" aria-selected="false" onclick="_setModelSubtab('loom')">Loom</button>
-    <button type="button" class="model-subtab" data-modelsub="variants" role="tab" aria-selected="false" onclick="_setModelSubtab('variants')">Variants</button>
+    <button type="button" class="model-subtab" data-modelsub="variants" role="tab" aria-selected="false" onclick="_setModelSubtab('variants')">Variants <span class="model-subtab-count">1</span></button>
     <button type="button" class="model-subtab" data-modelsub="interventions" role="tab" aria-selected="false" onclick="_setModelSubtab('interventions')">Interventions</button>
     <button type="button" class="model-subtab" data-modelsub="readouts" role="tab" aria-selected="false" onclick="_setModelSubtab('readouts')">Readouts</button>
   </div>
@@ -991,7 +1021,26 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
   <div class="overview-section" id="study-variants-section">
     <p class="msub-intro">A <strong>variant</strong> is a copy of a baseline model with a few parameters changed, run and compared against the baseline. Everything else stays fixed.</p>
     
-    <div class="msub-empty">No variants yet. Add one below to perturb the baseline and compare against it.</div>
+    <div class="var-list">
+      
+      <div class="var-card">
+        <div class="var-card-main">
+          <div class="var-card-head">
+            <code class="var-name">eventfree-proto-valve</code>
+            <span class="var-base">based on the baseline</span>
+          </div>
+          
+          <div class="var-overrides">
+            <span class="var-nochange">no overrides — identical to the baseline</span>
+          </div>
+        </div>
+        <div class="var-card-actions">
+          <button type="button" class="action-btn study-variant-run" data-variant="eventfree-proto-valve" title="Run this variant">▶ Run</button>
+          <button type="button" class="icon-btn study-variant-del" data-variant="eventfree-proto-valve" title="Delete variant" aria-label="Delete variant eventfree-proto-valve">✕</button>
+        </div>
+      </div>
+      
+    </div>
     
     
     <form class="study-variant-add-form msub-addcard" onsubmit="return _submitStudyVariantAdd(this)">
@@ -1372,6 +1421,36 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
       
     </li>
     
+    
+    
+    
+    
+    
+    
+    
+    <li class="expected-behavior-item" id="bt-event-free-reduction-is-faster-within-the-same-engine"
+        data-test-kind="behavioral"
+        
+        data-pytest-node="event-free-reduction-is-faster-within-the-same-engine"
+        data-classification="unclassified"
+        data-result="pending"
+        style="margin: 0 0 10px 0; padding: 10px 12px; border-left: 4px solid #cbd5e1; background: #f8fafc; border-radius: 4px;">
+      
+        
+      <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+        <span class="bt-result" style="font-size: 0.75em; font-family: monospace; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; color: #475569">⏳ pending</span>
+        <span class="classification-pill classification-unclassified">unclassified</span>
+        <strong style="font-size: 0.9em;">event-free-reduction-is-faster-within-the-same-engine</strong>
+        
+      </div>
+      <div style="margin-top: 6px; font-size: 0.95em;"></div>
+      
+      
+      
+      
+      
+    </li>
+    
   </ul>
   
   </div>
@@ -1529,7 +1608,7 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span class="gate-status-blocked" style="padding:2px 12px;border-radius:9999px;font-weight:700;font-size:0.85em">blocked</span>
         <span class="muted small">evaluated by code</span>
-        <span class="muted small">0/5 passed</span>
+        <span class="muted small">0/6 passed</span>
       </div>
       
     </div>
@@ -1569,6 +1648,8 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
           <li>Speed without admissibility: on severe sepsis the surrogate leaves physical bounds for 8 of 9 observables.</li>
           
           <li>COPASI, a second exact-SBML engine, reproduces Tellurium&#39;s severe trajectory to ~5e-4 across all 9 observables, at ~4.7x the wall-clock (chart 03).</li>
+          
+          <li>The event-free proto_valve reduction runs the same exact-SBML model ~1.20x faster on a matched severity-3 run (same roadrunner engine, same harness, measured this machine; chart 05).</li>
           
         </ul>
         
@@ -1617,6 +1698,11 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
       <li style="display:flex;align-items:flex-start;gap:8px">
         <button type="button" class="action-btn study-finding-del" data-id="copasi-reproduces-tellurium-at-higher-cost" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
         <span>COPASI, a second exact-SBML engine, reproduces Tellurium&#39;s severe trajectory to ~5e-4 across all 9 observables, at ~4.7x the wall-clock (chart 03). <span class="muted small">(supported)</span></span>
+      </li>
+      
+      <li style="display:flex;align-items:flex-start;gap:8px">
+        <button type="button" class="action-btn study-finding-del" data-id="event-free-reduction-is-a-faster-arm-same-engine" title="Delete finding" style="font-size:0.72em;line-height:1;padding:2px 6px">✕</button>
+        <span>The event-free proto_valve reduction runs the same exact-SBML model ~1.20x faster on a matched severity-3 run (same roadrunner engine, same harness, measured this machine; chart 05). <span class="muted small">(supported)</span></span>
       </li>
       
     </ul>
@@ -1673,7 +1759,7 @@ The speedups are compute-only. They tell you which engine is cheaper, not whethe
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "74c03263649881aa42878ac534332fad196de680", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/74c03263649881aa42878ac534332fad196de680", "branch": "main", "lockfile": "uv.lock@b43237a591cb", "generated_at": "2026-11-24 01:31 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "e528f1bc23a90fd8018f662435934d18a00b5a7c", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/e528f1bc23a90fd8018f662435934d18a00b5a7c", "branch": "main", "lockfile": "uv.lock@f9295bc9c93f", "generated_at": "2026-11-27 16:47 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>
