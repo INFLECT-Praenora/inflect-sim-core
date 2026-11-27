@@ -17,6 +17,32 @@ same API, and **switch between engines** — a C++ physiology engine, an exact
 SBML/Antimony model, a learned surrogate — by swapping one box, because they share
 the same typed port contract.
 
+### The simulator contract
+
+The front door is one interface — **model in, results + verification out** — with the
+engine swappable behind it:
+
+```python
+from viva_simulation_core import simulate, SimulationRequest
+
+out = simulate(model, SimulationRequest(
+    duration=7200, interval=60, observables=["MAP", "PB"],
+    engine="tellurium",            # or "copasi" / "julia" / "rust" / "surrogate"
+    cross_engine="copasi",         # optional: re-run on a 2nd engine and check agreement
+))
+out.results            # {"time": [...], "MAP": [...], "PB": [...]}
+out.verification.passed  # ran / finite / admissible / cross-engine agreement
+```
+
+That contract — plus the engine wrappers it dispatches to and the composite registry
+(`sepsis_sbml`, `sepsis_sbml_eventfree_valve`, `sepsis_cosim`, and every curated
+`inflect-models-db` model by slug) — **is** the simulator. The workflow/orchestration
+facade (`catalog` / `call` / `connect` / `run` / `serve`) lives in
+`viva_simulation_core.orchestration`; it composes modules into pipelines and is a
+driver concern on top of the simulator, not part of its identity. The
+`biogears-sbml-sepsis` investigation below is a co-located demonstration of the core,
+not part of its API.
+
 The demonstration takes one real model, the BioGears sepsis core, and puts it through
 the core's capabilities. Each one is a runnable artifact you can open and run, listed
 below.
