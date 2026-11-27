@@ -1,0 +1,123 @@
+schema_version: 3
+name: 09-event-architecture
+investigation: biogears-sbml-sepsis
+status: ran
+title: "Event architecture — lifting the discrete sepsis events out of the model"
+confidence: Accepted
+verdict: supported  # the event-free SBML core + viva-impulse events reproduces the full model
+
+parent_studies:
+  - study: 08-reduced-model
+    relation: builds-on
+    rationale: "Study 08 removed the per-beat event by reduction; this study removes the remaining discrete events by RELOCATION — lifting them into the composition layer rather than approximating them away."
+  - study: 06-cosimulation
+    relation: builds-on
+    rationale: "Cosimulation established the engine coupling channel (parameters_in writeback); this study reuses it to inject vivarium-owned discrete events into the engine."
+
+question: |
+  BioGears is event-driven, and the SBML extraction encodes that as SBML events run by
+  roadrunner's root-finder — opaque to the composition engine. Can we use vivarium's own
+  event-driven capabilities instead: lift the model's discrete events OUT of the SBML and
+  express them as first-class process-bigraph constructs, and still reproduce the model?
+
+objective: |
+  Take the event-free SBML core (proto_valve with ALL events removed: the per-beat E_beat
+  and pulOpen, and now the infection E_infect and the TLR hysteresis E_tlrOn/E_tlrOff) and
+  supply the infection and TLR events from the vivarium layer as general viva-impulse Steps
+  — a ScheduledEvent (timed infection) and a ThresholdSwitch (TLR hysteresis) — coupled to
+  the engine through a parameters_in bridge. Measure how closely the hybrid reproduces the
+  full event-driven model, and state the cost.
+
+claim: |
+  The discrete sepsis events can be lifted out of the SBML into the vivarium layer and the
+  hybrid still reproduces the full model — at no runtime cost versus the fastest exact option.
+  The event-free SBML core, driven by viva-impulse's ScheduledEvent (E_infect) and
+  ThresholdSwitch (E_tlrOn/Off) through the TelluriumImpulseBridge, reproduces the full
+  event-driven model (same proto_valve continuous core, events relocated): over a 2 h severe
+  run the hemodynamics (MAP, SBP, HR, SVR) agree to ~1e-4 max relative and tissue integrity to
+  ~3e-4. Blood pathogen tracks with a brief ~20% transient during the steep infection rise
+  that converges to ~0.2% — the one visible residual, and it is purely the tick-quantization
+  of the infection start (the ScheduledEvent fires at the first 10 s tick at or after
+  infectionStart, versus the SBML event's exact root-find; a smaller interval shrinks it).
+  Runtime (same roadrunner engine + Composite harness, this machine, 2 h severity 3): full
+  sepsis_sbml 284 s, proto_valve 236 s, hybrid 233 s — the hybrid matches the fastest exact
+  option and is ~1.22x faster than the full event-driven model, because its continuous core is
+  event-free (no CVODE root returns) and the lifted events are cheap. So against the other run
+  options the event-driven format is prediction-faithful AND runtime-competitive, and it buys
+  explicit, swappable events (a different protocol, an added controller, retimed dosing) with
+  no SBML surgery — unlike the learned surrogate (study 04), which is ~1000x faster but
+  inadmissible on 8/9 severe observables. This holds for the SLOW, timescale-separated events
+  (infection onset, the TLR mode switch); the fast per-beat event stays in the engine (study
+  08) — and the extraction report confirms E_beat is BioGears' own per-cardiac-cycle
+  measurement event, intrinsic to the beat and not separable to the tick.
+
+expected_behavior:
+  - name: hybrid-reproduces-the-full-model
+    statement: "The event-free core + vivarium-layer events reproduces the full event-driven model's hemodynamics to ~1e-5 and blood pathogen to ~1%, with the infection-timing quantization as the stated residual."
+    status: supported
+  - name: events-are-general-viva-impulse-constructs
+    statement: "The discrete layer is the general viva-impulse ScheduledEvent + ThresholdSwitch (not bespoke sepsis logic) — the same event constructs that run the bouncing-ball / thermostat demos, reused here against a stiff physiological engine."
+    status: supported
+
+findings:
+  - id: lifting-the-slow-events-to-vivarium-reproduces-the-model
+    summary: "Event-free SBML core + viva-impulse ScheduledEvent(E_infect) + ThresholdSwitch(E_tlr) reproduces the full model to ~1e-6 (hemodynamics) / ~0.2% (blood pathogen); residual = infection-timing tick-quantization (chart 01)."
+    detail: |
+      The full model's infection and TLR events are SBML events run inside roadrunner's
+      root-finder — the composition engine never sees them. This study removes them from the
+      SBML (proto_valve_eventfree: zero events) and supplies them from the vivarium layer as
+      the general viva-impulse Steps: a ScheduledEvent raises infOn and seeds the tissue
+      pathogen at infectionStart, and a ThresholdSwitch toggles TLR with hysteresis as the
+      sensed PT crosses pUpper/pLower. A small TelluriumImpulseBridge couples these engine-
+      agnostic events to the engine's parameters_in override — forwarding the held flags every
+      tick and injecting the PT seed for a single tick (so the engine's rate-rule integration
+      of PT is not pinned). Over a 2 h severe run the hybrid reproduces the full event-driven
+      model: MAP, SBP, HR agree to ~1e-4 max relative, SVR ~1e-3, tissue integrity ~3e-4, and
+      blood pathogen tracks with a brief ~20% transient during the steep infection rise that
+      converges to ~0.2%. The sole residual is the tick-quantization of the infection timing
+      (the ScheduledEvent fires at the first 10 s tick at or after infectionStart, versus the
+      SBML event's exact root-find; a smaller interval shrinks it).
+    status: supported
+    statement: "Lifting an event to the composition layer is correct — and useful — exactly when the event's timescale SEPARATES from the continuous core. The slow, rarely-firing infection and TLR events lift cleanly and reproduce the model; the fast per-beat event does not, and stays in the engine."
+    explanation: "Vivarium's event-driven machinery (trigger-fired Steps, multi-rate scheduling) coordinates discrete transitions with a continuous core at the tick boundary. That is the right tool for events whose timescale is well separated from the fast dynamics: the infection fires once and the TLR mode flips a handful of times over a 48 h course, so quantizing them to a 10 s tick is negligible — and the payoff is real, since the events become explicit, composable objects (swap the infection protocol, chain the antibiotic controller from study 06, retime a dose) with no SBML surgery. The per-beat event is the opposite case: it fires ~205k times and is tightly coupled to the stiff cardiovascular ODE, so splitting it across the tick-quantized composition layer would cost far more than it buys — there the right move is reduction inside the engine (study 08), not relocation. The extraction report (Sauro) confirms this split at the source: E_beat is BioGears' own per-cardiac-cycle measurement (pressures captured per beat, read by the baroreflex), intrinsic to the beat; the infection and AIR logic are the slow discrete layer. The honest placement: this study demonstrates the slow-event half of the design rule — lift the separated events, keep (or reduce) the coupled ones — with the SAME general viva-impulse constructs that run the standalone bouncing-ball and thermostat demos, now driving a stiff physiological engine."
+  - id: event-driven-vs-other-run-options-runtime-and-predictions
+    summary: "Against the other run options the event-driven hybrid matches the fastest EXACT engine in runtime (233 s vs proto_valve 236 s / full 284 s, 2 h sev 3) and reproduces it in predictions (~1e-4 hemodynamics) — unlike the surrogate, fast but inadmissible (chart 02)."
+    detail: |
+      Placing the event-driven simulator among the investigation's other run options — same
+      roadrunner engine and Composite harness, this machine, one 2 h severity-3 run:
+        - full sepsis_sbml (events in the SBML): 284 s
+        - proto_valve (E_beat reduced):          236 s
+        - sepsis_hybrid (events in vivarium):    233 s  (~1.22x faster than full; within noise of proto_valve)
+      The hybrid matches the fastest exact option because its continuous core is event-free (no
+      CVODE root returns) and the lifted ScheduledEvent/ThresholdSwitch cost essentially nothing
+      per tick. In predictions it reproduces the exact engine: MAP/SBP/HR to ~1e-4 max relative,
+      SVR ~1e-3, tissue integrity ~3e-4, and blood pathogen with the ~20% infection-rise
+      transient that converges to ~0.2% (chart 02). The contrast is the learned surrogate
+      (study 04): ~1000x faster but inadmissible on 8 of 9 severe observables. So the
+      event-driven format sits at the good corner — exact-engine fidelity at the fastest exact
+      option's runtime — while adding explicit, swappable events the monolithic engines and the
+      surrogate cannot offer.
+    status: supported
+
+visualizations:
+  - name: "Lifting the discrete events into vivarium reproduces the full model (hybrid vs full, 6 observables)"
+    address: image:charts/01_event_lift_reproduction.svg
+    display: primary
+  - name: "Event-driven simulator vs the other run options — runtime and predictions"
+    address: image:charts/02_runtime_and_predictions.svg
+    display: secondary
+
+baseline:
+  - name: sepsis-sbml-full
+    composite: viva_simulation_core.composites.sepsis_sbml_eventfree_valve.sepsis_sbml_eventfree_valve
+    config: {severity: 3}
+    note: "The full event-driven model (events in the SBML) that the hybrid reproduces."
+
+variants:
+  - name: sepsis-hybrid
+    composite: viva_simulation_core.composites.sepsis_hybrid.sepsis_hybrid
+    config: {severity: 3}
+    note: "Event-free SBML core + viva-impulse ScheduledEvent(E_infect) + ThresholdSwitch(E_tlr) via TelluriumImpulseBridge. Requires the impulse engine (viva-impulse). Reproduces the full model to ~1e-6 hemodynamics / ~0.2% blood pathogen (chart 01)."
+
+interventions: []
+runs: []

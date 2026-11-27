@@ -5,5 +5,6 @@ Process/Step subclasses visible on each top-level module) discovers them.
 """
 from .api_call import ApiCallStep
 from .antibiotic_controller import AntibioticControllerProcess
+from .tellurium_impulse_bridge import TelluriumImpulseBridge
 
-__all__ = ["ApiCallStep", "AntibioticControllerProcess"]
+__all__ = ["ApiCallStep", "AntibioticControllerProcess", "TelluriumImpulseBridge"]

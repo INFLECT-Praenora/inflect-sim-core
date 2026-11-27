@@ -1,0 +1,35 @@
+{
+ "scenario": {
+  "severity": 3,
+  "horizon_s": 7200,
+  "interval_s": 10
+ },
+ "baseline": "proto_valve (events in SBML)",
+ "hybrid_wall_s": 232.96115708351135,
+ "agreement": {
+  "MAP": {
+   "max_abs": 0.006922677135165145,
+   "max_rel": 7.20560474980684e-05
+  },
+  "SBP": {
+   "max_abs": 0.006922677135179356,
+   "max_rel": 6.010650674780343e-05
+  },
+  "HR": {
+   "max_abs": 0.0006656917231282478,
+   "max_rel": 9.308809643015427e-06
+  },
+  "SVR": {
+   "max_abs": 0.000993886825288448,
+   "max_rel": 0.0010107134003115852
+  },
+  "blood_pathogen": {
+   "max_abs": 2.3238982317035295,
+   "max_rel": 0.20416397153496113
+  },
+  "tissue_integrity": {
+   "max_abs": 0.0002716989080198129,
+   "max_rel": 0.0002716989080198129
+  }
+ }
+}

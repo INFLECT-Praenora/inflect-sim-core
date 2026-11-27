@@ -30,6 +30,17 @@ stand-ins, and instantaneous values do not line up (compare per-beat summaries).
 in the simulation core via the `sepsis_sbml_eventfree_valve` composite. Same authorship,
 license (Apache-2.0 derivative of BioGears), and caveats as the full model below.
 
+## Fully event-free variant (`proto_valve_eventfree`)
+`proto_valve_eventfree.{ant,xml}` is `proto_valve` with the remaining three discrete
+events also removed — `E_tlrOn`, `E_tlrOff` (the TLR hysteresis) and `E_infect` (the
+timed infection seed). The continuous core then has **no events at all**; `PT`, `TLR`,
+`infOn` stay at their initial 0 and are driven from the vivarium layer by general
+viva-impulse Steps (a `ScheduledEvent` for the infection, a `ThresholdSwitch` for the
+TLR hysteresis), coupled through the engine's `parameters_in` override. Regenerate with
+`make_eventfree_sbml.py`. Run via the `sepsis_hybrid` composite — it reproduces the full
+event-driven model to ~1e-6 on the hemodynamics and ~0.2% on blood pathogen (the residual
+is the tick-quantization of the infection timing). Same authorship/license/caveats as above.
+
 ## Model
 **BioGears sepsis core**, extracted from the BioGears physiology engine into Antimony (91 state variables, per the report). Targets BioGears **8.2.0**, patient StandardMale (77.1 kg, HR 72, BP 114/73.5).
 
