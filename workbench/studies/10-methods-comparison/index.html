@@ -91,7 +91,7 @@ comparison rather than just assert it?
   </button>
   <button class="study-pillar" data-kind="conclusions" onclick="_setStudyTab('conclusions')">
     <svg class="pillar-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M6 8.2v7.6"/><path d="M6 12h6a4 4 0 0 0 4-4V11"/></svg>
-    <span class="pillar-label">Conclusions</span>
+    <span class="pillar-label">Decide</span>
   </button>
   
   <span class="study-dl study-export-wrap" style="margin-left:auto; align-self:center; position:relative; display:inline-flex">
@@ -786,7 +786,7 @@ admissible (the discriminating control the surrogate fails), at a competitive ru
   <div class="overview-section" id="model-section">
     <h3>Runnable models <span class="muted" style="font-size:0.85em;font-weight:normal">— the composite(s) this study simulates</span></h3>
     
-    <div class="cond-block" data-model-composite="viva_simulation_core.composites.sepsis_sbml.sepsis_sbml" data-model-overrides='{}'>
+    <div class="cond-block" data-model-composite="viva_simulation_core.composites.sepsis_sbml.sepsis_sbml" data-model-overrides='{"interval_s": 1, "severity": 3}'>
       <div class="cond-block-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <strong>exact-engine-reference</strong>
         
@@ -815,6 +815,13 @@ admissible (the discriminating control the surrogate fails), at a competitive ru
         <div class="viv-loading"><span class="viv-loading-spin" aria-hidden="true"></span><span>Loading configuration…</span></div></div>
       
       
+      
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:0.8em">
+        
+        <span class="cond-pill"><span class="cond-pill-k">steps</span>=7200</span>
+        
+        <span class="cond-pill"><span class="cond-pill-k">status</span>=completed</span>
+      </div>
       
     </div>
     
@@ -1168,7 +1175,7 @@ admissible (the discriminating control the surrogate fails), at a competitive ru
         <span class="gate-current-tag">you are here</span>
       </span>
       
-      <span class="status-step  gate-status-not-assessed">
+      <span class="status-step set gate-status-passed">
         <span class="dot"></span>2 · Execution
         
         
@@ -1180,13 +1187,13 @@ admissible (the discriminating control the surrogate fails), at a competitive ru
         
       </span>
       
-      <span class="status-step  gate-status-not-assessed">
+      <span class="status-step set gate-status-passed">
         <span class="dot"></span>4 · Quality
         
         
       </span>
       
-      <span class="status-step  gate-status-not-assessed">
+      <span class="status-step  gate-status-blocked">
         <span class="dot"></span>5 · Decision
         
         
@@ -1281,7 +1288,7 @@ admissible (the discriminating control the surrogate fails), at a competitive ru
         evaluator's result from the behavior-test outcomes — the evaluation the
         conclusion rests on.</p>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="gate-status-not_started" style="padding:2px 12px;border-radius:9999px;font-weight:700;font-size:0.85em">not_started</span>
+        <span class="gate-status-blocked" style="padding:2px 12px;border-radius:9999px;font-weight:700;font-size:0.85em">blocked</span>
         <span class="muted small">evaluated by code</span>
         <span class="muted small">0/2 passed</span>
       </div>
@@ -1290,10 +1297,38 @@ admissible (the discriminating control the surrogate fails), at a competitive ru
     
 
     
+    
+    
+
+    
+    
+    
 
   </div>
 
   
+  
+  <div class="overview-section"><h2 class="overview-label">Plan &amp; assumptions</h2>
+
+    
+    <div class="overview-section">
+      <h3 class="overview-label">Pipeline gate</h3>
+      <p class="muted" style="margin: 0 0 8px 0;font-size:0.88em">
+        Each study is a model-building gate: it answers <em>"Can we safely build the next layer?"</em>
+      </p>
+      
+      <div style="margin-bottom:6px"><strong>Prerequisites:</strong> <em class="muted">none (root study)</em></div>
+      
+      
+      
+    </div>
+    
+
+    
+
+    
+
+  </div>
   
 
   
@@ -1301,28 +1336,21 @@ admissible (the discriminating control the surrogate fails), at a competitive ru
 
     
     
-    <p class="muted" style="margin:0 0 10px 0;font-size:0.85em">
-      Synthesised read-only from canonical fields — edit <code>findings</code>,
-      <code>limitations</code>, and <code>discovery_implications</code> to change
-      this (and the generated report) together.
-    </p>
-    <div class="conclusions-grid conclusions-synthesis">
-      <div class="conclusion-field">
-        <h3>Claims <span class="muted small">(from findings)</span></h3>
-        
-        <ul class="synthesis-list">
-          
-          <li>The comparison is a graded, admissibility-controlled frontier, not a table of assertions. Each method&#39;s cost is localized to specific observables, and the grading gate discriminates a faithful method from a degenerate one.</li>
-          
-        </ul>
-        
+    
+    
+    <div class="decide-section">
+      <h3 class="overview-label">Latest run outcomes</h3>
+      <div style="font-size:0.88em;color:#64748b;margin-bottom:8px">
+        baseline · seed ? ·
+        ?s simulated ·
+        ? history rows ·
+        started 1795816095.764595
       </div>
-      <div class="conclusion-field">
-        <h3>Evidence <span class="muted small">(from findings)</span></h3>
-        
-        <p class="muted">No evidence recorded on findings yet.</p>
-      </div>
+      
+      
+      
     </div>
+    
     
 
   </div>
@@ -1369,30 +1397,19 @@ admissible (the discriminating control the surrogate fails), at a competitive ru
     
 
     
+    
+    
+    
 
   </div>
 
   
   
-  <details class="overview-section"><summary class="overview-label">Limitations &amp; provenance</summary>
-
-    
-    
-    
-    <div class="conclusions-grid conclusions-synthesis">
-      <div class="conclusion-field">
-        <h3>Next steps <span class="muted small">(from discovery implications)</span></h3>
-        <p class="muted">No follow-up proposals recorded yet.</p>
-      </div>
-    </div>
-
-  </details>
-  
 
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "3c18a8347f162761ac3db87b449b44230e0a03da", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/3c18a8347f162761ac3db87b449b44230e0a03da", "branch": "main", "lockfile": "uv.lock@2a6eb0d147d7", "generated_at": "2026-11-27 19:28 UTC"} };</script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/INFLECT-Praenora/inflect-sim-core", basePath: "/inflect-sim-core/workbench", inputsDownloadBase: "https://github.com/INFLECT-Praenora/inflect-sim-core/raw/main/workspace", provenance: {"repo_slug": "INFLECT-Praenora/inflect-sim-core", "repo_url": "https://github.com/INFLECT-Praenora/inflect-sim-core", "commit": "7e7983a29b49d632c8b788a91737afc6c28bed76", "commit_url": "https://github.com/INFLECT-Praenora/inflect-sim-core/commit/7e7983a29b49d632c8b788a91737afc6c28bed76", "branch": "main", "lockfile": "uv.lock@2a6eb0d147d7", "generated_at": "2026-11-27 22:25 UTC"} };</script>
 <script src="/inflect-sim-core/workbench/assets/data-source.js"></script>
 <script src="/inflect-sim-core/workbench/assets/backend-features.js"></script>
 <script src="/inflect-sim-core/workbench/assets/toast.js"></script>
