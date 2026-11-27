@@ -53,6 +53,9 @@ expected_behavior:
   - name: copasi-second-exact-sbml-engine
     statement: "A second independent exact-SBML integrator, COPASI (LSODA), reproduces Tellurium's severe-arm trajectory on all 9 observables, at a few times the wall-clock cost — so the SBML result is engine-independent and the cost reflects the event-dense model."
     status: supported
+  - name: event-free-reduction-is-faster-within-the-same-engine
+    statement: "Removing the per-beat E_beat event and the piecewise pulOpen valve (the proto_valve reduction) makes the same exact-SBML model run measurably faster under roadrunner on a matched run — the per-beat event is a real, removable cost even inside one engine, without a surrogate."
+    status: supported
 
 findings:
   - id: one-48-h-run-three
@@ -147,6 +150,28 @@ findings:
       trigger operator (>= vs >) makes no difference. Tellurium remains the main SBML
       engine for the investigation; COPASI is the cross-engine validator.
     status: supported
+  - id: event-free-reduction-is-a-faster-arm-same-engine
+    summary: "The event-free proto_valve reduction runs the same exact-SBML model ~1.20x faster on a matched severity-3 run (same roadrunner engine, same harness, measured this machine; chart 05)."
+    detail: |
+      Beyond swapping engines or dropping to a surrogate, the per-beat event can be
+      removed from the model itself. The proto_valve reduction (composite
+      sepsis_sbml_eventfree_valve, sources/proto_valve.{ant,xml}) is the identical
+      BioGears-sepsis SBML with the per-beat E_beat event and the piecewise pulOpen
+      valve replaced by a continuous phase oscillator and per-artery valve gating, so
+      CVODE takes no root returns or reinitializations in the heartbeat. Run through the
+      identical process-bigraph Composite harness as the full model (severity 3, 2 h
+      model time, 10 s interval, this machine; run_proto_valve_compare.py ->
+      proto_valve_compare.json), it takes 236.1 s against the full model's 284.0 s — a
+      measured 1.20x speedup within the same roadrunner/CVODE engine. The absolute
+      seconds are harness-driven (per-interval reset + parameter re-apply) and sit above
+      the prototype report's raw-wheel single-call timings, but both arms pay that
+      overhead identically, so the ratio is the comparable number. The prototype report's
+      raw-wheel measurements give a consistent 1.24-1.44x from 30 min to an extrapolated
+      48 h. This is a model-level speed lever — fewer solver events — distinct from the
+      engine swap (study 04's Rust backend) and the surrogate: it keeps the full
+      pulsatile ODE, so unlike the surrogate it stays admissible (its fidelity cost is
+      quantified in study 05).
+    status: supported
 
 visualizations:
   - name: "Same sepsis spec, three engines: where compute time goes (committed full-run + live per-step)"
@@ -161,6 +186,9 @@ visualizations:
   - name: "Same sepsis SBML, two exact engines — Tellurium and COPASI agree to ~5e-4, at 4.7× the cost"
     address: image:charts/03_copasi_vs_tellurium.svg
     display: secondary
+  - name: "Event-free proto_valve vs full model — same engine, same harness: ~1.20× faster (measured)"
+    address: image:charts/05_proto_valve_speed.svg
+    display: secondary
 
 baseline:
   - name: sepsis-sbml-exact
@@ -168,7 +196,11 @@ baseline:
     config: {severity: 3}
     note: "The exact Tellurium/SBML engine benchmarked per-step live; full-run wall-clock cited from the committed engine-runtime study."
 
-variants: []
+variants:
+  - name: eventfree-proto-valve
+    composite: viva_simulation_core.composites.sepsis_sbml_eventfree_valve.sepsis_sbml_eventfree_valve
+    config: {severity: 3}
+    note: "The event-free proto_valve reduction (sources/proto_valve.xml): same exact-SBML model with the per-beat E_beat event and piecewise pulOpen valve removed. Run against the full model through the identical Composite harness (run_proto_valve_compare.py) — measured 1.20x faster on this machine, 236.1 s vs 284.0 s for a 2 h severity-3 run."
 interventions: []
 runs: []
 

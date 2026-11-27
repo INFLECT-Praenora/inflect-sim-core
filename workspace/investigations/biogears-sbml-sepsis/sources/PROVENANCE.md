@@ -6,6 +6,29 @@ These files were provided for this investigation (source: project-supplied).
 - `biogears_sepsis.ant` - Antimony form of the model (706 lines).
 - `biogears_sepsis.xml` - SBML export of the same model (L3V2, per the report).
 - `BioGears sepsis core in Antimony extraction report.pdf` / `.docx` - the extraction report (same content, two formats).
+- `proto_valve.ant` / `proto_valve.xml` - **event-free prototype** of the same model (see below).
+
+## Event-free prototype (`proto_valve`)
+`proto_valve.{ant,xml}` is a derivative of `biogears_sepsis` (same `biogears_sepsis`
+model id) with the two heartbeat-event sources of CVODE root returns removed, as a
+speed experiment. Changes (per the Nov 23 2026 prototype report):
+
+- `E_beat` (the per-beat event) becomes a continuous phase oscillator setting the
+  heartbeat driver `eshape`.
+- The piecewise pulmonic-valve gate `pulOpen` becomes per-artery valve gating.
+- `SBP := MAP + 19.1` and `DBP := MAP - 22` (assignment rules) and 5 s filters for
+  MAP/CVP/COmeas replace the per-beat latched pressures.
+- Heart-rate changes act immediately instead of at the next beat.
+- The three infection/TLR events (`E_tlrOn`, `E_tlrOff`, `E_infect`) are unchanged,
+  so the `severity` / `infectionStart` scenario knobs are identical.
+
+Measured behaviour (roadrunner 2.12.0 wheel): ~1.24–1.44x faster than the full model,
+with per-beat hemodynamics within ~0.2 mmHg and immune variables within ~1e-6 (`Alb_v`
+within ~1e-4). It is a **speed experiment, not a validated replacement** for `E_beat`:
+the per-artery valve, the `SBP`/`DBP` offsets, and the 5 s filters are physiological
+stand-ins, and instantaneous values do not line up (compare per-beat summaries). Run
+in the simulation core via the `sepsis_sbml_eventfree_valve` composite. Same authorship,
+license (Apache-2.0 derivative of BioGears), and caveats as the full model below.
 
 ## Model
 **BioGears sepsis core**, extracted from the BioGears physiology engine into Antimony (91 state variables, per the report). Targets BioGears **8.2.0**, patient StandardMale (77.1 kg, HR 72, BP 114/73.5).
