@@ -2,149 +2,247 @@ schema_version: 3
 name: 06-cosimulation
 investigation: biogears-sbml-sepsis
 status: ran
-title: "Dynamic Coupling — bidirectional co-simulation and physiological intervention"
+title: Dynamic Coupling — bidirectional co-simulation and physiological intervention
 confidence: Accepted
-# authored verdict — demonstration-level claim, backed by expected_behavior + a runnable artifact
-verdict: supported  # physiology engine + controller co-step; the closed loop clears the pathogen
-
+verdict: supported
 parent_studies:
-  - study: 05-fidelity
-    relation: builds-on
-    rationale: "Intervention acts on the sepsis mechanism fidelity establishes (detect discrepancy -> test treatment)."
+- study: 05-fidelity
+  relation: builds-on
+  rationale: Intervention acts on the sepsis mechanism fidelity establishes (detect discrepancy -> test treatment).
+question: 'Can the simulation core run a genuine co-simulation — two processes that exchange
 
-question: |
-  Can the simulation core run a genuine co-simulation — two processes that exchange
   state on every tick inside one composite — rather than running engines in parallel
+
   and comparing them afterwards (studies 01/02) or as parallel tiers (study 03)?
 
-objective: |
-  Demonstrate the co-simulation pillar with a clinically meaningful instance: couple
+  '
+objective: 'Demonstrate the co-simulation pillar with a clinically meaningful instance: couple
+
   the real BioGears-sepsis physiology engine (Tellurium) to a closed-loop antibiotic
+
   controller process in one composite, with a feedback edge, and show the loop acting
+
   on the physiology in flight. Run a matched untreated control from the identical
+
   composite (controller disabled).
 
-claim: |
-  The `sepsis_cosim` composite couples two process-bigraph processes that exchange
+  '
+claim: 'The `sepsis_cosim` composite couples two process-bigraph processes that exchange
+
   state every tick. The Tellurium sepsis physiology engine writes its global parameters
+
   (pathogen, hemodynamics) to a shared store. An antibiotic-PK controller process reads
+
   the pathogen, integrates a one-compartment drug PK, and writes the drug-killed
-  pathogen back into the engine through its `parameters_in` port before the engine's
+
+  pathogen back into the engine through its `parameters_in` port before the engine''s
+
   next step. The treatment the controller computes at tick n changes the physiology the
+
   engine integrates at tick n+1 — a real feedback loop, not two independent runs. With
+
   the controller enabled (closed-loop antibiotic), bacteremia is cleared. With it
+
   disabled (treat=False, the matched control from the same composite), bacteremia
+
   climbs. The pathogen drives septic collapse, so the loop removes the cause. The
-  multi-day clinical endpoint itself (studies 03/05) is beyond this run's horizon.
 
+  multi-day clinical endpoint itself (studies 03/05) is beyond this run''s horizon.
+
+  '
 expected_behavior:
-  - name: two-processes-exchange-state-each-tick
-    statement: "One composite contains a physiology engine and a controller process wired in a feedback loop (engine.parameters -> controller -> engine.parameters_in); both advance at the same interval and hand state back and forth every tick."
-    status: supported
-  - name: closed-loop-treatment-clears-the-pathogen
-    statement: "With the controller enabled, the sensed-and-dosed antibiotic drives bacteremia down relative to the matched untreated control run from the identical composite."
-    status: supported
-  - name: treatment-timing-counterfactuals
-    statement: "Untreated, early-treatment, and delayed-treatment arms from the identical composite give ordered, consistent intervention responses (early clears bacteremia, delayed lets it accumulate first then clears it, untreated climbs)."
-    status: supported
-  - name: coupling-step-convergence
-    statement: "Running the coupled composite at shrinking step sizes (240/120/60 s per tick) changes the endpoint negligibly, so the co-simulation is numerically consistent — execution success is separate from pharmacological credibility."
-    status: supported
-
+- name: two-processes-exchange-state-each-tick
+  statement: One composite contains a physiology engine and a controller process wired in a feedback loop (engine.parameters -> controller -> engine.parameters_in); both advance at the same interval and hand state back and forth every tick.
+  status: supported
+- name: closed-loop-treatment-clears-the-pathogen
+  statement: With the controller enabled, the sensed-and-dosed antibiotic drives bacteremia down relative to the matched untreated control run from the identical composite.
+  status: supported
+- name: treatment-timing-counterfactuals
+  statement: Untreated, early-treatment, and delayed-treatment arms from the identical composite give ordered, consistent intervention responses (early clears bacteremia, delayed lets it accumulate first then clears it, untreated climbs).
+  status: supported
+- name: coupling-step-convergence
+  statement: Running the coupled composite at shrinking step sizes (240/120/60 s per tick) changes the endpoint negligibly, so the co-simulation is numerically consistent — execution success is separate from pharmacological credibility.
+  status: supported
 findings:
-  - id: a-real-feedback-loop-in-one-composite
-    summary: "A physiology engine and an antibiotic controller co-step in one composite, exchanging state every tick."
-    detail: |
-      The `sepsis_cosim` composite wires two processes into a feedback loop:
-        * physiology — the real BioGears-sepsis core run by the Tellurium engine. It
-          writes every global parameter (pathogen PT/PB, MAP, SVR, tissue integrity)
-          to the shared `parameters` store each step and reads a `parameters_in`
-          writeback before the next step.
-        * controller — AntibioticControllerProcess: reads `parameters`, senses the
-          blood pathogen PB, integrates a one-compartment antibiotic PK (first-order
-          elimination), computes an Emax bactericidal kill, and writes the reduced
-          PT/PB back to `parameters_in`.
-      PT/PB are rate-rule state variables in the SBML, not assignment-rule outputs, so
-      roadrunner accepts the controller's mid-run writeback and the loop closes on the
-      real flagship model with no model surgery. This is co-simulation in the strict
-      sense: the controller's tick-n output is the engine's tick-(n+1) input. The same
-      composite with treat=False makes the controller inert, giving the matched
-      untreated control.
-    status: supported
-  - id: the-closed-loop-clears-bacteremia
-    summary: "Closed-loop antibiotic clears bacteremia; the untreated control's pathogen climbs (see chart 01)."
-    detail: |
-      Run at severity 3 over 2 h (120 ticks; see chart 01 and out/cosim_arms.json). The
-      untreated arm's blood pathogen rises to ~10.6 and plateaus. The closed-loop arm
-      drives it to 0 once the controller senses PB crossing its trigger and starts the
-      infusion (final bacteremia ratio untreated/treated = ∞). The treated arm's
-      sawtooth is the per-tick coupling made visible: the pathogen regrows within each
-      physiology step and the controller knocks it back down every tick. The figure also
-      shows the controller's own live state — antibiotic concentration from its
-      one-compartment PK, rising to ~5.9, and the sensed treat-on flag — which confirms
-      the second process is simulating, not scripted. Even at this short horizon a
-      downstream clinical effect is already visible: untreated tissue integrity has
-      begun to fall (1.000 -> 0.983) while the treated arm holds at 1.000, the first
-      measurable tissue damage, prevented by clearing the pathogen. Honest limit: the
-      clinical endpoint that defines septic shock (MAP < 65 mmHg at ~54 h, tissue
-      integrity minimum 0.24 at 72 h; studies 03/05) is a 2–3 day process, and the exact
-      engine runs ~1.75 h of wall per simulated 48 h. So this run's horizon shows the
-      controlled variable (pathogen) and the live PK — the loop removing the cause of
-      collapse — not the multi-day outcome itself. A full-horizon treated-vs-untreated
-      endpoint comparison is the natural follow-up.
+- id: a-real-feedback-loop-in-one-composite
+  summary: A physiology engine and an antibiotic controller co-step in one composite, exchanging state every tick.
+  detail: "The `sepsis_cosim` composite wires two processes into a feedback loop:\n  * physiology — the real BioGears-sepsis core run by the Tellurium engine. It\n    writes every global parameter (pathogen PT/PB, MAP, SVR, tissue integrity)\n    to the shared `parameters` store each step and reads a `parameters_in`\n    writeback before the next step.\n  * controller — AntibioticControllerProcess: reads `parameters`, senses the\n    blood pathogen PB, integrates a one-compartment antibiotic PK (first-order\n    elimination), computes an Emax bactericidal kill, and writes the reduced\n    PT/PB back to `parameters_in`.\nPT/PB are rate-rule state variables in the SBML, not assignment-rule outputs, so\nroadrunner accepts the controller's mid-run writeback and the loop closes on the\nreal flagship model with no model surgery. This is co-simulation in the strict\nsense: the controller's tick-n output is the engine's tick-(n+1) input. The same\ncomposite with treat=False makes the controller inert, giving the matched\nuntreated control.\n"
+  status: supported
+- id: the-closed-loop-clears-bacteremia
+  summary: Closed-loop antibiotic clears bacteremia; the untreated control's pathogen climbs (see chart 01).
+  detail: 'Run at severity 3 over 2 h (120 ticks; see chart 01 and out/cosim_arms.json). The
 
-    statement: "This co-simulation demonstrates the mechanism (per-tick state exchange with feedback) and the controlled variable (pathogen clearance), not the multi-day clinical endpoint."
-    explanation: "The main claim is a capability claim, and it is fully supported: two process-bigraph processes run in one composite and exchange state every tick through shared stores, with a genuine feedback edge (the controller's writeback at tick n is the engine's input at tick n+1). That is what sets co-simulation apart from the parallel engine comparison of studies 01/02 (same spec under different engines, compared after the fact) and from the parallel surrogate tier of study 03. The clinical instance — a closed-loop antibiotic that senses bacteremia and doses against it — is chosen so the coupling does something legible: the controller clears the pathogen that the matched untreated control (the identical composite with the controller disabled) lets climb. This study does not claim a validated clinical outcome. The pathogen is the upstream driver of the sepsis cascade (inflammation -> vasodilation -> hypotension), so clearing it removes the cause of collapse, but the collapse itself unfolds over 37-72 h (studies 03/05), and the exact engine is too slow to integrate matched treated/untreated arms to that endpoint in this pass. So the honest reading is: the co-simulation capability is demonstrated end to end on the real model, and the treatment's effect on its direct target (bacteremia) is shown; the downstream multi-day endpoint is referenced from the committed severity studies, not re-derived here. The controller's PK is an illustrative Emax/one-compartment model, not a calibrated pharmacology. Swapping it for a COPASI/Tellurium PK engine (true heterogeneous engine-to-engine co-simulation) is a noted follow-up."
-  - id: treatment-timing-counterfactuals
-    summary: "Untreated vs early vs delayed treatment give an ordered, consistent response — earlier is better (see chart 02)."
-    detail: |
-      Three arms from the identical sepsis_cosim composite (severity 3, 2 h; delay 1 h),
-      differing only in when the controller starts (run_counterfactuals.py ->
-      out/cosim_counterfactuals.json):
-        * untreated — bacteremia climbs to 10.6; tissue integrity ends 0.9828.
-        * delayed treatment (onset 1 h) — bacteremia tracks the untreated arm for the
-          first hour, then drops sharply once treatment starts, ending 0.162; tissue
-          integrity ends 0.9874.
-        * early treatment (onset at detection) — bacteremia is cleared (ends 0.006);
-          tissue integrity holds at 1.0000.
-      The ordering is consistent: earlier treatment clears the pathogen sooner and
-      leaves more tissue intact (early 1.0000 > delayed 0.9874 > untreated 0.9828 at 2 h).
-      The tissue-integrity gaps are small at this horizon because the clinical collapse
-      is a multi-day process; the pathogen trajectories separate the three arms cleanly.
-      This is a treatment counterfactual, not a dosing recommendation: the PK is
-      illustrative, not calibrated.
-    status: supported
-  - id: coupling-step-convergence
-    summary: "The co-simulation is numerically consistent: the endpoint converges as the coupling step shrinks."
-    detail: |
-      Running the early-treatment arm at shrinking coupling steps (240 / 120 / 60 s per
-      tick, 1 h; out/cosim_convergence.json) gives final bacteremia 0.4115 / 0.3747 /
-      0.3566 — monotone and converging, a total spread of 0.0548 across a 4× change in
-      step size (small against the untreated arm's ~10.6). The one-tick coupling lag
-      shrinks with the step, as expected for operator-split co-simulation. This separates
-      execution success (the coupling runs and converges) from pharmacological credibility
-      (the controller's PK is illustrative, not calibrated).
-    status: supported
+    untreated arm''s blood pathogen rises to ~10.6 and plateaus. The closed-loop arm
+
+    drives it to 0 once the controller senses PB crossing its trigger and starts the
+
+    infusion (final bacteremia ratio untreated/treated = ∞). The treated arm''s
+
+    sawtooth is the per-tick coupling made visible: the pathogen regrows within each
+
+    physiology step and the controller knocks it back down every tick. The figure also
+
+    shows the controller''s own live state — antibiotic concentration from its
+
+    one-compartment PK, rising to ~5.9, and the sensed treat-on flag — which confirms
+
+    the second process is simulating, not scripted. Even at this short horizon a
+
+    downstream clinical effect is already visible: untreated tissue integrity has
+
+    begun to fall (1.000 -> 0.983) while the treated arm holds at 1.000, the first
+
+    measurable tissue damage, prevented by clearing the pathogen. Honest limit: the
+
+    clinical endpoint that defines septic shock (MAP < 65 mmHg at ~54 h, tissue
+
+    integrity minimum 0.24 at 72 h; studies 03/05) is a 2–3 day process, and the exact
+
+    engine runs ~1.75 h of wall per simulated 48 h. So this run''s horizon shows the
+
+    controlled variable (pathogen) and the live PK — the loop removing the cause of
+
+    collapse — not the multi-day outcome itself. A full-horizon treated-vs-untreated
+
+    endpoint comparison is the natural follow-up.
+
+    '
+  statement: This co-simulation demonstrates the mechanism (per-tick state exchange with feedback) and the controlled variable (pathogen clearance), not the multi-day clinical endpoint.
+  explanation: 'The main claim is a capability claim, and it is fully supported: two process-bigraph processes run in one composite and exchange state every tick through shared stores, with a genuine feedback edge (the controller''s writeback at tick n is the engine''s input at tick n+1). That is what sets co-simulation apart from the parallel engine comparison of studies 01/02 (same spec under different engines, compared after the fact) and from the parallel surrogate tier of study 03. The clinical instance — a closed-loop antibiotic that senses bacteremia and doses against it — is chosen so the coupling does something legible: the controller clears the pathogen that the matched untreated control (the identical composite with the controller disabled) lets climb. This study does not claim a validated clinical outcome. The pathogen is the upstream driver of the sepsis cascade (inflammation -> vasodilation -> hypotension), so clearing it removes the cause of collapse, but the collapse itself unfolds over 37-72 h (studies 03/05), and the exact engine is too slow to integrate matched treated/untreated arms to that endpoint in this pass. So the honest reading is: the co-simulation capability is demonstrated end to end on the real model, and the treatment''s effect on its direct target (bacteremia) is shown; the downstream multi-day endpoint is referenced from the committed severity studies, not re-derived here. The controller''s PK is an illustrative Emax/one-compartment model, not a calibrated pharmacology. Swapping it for a COPASI/Tellurium PK engine (true heterogeneous engine-to-engine co-simulation) is a noted follow-up.'
+- id: treatment-timing-counterfactuals
+  summary: Untreated vs early vs delayed treatment give an ordered, consistent response — earlier is better (see chart 02).
+  detail: "Three arms from the identical sepsis_cosim composite (severity 3, 2 h; delay 1 h),\ndiffering only in when the controller starts (run_counterfactuals.py ->\nout/cosim_counterfactuals.json):\n  * untreated — bacteremia climbs to 10.6; tissue integrity ends 0.9828.\n  * delayed treatment (onset 1 h) — bacteremia tracks the untreated arm for the\n    first hour, then drops sharply once treatment starts, ending 0.162; tissue\n    integrity ends 0.9874.\n  * early treatment (onset at detection) — bacteremia is cleared (ends 0.006);\n    tissue integrity holds at 1.0000.\nThe ordering is consistent: earlier treatment clears the pathogen sooner and\nleaves more tissue intact (early 1.0000 > delayed 0.9874 > untreated 0.9828 at 2 h).\nThe tissue-integrity gaps are small at this horizon because the clinical collapse\nis a multi-day process; the pathogen trajectories separate the three arms cleanly.\nThis is a treatment counterfactual, not a dosing recommendation: the PK is\nillustrative, not calibrated.\n"
+  status: supported
+- id: coupling-step-convergence
+  summary: 'The co-simulation is numerically consistent: the endpoint converges as the coupling step shrinks.'
+  detail: 'Running the early-treatment arm at shrinking coupling steps (240 / 120 / 60 s per
+
+    tick, 1 h; out/cosim_convergence.json) gives final bacteremia 0.4115 / 0.3747 /
+
+    0.3566 — monotone and converging, a total spread of 0.0548 across a 4× change in
+
+    step size (small against the untreated arm''s ~10.6). The one-tick coupling lag
+
+    shrinks with the step, as expected for operator-split co-simulation. This separates
+
+    execution success (the coupling runs and converges) from pharmacological credibility
+
+    (the controller''s PK is illustrative, not calibrated).
+
+    '
+  status: supported
 visualizations:
-  - name: "Closed-loop co-simulation — pathogen clearance and the controller's live PK"
-    address: image:charts/01_cosim_closed_loop.svg
-    display: primary
-  - name: "Treatment counterfactuals (untreated / early / delayed) + coupling-step convergence"
-    address: image:charts/02_cosim_counterfactuals.svg
-    display: secondary
-
+- name: Closed-loop co-simulation — pathogen clearance and the controller's live PK
+  address: image:charts/01_cosim_closed_loop.svg
+  display: primary
+- name: Treatment counterfactuals (untreated / early / delayed) + coupling-step convergence
+  address: image:charts/02_cosim_counterfactuals.svg
+  display: secondary
 baseline:
-  - name: sepsis-cosim-untreated
-    composite: viva_simulation_core.composites.sepsis_cosim.sepsis_cosim
-    config: {severity: 3, treat: false}
-    note: "Matched untreated control — the identical composite with the controller inert."
-
+- name: sepsis-cosim-untreated
+  composite: viva_simulation_core.composites.sepsis_cosim.sepsis_cosim
+  params:
+    severity: 3
+    treat: false
+    interval_s: 1
+  note: Matched untreated control — the identical composite with the controller inert.
 variants:
-  - name: closed-loop-antibiotic
-    note: "treat=true — the antibiotic controller senses bacteremia and doses against it, coupled every tick."
-
+- name: closed-loop-antibiotic
+  note: treat=true — the antibiotic controller senses bacteremia and doses against it, coupled every tick.
+readouts:
+- name: SBP
+  store_path: stores/parameters/SBP
+  units: mmHg
+- name: DBP
+  store_path: stores/parameters/DBP
+  units: mmHg
+- name: MAP
+  store_path: stores/parameters/MAP
+  units: mmHg
+- name: HR
+  store_path: stores/parameters/HR
+  units: 1/min
+- name: CO
+  store_path: stores/parameters/COmeas
+  units: L/min
+- name: SVR
+  store_path: stores/parameters/SVR
+  units: mmHg·s/mL
+- name: blood_volume
+  store_path: stores/parameters/Vblood
+  units: mL
+- name: tissue_integrity
+  store_path: stores/parameters/TI
+  units: 0..1
+- name: blood_pathogen
+  store_path: stores/parameters/PB
+  units: a.u.
 interventions:
-  - name: antibiotic-controller
-    note: "AntibioticControllerProcess: one-compartment PK + Emax bactericidal kill, writing PT/PB back via parameters_in."
-
-runs: []
+- name: antibiotic-controller
+  note: 'AntibioticControllerProcess: one-compartment PK + Emax bactericidal kill, writing PT/PB back via parameters_in.'
+runs:
+- name: viva_simulation_core.composites.sepsis_cosim.sepsis_cosim__1795814676__64a4d2
+  status: completed
+  timestamp: 1795814974.891876
+  emitter:
+    kind: unknown
+  env_id: c1456316261260f9
+  variant: sepsis-cosim-untreated
+  params: '{"severity": 3, "treat": false, "interval_s": 1}'
+  computed_outcomes:
+    _grader:
+      version: 3-freshness
+      graded_at: '2026-11-27T21:29:37.732786+00:00'
+      inputs_hash: 4481d7955bf4a8e7
+      store: resolved
+  provenance:
+    params:
+      interval_s:
+        value: 1
+        source: override
+      n_steps:
+        value: 7200
+        source: resolved
+      severity:
+        value: 3
+        source: override
+      treat:
+        value: false
+        source: override
+    params_captured_at: '2026-11-27'
+    params_source: dashboard-runner
+simulation_set:
+- name: sepsis-cosim-untreated-baseline
+  kind: single
+  base_model: viva_simulation_core.composites.sepsis_cosim.sepsis_cosim
+  is_baseline: true
+  status: ran
+  params:
+    severity: 3
+    treat: false
+    interval_s: 1
+  metrics: &id001
+  - SBP
+  - DBP
+  - MAP
+  - HR
+  - CO
+  - SVR
+  - blood_volume
+  - tissue_integrity
+  - blood_pathogen
+- name: closed-loop-antibiotic
+  kind: single
+  base_model: viva_simulation_core.composites.sepsis_cosim.sepsis_cosim
+  status: ran
+  metrics: *id001
+pipeline_gate:
+  gate_evaluator:
+    result: blocked
+    blocked_by:
+    - two-processes-exchange-state-each-tick
+    - closed-loop-treatment-clears-the-pathogen
+    - treatment-timing-counterfactuals
+    - coupling-step-convergence
+    evaluated_by: code
+    diverges_from_authored: false
