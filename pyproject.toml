@@ -56,20 +56,26 @@ serve = ["starlette", "uvicorn[standard]"]
 # resolves. Engine imports in this package are lazy + guarded (see
 # viva_simulation_core.engines): a missing engine raises EngineNotInstalled with
 # the exact extra to install, never an ImportError at `import` time.
-tellurium = ["viva-tellurium @ git+https://github.com/vivarium-collective/viva-tellurium@2d07d068bb4dd713c9ed61f59747d21b49498cc2"]
-copasi    = ["viva-copasi @ git+https://github.com/vivarium-collective/viva-copasi.git@937ff132f2e8c755248a38a7440067f8d1871001"]
+tellurium = ["viva-tellurium @ git+https://github.com/vivarium-collective/viva-tellurium@7490aa2d6973f130553882bc06c338264a4c89bd"]
+copasi    = ["viva-copasi @ git+https://github.com/vivarium-collective/viva-copasi.git@aa612b6c9b4b163c9b07c76ceb901679e36a4df5"]
 biogears  = ["viva-biogears @ git+https://github.com/vivarium-collective/viva-biogears@8d0201976b2b3a008bc6406fdfe3f980d9bcb77f"]
 surrogate = ["viva-torch @ git+https://github.com/vivarium-collective/viva-torch@bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5"]
 rust      = ["viva-core @ git+https://github.com/vivarium-collective/viva-core@154d94c2f30050715e87aa89af2b93b04d5f77b7"]
-# julia — added when vivarium-collective/viva-julia-diffeqs lands (DifferentialEquations.jl):
-# julia  = ["viva-julia-diffeqs @ git+https://github.com/vivarium-collective/viva-julia-diffeqs@<sha>"]
+# julia — DifferentialEquations.jl via juliacall (JuliaDiffEqProcess). Heavy: juliacall
+# downloads a private Julia + precompiles the Julia stack on first import, and that
+# native runtime can conflict with other native simulator libs (COPASI/roadrunner) in
+# one process — so run_engines runs the julia arm opt-in / in isolation.
+julia  = ["viva-julia-diffeqs @ git+https://github.com/vivarium-collective/viva-julia-diffeqs@1d016ce705fc4a76760904eeac3096f1d5da273e"]
 # impulse — the hybrid continuous+discrete-event simulator (events as first-class PBG Steps).
 # Powers the `sepsis_hybrid` composite.
 impulse = ["viva-impulse @ git+https://github.com/vivarium-collective/viva-impulse@dfc6c86d85d7aba746b256ad4296ef3f0005b972"]
 
 # Bundles (self-referential; resolve to the per-engine extras above).
-sbml = ["simulation-core[tellurium,copasi]"]                            # the exact-SBML engines (+ julia later)
-all  = ["simulation-core[tellurium,copasi,biogears,surrogate,rust]"]    # every engine (+ julia later)
+sbml = ["simulation-core[tellurium,copasi]"]                            # the light exact-SBML pair
+# NB: julia is deliberately NOT in `all` — juliacall downloads + precompiles a Julia
+# stack on install, too heavy for the default CI `all` install. Add it explicitly
+# with `simulation-core[julia]` when you want the DifferentialEquations.jl arm.
+all  = ["simulation-core[tellurium,copasi,biogears,surrogate,rust]"]    # every engine except the heavy Julia stack
 
 [project.scripts]
 simulation-core = "viva_simulation_core.cli.__main__:main"
