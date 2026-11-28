@@ -729,6 +729,15 @@ wheels = [
 ]
 
 [[package]]
+name = "engine-core"
+version = "0.1.0"
+source = { git = "https://github.com/vivarium-collective/engine-core.git?rev=main#161b42a3add84468a673dd620972bb1e610f1978" }
+dependencies = [
+    { name = "bigraph-schema" },
+    { name = "process-bigraph" },
+]
+
+[[package]]
 name = "executing"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3407,11 +3416,11 @@ requires-dist = [
     { name = "typer" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'serve'" },
     { name = "viva-biogears", marker = "extra == 'biogears'", git = "https://github.com/vivarium-collective/viva-biogears?rev=8d0201976b2b3a008bc6406fdfe3f980d9bcb77f" },
-    { name = "viva-copasi", marker = "extra == 'copasi'", git = "https://github.com/vivarium-collective/viva-copasi.git?rev=937ff132f2e8c755248a38a7440067f8d1871001" },
+    { name = "viva-copasi", marker = "extra == 'copasi'", git = "https://github.com/vivarium-collective/viva-copasi.git?rev=aa612b6c9b4b163c9b07c76ceb901679e36a4df5" },
     { name = "viva-core", marker = "extra == 'rust'", git = "https://github.com/vivarium-collective/viva-core?rev=154d94c2f30050715e87aa89af2b93b04d5f77b7" },
     { name = "viva-emitters" },
     { name = "viva-impulse", marker = "extra == 'impulse'", git = "https://github.com/vivarium-collective/viva-impulse?rev=dfc6c86d85d7aba746b256ad4296ef3f0005b972" },
-    { name = "viva-tellurium", marker = "extra == 'tellurium'", git = "https://github.com/vivarium-collective/viva-tellurium?rev=2d07d068bb4dd713c9ed61f59747d21b49498cc2" },
+    { name = "viva-tellurium", marker = "extra == 'tellurium'", git = "https://github.com/vivarium-collective/viva-tellurium?rev=7490aa2d6973f130553882bc06c338264a4c89bd" },
     { name = "viva-torch", marker = "extra == 'surrogate'", git = "https://github.com/vivarium-collective/viva-torch?rev=bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5" },
     { name = "vivarium-workbench", git = "https://github.com/vivarium-collective/vivarium-workbench.git?rev=cd6258699f61674021b24a15e7d93cea4c5c5d0a" },
 ]
@@ -3802,10 +3811,11 @@ source = { git = "https://github.com/vivarium-collective/viva-marketplace.git?re
 [[package]]
 name = "viva-copasi"
 version = "0.2.2"
-source = { git = "https://github.com/vivarium-collective/viva-copasi.git?rev=937ff132f2e8c755248a38a7440067f8d1871001#937ff132f2e8c755248a38a7440067f8d1871001" }
+source = { git = "https://github.com/vivarium-collective/viva-copasi.git?rev=aa612b6c9b4b163c9b07c76ceb901679e36a4df5#aa612b6c9b4b163c9b07c76ceb901679e36a4df5" }
 dependencies = [
     { name = "bigraph-schema" },
     { name = "copasi-basico" },
+    { name = "engine-core" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "process-bigraph" },
@@ -3913,10 +3923,11 @@ evaluator = [
 
 [[package]]
 name = "viva-tellurium"
-version = "0.2.3"
-source = { git = "https://github.com/vivarium-collective/viva-tellurium?rev=2d07d068bb4dd713c9ed61f59747d21b49498cc2#2d07d068bb4dd713c9ed61f59747d21b49498cc2" }
+version = "0.2.4"
+source = { git = "https://github.com/vivarium-collective/viva-tellurium?rev=7490aa2d6973f130553882bc06c338264a4c89bd#7490aa2d6973f130553882bc06c338264a4c89bd" }
 dependencies = [
     { name = "bigraph-schema" },
+    { name = "engine-core" },
     { name = "libroadrunner" },
     { name = "numpy" },
     { name = "process-bigraph" },

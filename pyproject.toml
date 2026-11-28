@@ -56,8 +56,8 @@ serve = ["starlette", "uvicorn[standard]"]
 # resolves. Engine imports in this package are lazy + guarded (see
 # viva_simulation_core.engines): a missing engine raises EngineNotInstalled with
 # the exact extra to install, never an ImportError at `import` time.
-tellurium = ["viva-tellurium @ git+https://github.com/vivarium-collective/viva-tellurium@2d07d068bb4dd713c9ed61f59747d21b49498cc2"]
-copasi    = ["viva-copasi @ git+https://github.com/vivarium-collective/viva-copasi.git@937ff132f2e8c755248a38a7440067f8d1871001"]
+tellurium = ["viva-tellurium @ git+https://github.com/vivarium-collective/viva-tellurium@7490aa2d6973f130553882bc06c338264a4c89bd"]
+copasi    = ["viva-copasi @ git+https://github.com/vivarium-collective/viva-copasi.git@aa612b6c9b4b163c9b07c76ceb901679e36a4df5"]
 biogears  = ["viva-biogears @ git+https://github.com/vivarium-collective/viva-biogears@8d0201976b2b3a008bc6406fdfe3f980d9bcb77f"]
 surrogate = ["viva-torch @ git+https://github.com/vivarium-collective/viva-torch@bf1ebcca8bfa9f83b8d79ae0b4438a75376b59b5"]
 rust      = ["viva-core @ git+https://github.com/vivarium-collective/viva-core@154d94c2f30050715e87aa89af2b93b04d5f77b7"]

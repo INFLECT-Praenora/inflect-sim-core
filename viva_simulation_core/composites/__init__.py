@@ -20,6 +20,9 @@ from viva_simulation_core.composites.sepsis_cosim import (
 from viva_simulation_core.composites.sepsis_hybrid import (
     make_sepsis_hybrid_composite,
 )
+from viva_simulation_core.composites.lotka_volterra import (
+    make_lotka_volterra_composite,
+)
 
 # Register every curated model from inflect-models-db as a composite generator, so
 # the catalog/workbench lists them alongside the workspace's own composites. This is
@@ -34,4 +37,5 @@ __all__ = [
     "make_sepsis_cosim_composite",
     "extract_cosim",
     "make_sepsis_hybrid_composite",
+    "make_lotka_volterra_composite",
 ]
