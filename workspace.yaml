@@ -26,12 +26,12 @@ runtime:
 imports:
   viva-tellurium:
     source: "git+https://github.com/vivarium-collective/viva-tellurium"
-    ref: "2d07d068bb4dd713c9ed61f59747d21b49498cc2"
+    ref: "7490aa2d6973f130553882bc06c338264a4c89bd"
     mode: reference
     description: "Tellurium / roadrunner engine — exact SBML (CVODE). Optional extra: tellurium."
   viva-copasi:
     source: "git+https://github.com/vivarium-collective/viva-copasi.git"
-    ref: "937ff132f2e8c755248a38a7440067f8d1871001"
+    ref: "aa612b6c9b4b163c9b07c76ceb901679e36a4df5"
     mode: reference
     description: "COPASI engine (basico) — exact SBML. Optional extra: copasi."
   viva-biogears:
@@ -54,6 +54,11 @@ imports:
     ref: "dfc6c86d85d7aba746b256ad4296ef3f0005b972"
     mode: reference
     description: "Hybrid continuous + discrete-event simulator (events as first-class Steps). Powers the sepsis_hybrid composite. Optional extra: impulse."
+  viva-julia-diffeqs:
+    source: "git+https://github.com/vivarium-collective/viva-julia-diffeqs"
+    ref: "1d016ce705fc4a76760904eeac3096f1d5da273e"
+    mode: reference
+    description: "Julia DifferentialEquations.jl engine — exact ODE via juliacall. Heavy (downloads + precompiles a Julia stack). Optional extra: julia."
   inflect-models-db:
     source: "git+https://github.com/INFLECT-Praenora/inflect-models-db"
     ref: "152d6f5297f0026f4cb2ef215d03ff8d9613d0e8"
