@@ -12,11 +12,26 @@ The model-interchange story, realized at two levels:
   reconcile. This module reuses those consolidated Steps rather than rolling a
   per-engine adapter for each.
 
-viva-core (the Rust execution backend) is *not* on that contract, so its arm runs
-the incremental ``TelluriumProcess`` under viva-core through
-:class:`~viva_simulation_core.analysis.vc_adapter.VivaCoreTelluriumGeneric`. It
-reproduces the roadrunner computation bit-for-bit (a throughput/overhead story),
-not a second independent solver.
+Two more exact-ODE arms are *not* on that contract and run through their own
+process:
+
+* **viva-core** (the Rust execution backend) runs the incremental
+  ``TelluriumProcess`` under viva-core via
+  :class:`~viva_simulation_core.analysis.vc_adapter.VivaCoreTelluriumGeneric`. It
+  reproduces the roadrunner computation bit-for-bit (a throughput/overhead story),
+  not a second independent solver.
+* **julia** (DifferentialEquations.jl via ``JuliaDiffEqProcess``) reads the same
+  SBML and gives a genuinely independent ODE solve, run through a Composite.
+
+Two engine *tiers are out of scope here* because they do not read SBML the way the
+exact-ODE engines do:
+
+* **surrogate** (``viva_torch`` / ``NeuralProcess``) is a *learned* model — it
+  consumes named leaf stores and a per-model trained checkpoint, not an SBML file,
+  and must be trained on a given model's trajectories before it can run. It is not
+  an engine you can point at an arbitrary SBML string.
+* **biogears** is the C++ engine the sepsis SBML was *extracted from* — a
+  different model, not a reader of this SBML.
 
 Usage::
 
@@ -130,6 +145,42 @@ def run_viva_core(sbml: str, time: float, n_points: int) -> dict:
     }
 
 
+def run_julia(sbml: str, time: float, n_points: int) -> dict:
+    """Run the model under Julia DifferentialEquations.jl via JuliaDiffEqProcess.
+
+    Not on the FullReportUTCStep contract; a genuinely independent ODE solve.
+    JuliaDiffEqProcess emits floating species as a ``map[float]`` keyed by SBML id.
+    Returns the same shape as :func:`run_fullreport` (final species).
+
+    NB: importing ``juliacall`` loads a Julia native runtime; for isolation from
+    other native simulator libraries (COPASI / roadrunner) prefer to call this in a
+    fresh process rather than alongside the contract arms in :func:`run_all`.
+    """
+    from process_bigraph import Composite, gather_emitter_results
+    from viva_julia_diffeqs import make_julia_diffeqs_document
+    from viva_julia_diffeqs.core import build_core as julia_build_core
+
+    interval = time / n_points
+    doc = make_julia_diffeqs_document(model=sbml, model_format="sbml", interval=interval)
+    core = julia_build_core()
+    t0 = _time.perf_counter()
+    sim = Composite({"state": doc}, core=core)
+    sim.run(time)
+    wall = _time.perf_counter() - t0
+    rows = gather_emitter_results(sim)[("emitter",)]
+    sp = [r["species"] for r in rows if r.get("species")]
+    final = {k: float(v) for k, v in sp[-1].items()}
+    return {
+        "engine": "julia",
+        "via": "JuliaDiffEqProcess (DifferentialEquations.jl; not on the contract)",
+        "columns": list(final),
+        "time": None,
+        "values": None,
+        "final_all": final,
+        "wall_ms": wall * 1e3,
+    }
+
+
 def _reshape_for_viva_core(doc: dict, species_ids: list[str], adapter: str) -> dict:
     """Swap the Tellurium node for the generic viva-core adapter + per-id species
     leaves, drop the empty/map ports and the emitter (viva-core reads end state)."""
@@ -148,11 +199,16 @@ def _reshape_for_viva_core(doc: dict, species_ids: list[str], adapter: str) -> d
 
 def run_all(model: str, model_format: str = "sbml", *, time: float = 30.0,
             n_points: int = 301, engines: list[str] | None = None,
-            include_viva_core: bool = True) -> dict:
+            include_viva_core: bool = True, include_julia: bool = False) -> dict:
     """Run ``model`` under every requested engine; return ``{engine: result}``.
 
-    ``engines`` defaults to every available contract engine. Unavailable engines
-    are skipped with a ``{'skipped': reason}`` entry rather than raising.
+    ``engines`` defaults to every available contract engine. The non-contract
+    exact-ODE arms are added when requested: viva-core by default, **julia only
+    with ``include_julia=True``**. Julia is opt-in because importing ``juliacall``
+    loads a Julia native runtime that can segfault when other native simulator
+    libraries (COPASI, roadrunner) are already loaded in the same process — so the
+    julia arm is best run in a fresh process (see :func:`run_julia`). Unavailable
+    engines are skipped with a ``{'skipped': reason}`` entry rather than raising.
     """
     sbml = _to_sbml(model, model_format)
     species = _species_ids(sbml)
@@ -163,11 +219,15 @@ def run_all(model: str, model_format: str = "sbml", *, time: float = 30.0,
             results[engine] = run_fullreport(engine, sbml, time, n_points)
         except Exception as exc:  # pragma: no cover - engine-specific failures
             results[engine] = {"engine": engine, "skipped": f"{type(exc).__name__}: {exc}"}
-    if include_viva_core:
-        try:
-            results["viva-core"] = run_viva_core(sbml, time, n_points)
-        except Exception as exc:  # pragma: no cover
-            results["viva-core"] = {"engine": "viva-core", "skipped": f"{type(exc).__name__}: {exc}"}
+    for flag, name, fn in (
+        (include_viva_core, "viva-core", run_viva_core),
+        (include_julia, "julia", run_julia),
+    ):
+        if flag:
+            try:
+                results[name] = fn(sbml, time, n_points)
+            except Exception as exc:  # pragma: no cover
+                results[name] = {"engine": name, "skipped": f"{type(exc).__name__}: {exc}"}
     for r in results.values():
         if "final_all" in r:
             r["species_ids"] = species

@@ -103,3 +103,30 @@ def test_run_all_includes_viva_core_and_agrees():
     res = run_engines.run_all(LV_ANTIMONY, model_format='antimony', time=30.0, n_points=301)
     assert 'viva-core' in res and 'final_all' in res['viva-core'], res.get('viva-core')
     assert run_engines.compare(res, ref='tellurium')['viva-core'] < 1e-2
+
+
+@pytest.mark.slow
+def test_julia_arm_isolated_agrees(tmp_path):
+    """Julia (DifferentialEquations.jl) reads the SAME SBML and reaches the LV final
+    state. Run in a SUBPROCESS: importing juliacall loads a Julia native runtime that
+    segfaults alongside roadrunner/COPASI in one process. The SBML is pre-built here
+    (roadrunner in this process) and the julia-only subprocess never imports it."""
+    import json
+    import subprocess
+    import sys
+
+    pytest.importorskip('viva_julia_diffeqs')
+    from viva_simulation_core.analysis.run_engines import _to_sbml
+    sbml_path = tmp_path / "lv.xml"
+    sbml_path.write_text(_to_sbml(LV_ANTIMONY, "antimony"))
+    code = (
+        "import json, sys\n"
+        "from viva_simulation_core.analysis.run_engines import run_julia\n"
+        "r = run_julia(open(sys.argv[1]).read(), 30.0, 301)\n"
+        "print('OUT' + json.dumps(r['final_all']))\n"
+    )
+    out = subprocess.run([sys.executable, "-c", code, str(sbml_path)],
+                         capture_output=True, text=True)
+    assert out.returncode == 0, out.stderr[-2000:]
+    final = json.loads(out.stdout.split("OUT", 1)[1])
+    assert abs(final['X'] - 0.0491) < 5e-3 and abs(final['Y'] - 0.1595) < 5e-3
